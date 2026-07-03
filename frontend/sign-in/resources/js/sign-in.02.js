@@ -212,10 +212,9 @@ async function addUserToFirestore(user){
   await setDoc(
     userRef,
     {
-      email: user.email,
-      name: user.displayName || null,
-      createdAt: serverTimestamp(),
-      lastLoginAt: serverTimestamp(),
+      email: user.email || "",
+      name: user.displayName || "",
+      profilePicture: user.photoURL || "",
     },
     { merge: true }
   );
@@ -482,12 +481,12 @@ function setMode(createMode){
 
   if (googleBtn) {
     const img = googleBtn.querySelector("img");
-  
+
     // Remove every text node
     [...googleBtn.childNodes]
       .filter(node => node.nodeType === Node.TEXT_NODE)
       .forEach(node => node.remove());
-  
+
     // Insert one text node after the image
     img.after(
       document.createTextNode(
