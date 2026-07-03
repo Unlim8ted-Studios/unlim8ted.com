@@ -207,19 +207,20 @@ async function showConfirm(title, message, confirmText = "Continue"){
 }
 
 async function addUserToFirestore(user){
-  const userRef = doc(db, "users", user.uid);
+  await user.reload();
+  await user.getIdToken(true);
 
-  await setDoc(
-    userRef,
-    {
-      email: user.email || "",
-      name: user.displayName || "",
-      profilePicture: user.photoURL || "",
-    },
-    { merge: true }
-  );
+  const liveUser = auth.currentUser;
+  if (!liveUser) throw new Error("No authenticated Firebase user before Firestore write.");
+
+  const userRef = doc(db, "users", liveUser.uid);
+
+  await setDoc(userRef, {
+    email: liveUser.email || "",
+    name: liveUser.displayName || "",
+    profilePicture: liveUser.photoURL || "",
+  });
 }
-
 async function applyPersistenceFromCheckbox(){
   const remember = document.getElementById("rememberMe")?.checked ?? true;
 
