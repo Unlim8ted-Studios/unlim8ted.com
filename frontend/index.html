@@ -526,6 +526,9 @@
       min-height: 100vh;
       height: auto;
       background: #080808;
+      position: relative;
+      overflow: hidden;
+      --horizontalFadeVeil: 1;
     }
 
     .horizontal-sticky {
@@ -535,6 +538,28 @@
       overflow: hidden;
       display: flex;
       align-items: center;
+      opacity: 0;
+      transform: translate3d(0, 56px, 0);
+      filter: blur(14px);
+      will-change: opacity, transform, filter;
+    }
+
+    .horizontal::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: var(--horizontalFadeVeil, 1);
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(109,241,255,.10), transparent 38%),
+        linear-gradient(180deg, #050505 0%, rgba(5,5,5,.96) 24%, rgba(8,8,8,.62) 58%, rgba(8,8,8,0) 100%);
+      will-change: opacity;
+    }
+
+    .horizontal > * {
+      position: relative;
+      z-index: 1;
     }
 
     .track {
@@ -1740,7 +1765,7 @@
   mix-blend-mode:screen;
 }
 .cityDescent{
-  height:558vh;
+  height:500vh;
   margin-top:-58vh;
   position:relative;
   background:transparent;
@@ -1748,7 +1773,7 @@
   z-index:4;
   contain:layout paint;
 }
-.cityDescent + .philosophy{margin-top:-100vh;position:relative;z-index:5}
+.cityDescent + .philosophy{margin-top:-138vh;position:relative;z-index:5}
 .orbital-neon-viewport{
   position:sticky;
   top:0;
@@ -1760,6 +1785,20 @@
   will-change:opacity;
 }
 .cityDescent canvas{position:absolute;inset:0;width:100vw;height:100vh;display:block;will-change:transform;opacity:var(--orbitalCanvasOpacity,1)}
+
+.cityDescent .gpu-city-layer,
+.cityDescent .city-overlay-layer{
+  position:absolute;
+  inset:0;
+  width:100vw;
+  height:100vh;
+  display:block;
+  pointer-events:none;
+}
+.cityDescent .gpu-city-layer{z-index:1;}
+.cityDescent #c{z-index:0;}
+.cityDescent .city-overlay-layer{z-index:2;}
+
 .orbital-neon-viewport::before{
   content:"";
   position:absolute;
@@ -1820,8 +1859,19 @@
 }
 .cityDescent #bottomVignette{
   z-index:32;
-  opacity:0;
-  background:linear-gradient(to bottom,rgba(0,0,0,0) 0%,rgba(0,0,0,0) 48%,rgba(0,0,0,.42) 74%,rgba(0,0,0,.92) 100%);
+  opacity:var(--orbitalBottomFog,0);
+  background:
+    radial-gradient(ellipse at 50% 92%,rgba(125,210,255,.075),transparent 45%),
+    linear-gradient(to bottom,
+      rgba(0,0,0,0) 0%,
+      rgba(0,0,0,0) 40%,
+      rgba(0,0,0,.10) 58%,
+      rgba(0,0,0,.38) 74%,
+      rgba(0,0,0,.74) 88%,
+      rgba(0,0,0,.96) 100%
+    );
+  will-change:opacity;
+  transition:opacity .12s linear;
 }
 .cityDescent #bars{z-index:40;opacity:var(--orbitalBars,0);transition:opacity .05s linear}
 .cityDescent #bars:before,.cityDescent #bars:after{content:"";position:absolute;left:0;width:100%;height:7.5vh;background:#000}
@@ -2222,7 +2272,8 @@ Z"></path>
     </div>
   </main>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.152.2/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.4.2/pixi.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.152.2/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
@@ -2368,10 +2419,24 @@ Z"></path>
       if (horizontalSection && horizontalTrack) {
         const panels = gsap.utils.toArray(".horizontal .panel");
         gsap.set(horizontalTrack, { x: 0, willChange: "transform", force3D: true });
-        gsap.set(panels, { opacity: 0, y: 46, scale: .965, willChange: "transform,opacity", force3D: true });
+        // Keep the row pre-rendered/visible before pinning. The section itself fades in,
+        // so the panels no longer pop into existence on the first pinned frame.
+        gsap.set(panels, { opacity: 1, y: 0, scale: 1, willChange: "transform,opacity", force3D: true });
 
         const getMaxX = () => Math.max(0, horizontalTrack.scrollWidth - window.innerWidth + window.innerWidth * .08);
         const getScrollLen = () => Math.max(window.innerHeight * .9, getMaxX() * .82);
+
+        gsap.timeline({
+          scrollTrigger: {
+            trigger: horizontalSection,
+            start: "top 94%",
+            end: "top 42%",
+            scrub: .8,
+            invalidateOnRefresh: true
+          }
+        })
+          .to(".horizontal-sticky", { opacity: 1, y: 0, filter: "blur(0px)", ease: "none" }, 0)
+          .to(horizontalSection, { "--horizontalFadeVeil": 0, ease: "none" }, 0);
 
         gsap.to(horizontalTrack, {
           x: () => -getMaxX(),
@@ -2387,17 +2452,9 @@ Z"></path>
             invalidateOnRefresh: true,
             anticipatePin: 1,
             onUpdate: self => {
-              panels.forEach((panel, i) => {
-                const panelStart = i / Math.max(1, panels.length);
-                const panelProgress = gsap.utils.clamp(0, 1, (self.progress - panelStart + .20) / .24);
-                const eased = 1 - Math.pow(1 - panelProgress, 3);
-                gsap.set(panel, {
-                  opacity: eased,
-                  y: (1 - eased) * 46,
-                  scale: .965 + eased * .035,
-                  force3D: true
-                });
-              });
+              // The horizontal row is already faded in by the section entrance timeline.
+              // Avoid per-panel opacity resets here because they caused a visible snap
+              // exactly when the pinned horizontal scroll began.
             }
           }
         });
@@ -3146,7 +3203,14 @@ Z"></path>
 
 const root = document.getElementById("cityDescent");
 const canvas = root.querySelector("#c");
-const ctx = canvas.getContext("2d", { alpha:false });
+canvas.classList.add("city-base-layer");
+let ctx = canvas.getContext("2d", { alpha:true });
+const baseCtx = ctx;
+const overlayCanvas = document.createElement("canvas");
+overlayCanvas.className = "city-overlay-layer";
+canvas.parentNode.insertBefore(overlayCanvas, canvas.nextSibling);
+const overlayCtx = overlayCanvas.getContext("2d", { alpha:true });
+let gpuCity = null;
 const fade = root.querySelector("#fade");
 //const progress = root.querySelector("#progress");
 const bottomVignette = root.querySelector("#bottomVignette");
@@ -3267,7 +3331,112 @@ const Scene = {
   sidewalk:null,
   sidewalkContainers:null,
   road:null,
-  fg:null
+  fg:null,
+  posterSprites:null,
+  lampSprites:null,
+  dogSprites:null,
+  carSprites:null
+};
+
+class HybridGpuCityCompositor{
+  constructor(parent){
+    this.parent=parent;
+    this.ready=false;
+    this.layers={};
+    this.app=null;
+    this.container=null;
+    this.lastW=0;
+    this.lastH=0;
+    this.boot();
+  }
+  boot(){
+    if(!window.PIXI) return;
+    this.app=new PIXI.Application({
+      width:W,
+      height:H,
+      backgroundAlpha:0,
+      antialias:false,
+      resolution:1,
+      autoDensity:false,
+      powerPreference:"high-performance"
+    });
+    this.app.view.className="gpu-city-layer";
+    this.app.ticker.stop();
+    this.parent.insertBefore(this.app.view, overlayCanvas);
+    this.container=new PIXI.Container();
+    this.app.stage.addChild(this.container);
+    this.ready=true;
+  }
+  setSize(){
+    if(!this.ready) return;
+    if(this.lastW===W && this.lastH===H) return;
+    this.lastW=W; this.lastH=H;
+    this.app.renderer.resize(W,H);
+  }
+  rebuild(){
+    if(!this.ready) return;
+    this.container.removeChildren();
+    this.layers={};
+    const makeLayer=(key,source,alphaBase=1)=>{
+      if(!source) return;
+      const tex=PIXI.Texture.from(source);
+      tex.baseTexture.scaleMode=PIXI.SCALE_MODES.LINEAR;
+      const a=new PIXI.Sprite(tex);
+      const b=new PIXI.Sprite(tex);
+      a.alpha=alphaBase; b.alpha=alphaBase;
+      this.container.addChild(a,b);
+      this.layers[key]={a,b,alphaBase,source};
+    };
+    makeLayer("far",Scene.far,1);
+    makeLayer("mid",Scene.mid,1);
+    makeLayer("near",Scene.near,1);
+    makeLayer("front",Scene.front,1);
+  }
+  drawLoopLayer(name,shift,y,alpha){
+    const L=this.layers[name];
+    if(!L) return;
+    const iw=L.source.width;
+    let x=-(shift%iw);
+    if(x>0) x-=iw;
+    L.a.x=x; L.b.x=x+iw;
+    L.a.y=y; L.b.y=y;
+    L.a.alpha=alpha*L.alphaBase; L.b.alpha=alpha*L.alphaBase;
+    L.a.visible=L.b.visible=alpha>.001;
+    L.a.scale.set(1); L.b.scale.set(1);
+  }
+  update(city,street,side){
+    if(!this.ready) return false;
+    this.setSize();
+    const cityReveal = out(inv(.24,.72,scroll));
+    const rise = (1-cityReveal) * 520;
+    const horizon=lerp(H*1.22,H*.58,ease(cityReveal))-street*44;
+    const baseY=horizon-Scene.cacheH+rise;
+    // Fade in during the approach, then reach full opacity quickly.
+    // The earlier hybrid version left the city looking translucent because reveal alpha
+    // kept multiplying already-transparent generated layers.
+    const revealAlpha = out(inv(.24,.42,scroll));
+    this.container.visible=city>.002;
+    this.container.alpha=1;
+    this.drawLoopLayer("far",side*.22,baseY+50,revealAlpha);
+    this.drawLoopLayer("mid",side*.48,baseY+18,revealAlpha);
+    this.drawLoopLayer("near",side*.84,baseY,revealAlpha);
+    this.drawLoopLayer("front",side*1.18,baseY+18,revealAlpha*sat(street*1.35));
+    this.app.renderer.render(this.app.stage);
+    return true;
+  }
+}
+
+function ensureGpuCity(){
+  if(!window.PIXI) return null;
+  if(!gpuCity) gpuCity = new HybridGpuCityCompositor(canvas.parentNode);
+  return gpuCity && gpuCity.ready ? gpuCity : null;
+}
+
+
+const TextCache = {
+  title: null,
+  burst: null,
+  manifesto: null
 };
 
 function resize(){
@@ -3281,9 +3450,79 @@ function resize(){
   canvas.height=Math.floor(H*DPR);
   canvas.style.width=W+"px";
   canvas.style.height=H+"px";
-  ctx.setTransform(DPR,0,0,DPR,0,0);
+  overlayCanvas.width=Math.floor(W*DPR);
+  overlayCanvas.height=Math.floor(H*DPR);
+  overlayCanvas.style.width=W+"px";
+  overlayCanvas.style.height=H+"px";
+  baseCtx.setTransform(DPR,0,0,DPR,0,0);
+  overlayCtx.setTransform(DPR,0,0,DPR,0,0);
   maxScroll=Math.max(1,root.offsetHeight-innerHeight);
   build();
+  if(gpuCity) gpuCity.setSize();
+  buildTextCaches();
+}
+
+function wrapTextLines(text, font, maxW){
+  ctx.save();
+  ctx.font = font;
+  const words = text.split(" ");
+  const lines = [];
+  let current = "";
+  for(const word of words){
+    const test = current ? current + " " + word : word;
+    if(ctx.measureText(test).width > maxW && current){
+      lines.push(current);
+      current = word;
+    }else{
+      current = test;
+    }
+  }
+  if(current) lines.push(current);
+  ctx.restore();
+  return lines;
+}
+
+function buildTextCaches(){
+  const longText = "We build digital products and original worlds across film, gameplay, audio, story, AI, and hardware with the same standard: every release should feel usable, memorable, and alive.";
+
+  const titleMaxW = Math.min(W*.82,1040);
+  const titleFontSize = Math.max(23,Math.min(44,W*.032));
+  const titleFont = `900 ${titleFontSize}px system-ui,sans-serif`;
+  TextCache.title = {
+    text: longText,
+    maxW: titleMaxW,
+    fontSize: titleFontSize,
+    lineH: titleFontSize*1.24,
+    font: titleFont,
+    lines: wrapTextLines(longText, titleFont, titleMaxW)
+  };
+
+  const manifestoMaxW = Math.min(W*.82,980);
+  const manifestoFontSize = Math.max(21,Math.min(36,W*.028));
+  const manifestoFont = `850 ${manifestoFontSize}px system-ui,sans-serif`;
+  TextCache.manifesto = {
+    text: longText,
+    maxW: manifestoMaxW,
+    fontSize: manifestoFontSize,
+    lineH: manifestoFontSize*1.34,
+    font: manifestoFont,
+    lines: wrapTextLines(longText, manifestoFont, manifestoMaxW)
+  };
+
+  const burstText = "Unlim8ted has it all.";
+  const burstFontSize = Math.min(W*.082,104);
+  const burstFont = `950 ${burstFontSize}px system-ui,sans-serif`;
+  ctx.save();
+  ctx.font = burstFont;
+  const burstWidth = ctx.measureText(burstText).width;
+  ctx.restore();
+  TextCache.burst = {
+    text: burstText,
+    fontSize: burstFontSize,
+    font: burstFont,
+    width: burstWidth,
+    sub: "FILMS  /  GAMES  /  TOOLS  /  MORE"
+  };
 }
 
 let resizeTimer=null;
@@ -3366,16 +3605,22 @@ function build(){
     });
   }
 
-  Scene.far=makeSkyline({count:100,step:95,alpha:.34,scale:.7,seed:10});
-  Scene.mid=makeSkyline({count:86,step:145,alpha:.7,scale:.93,seed:20});
+  Scene.far=makeSkyline({count:100,step:95,alpha:1,scale:.7,seed:10});
+  Scene.mid=makeSkyline({count:86,step:145,alpha:1,scale:.93,seed:20});
   Scene.near=makeSkyline({count:68,step:220,alpha:1,scale:1.08,seed:30});
-  Scene.front=makeSkyline({count:42,step:340,alpha:.94,scale:1.15,seed:40,dark:true});
+  Scene.front=makeSkyline({count:42,step:340,alpha:1,scale:1.15,seed:40,dark:true});
   Scene.billboards=makeBillboardLayer();
   Scene.signs=makeSignLayer();
   Scene.sidewalk=makeSidewalkLayer("front");
   Scene.sidewalkContainers=makeSidewalkLayer("containers");
   Scene.road=makeRoadDetailLayer();
   Scene.fg=makeForegroundLayer();
+  Scene.posterSprites=makePosterSprites();
+  Scene.lampSprites=makeLampSprites();
+  Scene.dogSprites=makeDogSprites();
+  Scene.carSprites=makeCarSprites();
+  const gpu = ensureGpuCity();
+  if(gpu) gpu.rebuild();
 }
 
 function makeSkyline({count,step,alpha,scale,seed,dark=false}){
@@ -3610,6 +3855,39 @@ function drawSidewalkPoster(g,x,y,label,col,sub,alpha=1,scale=1){
   g.restore();
 }
 
+
+function makePosterSprites(){
+  const specs=[
+    {key:"FILMS",label:"FILMS",col:"#ff3bdc",sub:"CINEMA / STORIES"},
+    {key:"GAMES",label:"GAMES",col:"#6df1ff",sub:"PLAY / WORLDS"},
+    {key:"TOOLS",label:"TOOLS",col:"#ffe46d",sub:"BUILD / CREATE"}
+  ];
+  const out={};
+  for(const spec of specs){
+    const pad=170;
+    const c=makeCanvas(500,520);
+    const g=c.getContext("2d");
+    drawSidewalkPoster(g,c.width/2,c.height-pad/2,spec.label,spec.col,spec.sub,1,1);
+    out[spec.key]={canvas:c,w:c.width,h:c.height,ox:c.width/2,oy:c.height-pad/2};
+  }
+  return out;
+}
+
+function drawCachedSidewalkPoster(x,y,label,alpha=1,scale=1){
+  const sprite=Scene.posterSprites && Scene.posterSprites[label];
+  if(!sprite){
+    const fallback={FILMS:["#ff3bdc","CINEMA / STORIES"],GAMES:["#6df1ff","PLAY / WORLDS"],TOOLS:["#ffe46d","BUILD / CREATE"]}[label];
+    drawSidewalkPoster(ctx,x,y,label,fallback[0],fallback[1],alpha,scale);
+    return;
+  }
+  ctx.save();
+  ctx.globalAlpha=alpha;
+  ctx.translate(x,y);
+  ctx.scale(scale,scale);
+  ctx.drawImage(sprite.canvas,-sprite.ox,-sprite.oy);
+  ctx.restore();
+}
+
 function drawHeroSidewalkPosters(street,travel,sideY){
   if(street<=.02) return;
   const posters=[
@@ -3639,7 +3917,7 @@ function drawHeroSidewalkPosters(street,travel,sideY){
       ctx.fill();
       ctx.restore();
     }
-    drawSidewalkPoster(ctx,x,sideY+96,p.label,p.col,p.sub,alpha,scale);
+    drawCachedSidewalkPoster(x,sideY+96,p.label,alpha,scale);
   }
 }
 
@@ -3902,16 +4180,18 @@ function drawCity(city,street,side){
   ctx.fillRect(0,horizon-240,W,H-horizon+260);
 
   ctx.save();
-  ctx.globalAlpha=cityReveal;
+  ctx.globalAlpha=out(inv(.24,.42,scroll));
 
-  drawLoop(Scene.far,side*.22,0,baseY+50);
-  drawLoop(Scene.mid,side*.48,0,baseY+18);
-  drawLoop(Scene.near,side*.84,0,baseY);
-  //drawLoop(Scene.billboards,side*1.02,0,baseY+8,Scene.cacheW,Scene.cacheH,cityReveal);
-  //drawLoop(Scene.signs,side*1.08,0,baseY+5,Scene.cacheW,Scene.cacheH,cityReveal);
+  if(!gpuCity || !gpuCity.ready){
+    drawLoop(Scene.far,side*.22,0,baseY+50);
+    drawLoop(Scene.mid,side*.48,0,baseY+18);
+    drawLoop(Scene.near,side*.84,0,baseY);
+    //drawLoop(Scene.billboards,side*1.02,0,baseY+8,Scene.cacheW,Scene.cacheH,cityReveal);
+    //drawLoop(Scene.signs,side*1.08,0,baseY+5,Scene.cacheW,Scene.cacheH,cityReveal);
 
-  if(street>.48){
-    drawLoop(Scene.front,side*1.18,0,baseY+18,Scene.cacheW,Scene.cacheH,.9*street);
+    if(street>.48){
+      drawLoop(Scene.front,side*1.18,0,baseY+18,Scene.cacheW,Scene.cacheH,.9*street);
+    }
   }
 
   ctx.restore();
@@ -4002,21 +4282,20 @@ function drawStreet(street,travel){
     line(ctx,x,sideY-4,x+82,curbY+48,`rgba(255,255,255,${.075*street})`,1);
   }
 
-  // ONLY lamps and the turquoise utility containers render behind the hero posters/signs.
+  // All sidewalk/street objects render behind the big FILMS / GAMES / TOOLS signs.
+  // This includes lamps, containers, traffic cones, benches, papers, plants, trash cans, and the dog.
   for(let i=0;i<18;i++){
     const x=((i*190-travel*1.05)%(Scene.cacheW)+Scene.cacheW)%Scene.cacheW;
     if(x>-90&&x<W+90) drawLamp(x,objectGroundY,110+hash(i,2)*45,street);
   }
   drawLoop(Scene.sidewalkContainers,travel*1.12,0,objectGroundY - 194,Scene.cacheW,300,street);
-
-  drawHeroSidewalkPosters(street,travel,objectGroundY - 104);
-
-  // All other sidewalk props render after the posters so they stay in front.
   drawLoop(Scene.sidewalk,travel*1.12,0,objectGroundY - 194,Scene.cacheW,300,street);
 
   drawDog(((860-travel*1.12)%(Scene.cacheW)+Scene.cacheW)%Scene.cacheW,objectGroundY,street);
   const dog2=((860-travel*1.12+Scene.cacheW)%(Scene.cacheW)+Scene.cacheW)%Scene.cacheW;
   if(dog2<W+160) drawDog(dog2,objectGroundY,street);
+
+  drawHeroSidewalkPosters(street,travel,objectGroundY - 104);
 
   const road=ctx.createLinearGradient(0,roadY,0,H);
   road.addColorStop(0,`rgba(32,12,42,${.92*street})`);
@@ -4048,169 +4327,217 @@ function drawStreet(street,travel){
   drawCars(street,travel,roadY);
 }
 
+
+function makeLampSprites(){
+  const out={};
+  const heights=[110,125,140,155];
+  for(const h of heights){
+    const c=makeCanvas(260,h+230);
+    const g=c.getContext("2d");
+    const ax=88;
+    const ay=h+96;
+    line(g,ax,ay,ax,ay-h,"rgba(13,12,21,.98)",6);
+    line(g,ax,ay-h,ax+42,ay-h,"rgba(13,12,21,.98)",5);
+    glow(g,ax+54,ay-h,92,"rgba(255,210,110,A)",.20);
+    glow(g,ax+54,ay-h,150,"rgba(255,150,90,A)",.055);
+    g.fillStyle="rgba(255,222,140,.92)";
+    g.beginPath();
+    g.arc(ax+54,ay-h,8,0,TAU);
+    g.fill();
+    out[h]={canvas:c,ax,ay};
+  }
+  return out;
+}
+
+function nearestLampHeight(h){
+  if(h<118) return 110;
+  if(h<133) return 125;
+  if(h<148) return 140;
+  return 155;
+}
+
+function makeDogSprites(){
+  const frames=[];
+  for(let f=0;f<16;f++){
+    const c=makeCanvas(220,150);
+    const g=c.getContext("2d");
+    const ax=110, ay=82;
+    const tail=Math.sin((f/16)*TAU)*5;
+    g.save();
+    g.translate(ax,ay);
+    g.scale(.6,.6);
+    g.fillStyle="rgba(0,0,0,.34)";
+    g.beginPath();
+    g.ellipse(0,42,54,11,0,0,TAU);
+    g.fill();
+    g.strokeStyle="#f0b77c";
+    g.lineWidth=12;
+    g.lineCap="round";
+    g.beginPath();
+    g.moveTo(-26,16);g.lineTo(-28,43);
+    g.moveTo(-4,18);g.lineTo(-4,43);
+    g.moveTo(22,17);g.lineTo(23,43);
+    g.moveTo(42,14);g.lineTo(43,42);
+    g.stroke();
+    const body=g.createLinearGradient(-42,-18,42,30);
+    body.addColorStop(0,"#ffd39c");
+    body.addColorStop(.52,"#efb272");
+    body.addColorStop(1,"#c77a46");
+    g.fillStyle=body;
+    g.beginPath();
+    g.roundRect(-42,-18,86,48,24);
+    g.fill();
+    g.fillStyle="#ffd39c";
+    g.beginPath();
+    g.roundRect(25,-47,50,48,22);
+    g.fill();
+    g.fillStyle="#8a4b2c";
+    g.beginPath();
+    g.ellipse(69,-25,9,7,0,0,TAU);
+    g.fill();
+    g.fillStyle="#160b0b";
+    g.beginPath();
+    g.arc(52,-34,4,0,TAU);
+    g.fill();
+    g.fillStyle="#c9794d";
+    g.beginPath();
+    g.moveTo(38,-47);
+    g.quadraticCurveTo(26,-72,21,-42);
+    g.quadraticCurveTo(29,-35,38,-47);
+    g.fill();
+    g.strokeStyle="#efb272";
+    g.lineWidth=10;
+    g.beginPath();
+    g.moveTo(-38,-4);
+    g.quadraticCurveTo(-72,-28,-82,-7+tail);
+    g.stroke();
+    g.fillStyle="#65eaff";
+    g.beginPath();
+    g.arc(28,-6,6,0,TAU);
+    g.fill();
+    glow(g,28,-6,36,"rgba(101,234,255,A)",.16);
+    g.restore();
+    frames.push({canvas:c,ax,ay});
+  }
+  return frames;
+}
+
+function makeCarSprites(){
+  const colors=["#ff3bdc","#6df1ff","#ffe46d","#ff735f"];
+  const out={};
+  for(const col of colors){
+    const c=makeCanvas(260,130);
+    const g=c.getContext("2d");
+    const ax=130, ay=72;
+    g.save();
+    g.translate(ax,ay);
+    g.fillStyle="rgba(0,0,0,.42)";
+    g.beginPath();
+    g.ellipse(0,20,72,16,0,0,TAU);
+    g.fill();
+    const bodyGrad=g.createLinearGradient(-70,-35,70,18);
+    bodyGrad.addColorStop(0,"rgba(18,18,28,.98)");
+    bodyGrad.addColorStop(.32,rgba(col,.82));
+    bodyGrad.addColorStop(.72,"rgba(8,8,14,.98)");
+    bodyGrad.addColorStop(1,"rgba(2,2,6,.98)");
+    const rgb=hexToRgb(col);
+    glow(g,-54,-5,135,`rgba(${rgb.r},${rgb.g},${rgb.b},A)`,.12);
+    glow(g,55,-2,120,"rgba(255,225,145,A)",.16);
+    g.fillStyle=bodyGrad;
+    g.beginPath();
+    g.moveTo(-74,6);
+    g.quadraticCurveTo(-66,-28,-34,-34);
+    g.lineTo(22,-38);
+    g.quadraticCurveTo(58,-34,76,-4);
+    g.quadraticCurveTo(84,13,58,17);
+    g.lineTo(-55,18);
+    g.quadraticCurveTo(-82,16,-74,6);
+    g.closePath();
+    g.fill();
+    const glass=g.createLinearGradient(-30,-36,42,-18);
+    glass.addColorStop(0,"rgba(155,235,255,.46)");
+    glass.addColorStop(.55,"rgba(45,80,115,.5)");
+    glass.addColorStop(1,"rgba(5,8,18,.8)");
+    g.fillStyle=glass;
+    g.beginPath();
+    g.moveTo(-28,-31);
+    g.lineTo(15,-34);
+    g.quadraticCurveTo(38,-31,50,-11);
+    g.lineTo(-45,-8);
+    g.quadraticCurveTo(-41,-22,-28,-31);
+    g.closePath();
+    g.fill();
+    g.strokeStyle="rgba(255,255,255,.16)";
+    g.lineWidth=1.4;
+    g.stroke();
+    g.fillStyle="rgba(255,230,150,.95)";
+    g.fillRect(52,-10,22,7);
+    g.fillStyle="rgba(255,65,85,.82)";
+    g.fillRect(-74,-7,16,6);
+    g.fillStyle="rgba(4,4,8,.98)";
+    g.beginPath(); g.arc(-42,15,13,0,TAU); g.fill();
+    g.beginPath(); g.arc(43,15,13,0,TAU); g.fill();
+    g.fillStyle="rgba(55,58,68,.95)";
+    g.beginPath(); g.arc(-42,15,6,0,TAU); g.fill();
+    g.beginPath(); g.arc(43,15,6,0,TAU); g.fill();
+    g.restore();
+    out[col]={canvas:c,ax,ay};
+  }
+  return out;
+}
+
 function drawLamp(x,y,h,street){
-  line(ctx,x,y,x,y-h,"rgba(13,12,21,.98)",6);
-  line(ctx,x,y-h,x+42,y-h,"rgba(13,12,21,.98)",5);
-  glow(ctx,x+54,y-h,92,"rgba(255,210,110,A)",.20*street);
-  glow(ctx,x+54,y-h,150,"rgba(255,150,90,A)",.055*street);
-  ctx.fillStyle=`rgba(255,222,140,${.92*street})`;
-  ctx.beginPath();
-  ctx.arc(x+54,y-h,8,0,TAU);
-  ctx.fill();
+  const key=nearestLampHeight(h);
+  const sprite=Scene.lampSprites && Scene.lampSprites[key];
+  if(!sprite){
+    line(ctx,x,y,x,y-h,"rgba(13,12,21,.98)",6);
+    line(ctx,x,y-h,x+42,y-h,"rgba(13,12,21,.98)",5);
+    glow(ctx,x+54,y-h,92,"rgba(255,210,110,A)",.20*street);
+    glow(ctx,x+54,y-h,150,"rgba(255,150,90,A)",.055*street);
+    ctx.fillStyle=`rgba(255,222,140,${.92*street})`;
+    ctx.beginPath();
+    ctx.arc(x+54,y-h,8,0,TAU);
+    ctx.fill();
+    return;
+  }
+  ctx.save();
+  ctx.globalAlpha=street;
+  ctx.drawImage(sprite.canvas,x-sprite.ax,y-sprite.ay);
+  ctx.restore();
 }
 
 function drawDog(x,y,street){
   if(street<.35||x<-170||x>W+170) return;
-  const s=.6;
+  const frames=Scene.dogSprites;
+  if(!frames || !frames.length) return;
   const idle=Math.sin(time*3.2)*1.2;
-  const tail=Math.sin(time*5.5)*5;
+  const frame=frames[((time*5.5/TAU*16)|0)&15];
   ctx.save();
-  ctx.translate(x,y+idle);
-  ctx.scale(s,s);
   ctx.globalAlpha=street;
-
-  ctx.fillStyle="rgba(0,0,0,.34)";
-  ctx.beginPath();
-  ctx.ellipse(0,42,54,11,0,0,TAU);
-  ctx.fill();
-
-  ctx.strokeStyle="#f0b77c";
-  ctx.lineWidth=12;
-  ctx.lineCap="round";
-  ctx.beginPath();
-  ctx.moveTo(-26,16);ctx.lineTo(-28,43);
-  ctx.moveTo(-4,18);ctx.lineTo(-4,43);
-  ctx.moveTo(22,17);ctx.lineTo(23,43);
-  ctx.moveTo(42,14);ctx.lineTo(43,42);
-  ctx.stroke();
-
-  const body=ctx.createLinearGradient(-42,-18,42,30);
-  body.addColorStop(0,"#ffd39c");
-  body.addColorStop(.52,"#efb272");
-  body.addColorStop(1,"#c77a46");
-  ctx.fillStyle=body;
-  ctx.beginPath();
-  ctx.roundRect(-42,-18,86,48,24);
-  ctx.fill();
-
-  ctx.fillStyle="#ffd39c";
-  ctx.beginPath();
-  ctx.roundRect(25,-47,50,48,22);
-  ctx.fill();
-
-  ctx.fillStyle="#8a4b2c";
-  ctx.beginPath();
-  ctx.ellipse(69,-25,9,7,0,0,TAU);
-  ctx.fill();
-
-  ctx.fillStyle="#160b0b";
-  ctx.beginPath();
-  ctx.arc(52,-34,4,0,TAU);
-  ctx.fill();
-
-  ctx.fillStyle="#c9794d";
-  ctx.beginPath();
-  ctx.moveTo(38,-47);
-  ctx.quadraticCurveTo(26,-72,21,-42);
-  ctx.quadraticCurveTo(29,-35,38,-47);
-  ctx.fill();
-
-  ctx.strokeStyle="#efb272";
-  ctx.lineWidth=10;
-  ctx.beginPath();
-  ctx.moveTo(-38,-4);
-  ctx.quadraticCurveTo(-72,-28,-82,-7+tail);
-  ctx.stroke();
-
-  ctx.fillStyle="#65eaff";
-  ctx.beginPath();
-  ctx.arc(28,-6,6,0,TAU);
-  ctx.fill();
-
-  glow(ctx,28,-6,36,"rgba(101,234,255,A)",.16);
-  ctx.globalAlpha=1;
+  ctx.drawImage(frame.canvas,x-frame.ax,y+idle-frame.ay);
   ctx.restore();
 }
 
 function drawCars(street,travel,roadY){
   if(street<.18) return;
-
+  const sprites=Scene.carSprites;
   ctx.save();
   ctx.globalAlpha=sat(street*1.7);
-
   for(const car of Scene.cars){
     const x=((car.x-travel*1.65)%(Scene.cacheW)+Scene.cacheW)%Scene.cacheW;
     if(x<-180||x>W+180) continue;
-
-    const depth = sat((x + 180) / (W + 360));
     const lane = car.y;
     const y = lerp(roadY + 44, H - 58, lane);
     const perspective = lerp(.40, 1.12, lane) * car.s;
-
-    ctx.save();
-    ctx.translate(x,y);
-    ctx.scale(perspective,perspective);
-
-    ctx.fillStyle="rgba(0,0,0,.42)";
-    ctx.beginPath();
-    ctx.ellipse(0,20,72,16,0,0,TAU);
-    ctx.fill();
-
-    const bodyGrad=ctx.createLinearGradient(-70,-35,70,18);
-    bodyGrad.addColorStop(0,"rgba(18,18,28,.98)");
-    bodyGrad.addColorStop(.32,rgba(car.c,.82));
-    bodyGrad.addColorStop(.72,"rgba(8,8,14,.98)");
-    bodyGrad.addColorStop(1,"rgba(2,2,6,.98)");
-
-    glow(ctx,-54,-5,135,`rgba(${hexToRgb(car.c).r},${hexToRgb(car.c).g},${hexToRgb(car.c).b},A)`,.12);
-    glow(ctx,55,-2,120,"rgba(255,225,145,A)",.16);
-
-    ctx.fillStyle=bodyGrad;
-    ctx.beginPath();
-    ctx.moveTo(-74,6);
-    ctx.quadraticCurveTo(-66,-28,-34,-34);
-    ctx.lineTo(22,-38);
-    ctx.quadraticCurveTo(58,-34,76,-4);
-    ctx.quadraticCurveTo(84,13,58,17);
-    ctx.lineTo(-55,18);
-    ctx.quadraticCurveTo(-82,16,-74,6);
-    ctx.closePath();
-    ctx.fill();
-
-    const glass=ctx.createLinearGradient(-30,-36,42,-18);
-    glass.addColorStop(0,"rgba(155,235,255,.46)");
-    glass.addColorStop(.55,"rgba(45,80,115,.5)");
-    glass.addColorStop(1,"rgba(5,8,18,.8)");
-    ctx.fillStyle=glass;
-    ctx.beginPath();
-    ctx.moveTo(-28,-31);
-    ctx.lineTo(15,-34);
-    ctx.quadraticCurveTo(38,-31,50,-11);
-    ctx.lineTo(-45,-8);
-    ctx.quadraticCurveTo(-41,-22,-28,-31);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.strokeStyle="rgba(255,255,255,.16)";
-    ctx.lineWidth=1.4;
-    ctx.stroke();
-
-    ctx.fillStyle="rgba(255,230,150,.95)";
-    ctx.fillRect(52,-10,22,7);
-    ctx.fillStyle="rgba(255,65,85,.82)";
-    ctx.fillRect(-74,-7,16,6);
-
-    ctx.fillStyle="rgba(4,4,8,.98)";
-    ctx.beginPath(); ctx.arc(-42,15,13,0,TAU); ctx.fill();
-    ctx.beginPath(); ctx.arc(43,15,13,0,TAU); ctx.fill();
-
-    ctx.fillStyle="rgba(55,58,68,.95)";
-    ctx.beginPath(); ctx.arc(-42,15,6,0,TAU); ctx.fill();
-    ctx.beginPath(); ctx.arc(43,15,6,0,TAU); ctx.fill();
-
-    ctx.restore();
+    const sprite=sprites && sprites[car.c];
+    if(sprite){
+      ctx.save();
+      ctx.translate(x,y);
+      ctx.scale(perspective,perspective);
+      ctx.drawImage(sprite.canvas,-sprite.ax,-sprite.ay);
+      ctx.restore();
+    }
   }
-
   ctx.restore();
 }
 
@@ -4318,10 +4645,11 @@ function drawSquareDissolveBurst(t){
     ctx.globalAlpha=textA;
     ctx.textAlign="center";
     ctx.textBaseline="middle";
-    const mainSize=Math.min(W*.082,104);
-    ctx.font=`950 ${mainSize}px system-ui,sans-serif`;
-    const text="Unlim8ted has it all.";
-    const tw=ctx.measureText(text).width;
+    const burst = TextCache.burst || {};
+    const mainSize = burst.fontSize || Math.min(W*.082,104);
+    const text = burst.text || "Unlim8ted has it all.";
+    const tw = burst.width || ctx.measureText(text).width;
+    ctx.font = burst.font || `950 ${mainSize}px system-ui,sans-serif`;
     roundRect(ctx,cx-tw/2-34,cy-mainSize*.64,tw+68,mainSize*1.18,18,"rgba(0,0,0,.72)","rgba(255,255,255,.18)",1.5);
     ctx.lineWidth=Math.max(7,mainSize*.105);
     ctx.strokeStyle="rgba(0,0,0,.95)";
@@ -4342,7 +4670,7 @@ function drawSquareDissolveBurst(t){
     ctx.fillStyle="rgba(255,255,255,.90)";
     ctx.strokeStyle="rgba(0,0,0,.9)";
     ctx.lineWidth=5;
-    const sub="FILMS  /  GAMES  /  TOOLS  /  MORE";
+    const sub=burst.sub || "FILMS  /  GAMES  /  TOOLS  /  MORE";
     ctx.strokeText(sub,cx,cy+Math.min(88,H*.12));
     ctx.fillText(sub,cx,cy+Math.min(88,H*.12));
     ctx.restore();
@@ -4355,25 +4683,14 @@ function drawCloudManifesto(cloud){
   const a=sat(fadeIn*fadeOut)*sat(cloud*1.25);
   if(a<=.001) return;
 
-  const text="We build digital products and original worlds across film, gameplay, audio, story, AI, and hardware with the same standard: every release should feel usable, memorable, and alive.";
-  const maxW=Math.min(W*.82,980);
-  const fontSize=Math.max(21,Math.min(36,W*.028));
-  const lineH=fontSize*1.34;
-  const words=text.split(" "), lines=[];
+  const cache = TextCache.manifesto || {};
+  const maxW = cache.maxW || Math.min(W*.82,980);
+  const fontSize = cache.fontSize || Math.max(21,Math.min(36,W*.028));
+  const lineH = cache.lineH || fontSize*1.34;
+  const lines = cache.lines || [];
 
   ctx.save();
-  ctx.font=`850 ${fontSize}px system-ui,sans-serif`;
-  let lineText="";
-  for(const word of words){
-    const test=lineText?lineText+" "+word:word;
-    if(ctx.measureText(test).width>maxW && lineText){
-      lines.push(lineText);
-      lineText=word;
-    }else{
-      lineText=test;
-    }
-  }
-  if(lineText) lines.push(lineText);
+  ctx.font=cache.font || `850 ${fontSize}px system-ui,sans-serif`;
 
   const cx=W*.5;
   const cy=H*.49 + Math.sin(time*.6)*5 - inv(.235,.555,scroll)*38;
@@ -4416,29 +4733,16 @@ function drawTitle(){
   const a=out(inv(.060,.155,scroll))*(1-out(inv(.255,.36,scroll)));
   if(a<=.001) return;
 
-  const text="We build digital products and original worlds across film, gameplay, audio, story, AI, and hardware with the same standard: every release should feel usable, memorable, and alive.";
-  const maxW=Math.min(W*.82,1040);
-  const fontSize=Math.max(23,Math.min(44,W*.032));
-  const lineH=fontSize*1.24;
-  const words=text.split(" ");
-  const lines=[];
+  const cache = TextCache.title || {};
+  const maxW = cache.maxW || Math.min(W*.82,1040);
+  const fontSize = cache.fontSize || Math.max(23,Math.min(44,W*.032));
+  const lineH = cache.lineH || fontSize*1.24;
+  const lines = cache.lines || [];
 
   ctx.save();
   ctx.textAlign="center";
   ctx.textBaseline="middle";
-  ctx.font=`900 ${fontSize}px system-ui,sans-serif`;
-
-  let current="";
-  for(const word of words){
-    const test=current?current+" "+word:word;
-    if(ctx.measureText(test).width>maxW && current){
-      lines.push(current);
-      current=word;
-    }else{
-      current=test;
-    }
-  }
-  if(current) lines.push(current);
+  ctx.font=cache.font || `900 ${fontSize}px system-ui,sans-serif`;
 
   const cx=W*.5;
   const cy=H*.50 - out(inv(.060,.155,scroll))*34 + Math.sin(time*.45)*4;
@@ -4558,7 +4862,8 @@ function render(now=0){
   root.style.setProperty("--orbitalEntryMist", entryMist.toFixed(4));
   root.style.setProperty("--orbitalWindX", (Math.sin(time*.7)*18).toFixed(2));
   fade.style.opacity=(entryMist*.42).toFixed(4);
-  bottomVignette.style.opacity=(out(inv(.31,.50,scroll))*.92).toFixed(4);
+  const bottomFog = inout(inv(.18,.70,scroll)) * out(inv(.08,.22,scroll)) * .92;
+  root.style.setProperty("--orbitalBottomFog", bottomFog.toFixed(4));
 
   const drop=inout(inv(.06,.44,scroll));
   const burn=inv(.12,.42,scroll);
@@ -4568,23 +4873,35 @@ function render(now=0){
   const street = out(streetIntro);
   // Slower city pass with no doubled end acceleration. The section is longer,
   // but the next section overlaps at the 80% point so the ending does not drag.
-  const cityCruise=inout(inv(.10,.88,scroll));
-  const streetTravel=inout(inv(.44,.90,scroll));
+  const cityCruise=inout(inv(.10,.78,scroll));
+  const streetTravel=inout(inv(.44,.78,scroll));
   const side=cityCruise*5200 + streetTravel*2600;
   const travel=side + streetTravel*4200;
 
-  ctx.clearRect(0,0,W,H);
+  baseCtx.clearRect(0,0,W,H);
+  overlayCtx.clearRect(0,0,W,H);
+
+  ctx = baseCtx;
   drawSky(drop,street,side);
   if(street < .96) drawAtmosphere(drop,burn,cloud,side);
-  drawCity(city,street,side);
+
+  const gpu = ensureGpuCity();
+  if(gpu){
+    gpu.update(city,street,side);
+  }else{
+    drawCity(city,street,side);
+  }
+
+  ctx = overlayCtx;
+  if(gpu) drawCity(city,street,side);
   drawStreet(street,travel);
   if(frameSkip % 2 === 0) drawRain(street);
   drawForeground(street,travel);
   drawPost(city,burn,street);
-  // Final takeover now starts around 3/4 through the orbital scene and reaches full strength
-  // right as the next section begins to enter, preventing the long dead ending.
-  drawSquareDissolveBurst(inv(.74,.88,scroll));
+  // Final takeover starts after the third sign, but not before the city has settled.
+  drawSquareDissolveBurst(inv(.56,.70,scroll));
   drawTitle();
+  ctx = baseCtx;
 
   requestAnimationFrame(render);
 }
@@ -4599,5 +4916,3 @@ requestAnimationFrame(render);
 </body>
 
 </html>
-
-
