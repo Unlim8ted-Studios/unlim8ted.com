@@ -6,21 +6,20 @@
   <title>Unlim8ted Sign-In</title>
   <link rel="icon" href="https://unlim8ted.com/favicon.ico" type="image/x-icon" />
 
-  <link rel="stylesheet" href="./resources/css/sign-in.01.css">
-
+  <link rel="stylesheet" href="./resources/css/sign-in.01.css" />
   <script src="./resources/js/sign-in.01.js"></script>
 
-<script type="module" src="/components/site-navbar.js"></script>
-<site-navbar
-  cart-href="/cart"
-  signin-href="/sign-in"
-  profile-href="/profile">
-</site-navbar>
-
+  <script type="module" src="/components/site-navbar.js"></script>
   <script type="module" src="./resources/js/sign-in.02.js"></script>
 </head>
 
 <body>
+  <site-navbar
+    cart-href="/cart"
+    signin-href="/sign-in"
+    profile-href="/profile">
+  </site-navbar>
+
   <div class="background">
     <span style="top: 20%; left: 10%; animation-delay: 0s;"></span>
     <span style="top: 40%; left: 70%; animation-delay: 2s;"></span>
@@ -33,7 +32,7 @@
     <div class="logo">Unlim8ted</div>
     <p class="subtitle">Sign in or create an account to continue.</p>
 
-    <div id="form-mode" style="font-weight:700; margin-bottom: 10px;">Sign In</div>
+    <div id="form-mode">Sign In</div>
 
     <button id="google-signin-btn" type="button">
       <img
@@ -47,6 +46,14 @@
     <form id="email-signin-form">
       <input type="email" id="email" placeholder="Email" autocomplete="email" required />
       <input type="password" id="password" placeholder="Password" autocomplete="current-password" required />
+
+      <div id="confirm-password-wrap" hidden>
+        <input
+          type="password"
+          id="confirm-password"
+          placeholder="Confirm password"
+          autocomplete="new-password" />
+      </div>
 
       <div class="row">
         <label class="remember" for="rememberMe">
@@ -67,12 +74,27 @@
       <div class="info">
         <span id="toggle-text" class="toggle">Don't have an account? Create one.</span>
         <p>An account is needed to comment, rate products, and add things to your cart, but it is not required.</p>
-        <p>If you'd prefer not to create an account, you can visit our <a href="products">Products</a> or <a href="about">About Us</a> pages.</p>
+        <p>If you'd prefer not to create an account, you can visit our <a href="/products">Products</a> or <a href="/about">About Us</a> pages.</p>
         <p id="footer-text"></p>
       </div>
     </form>
   </div>
+
+  <div id="auth-modal-backdrop" class="modal-backdrop" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button id="modal-close" class="modal-close" type="button" aria-label="Close">×</button>
+
+      <div id="modal-icon" class="modal-icon">!</div>
+      <h2 id="modal-title">Title</h2>
+      <p id="modal-message">Message</p>
+
+      <div id="modal-fields" class="modal-fields"></div>
+
+      <div class="modal-actions">
+        <button id="modal-cancel" class="modal-secondary" type="button">Cancel</button>
+        <button id="modal-confirm" class="modal-primary" type="button">OK</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
-
-

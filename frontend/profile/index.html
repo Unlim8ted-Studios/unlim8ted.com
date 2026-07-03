@@ -7,37 +7,100 @@
   <meta name="description" content="Manage your Unlim8ted account profile." />
   <link rel="icon" href="https://unlim8ted.com/favicon.ico" type="image/x-icon">
 
-  <!-- Components -->
   <script type="module" src="/components/site-navbar.js"></script>
-
   <link rel="stylesheet" href="./resources/css/profile.01.css">
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="container">
-      <img id="profilePic" class="profile-pic" src="https://via.placeholder.com/110" alt="Profile picture" />
-      <h1 id="displayName">Loading…</h1>
-      <div class="meta">Email: <span id="email">Loading…</span></div>
+  <site-navbar
+    cart-href="/cart"
+    signin-href="/sign-in"
+    profile-href="/profile">
+  </site-navbar>
 
-      <div class="panel">
-        <label for="username">
-          <span>Username</span>
-          <span class="hint" id="nameHint"></span>
-        </label>
-        <input id="username" type="text" placeholder="Enter a username" />
+  <div class="background">
+    <span style="top:20%;left:10%;animation-delay:0s;"></span>
+    <span style="top:40%;left:70%;animation-delay:2s;"></span>
+    <span style="top:70%;left:30%;animation-delay:4s;"></span>
+    <span style="top:50%;left:90%;animation-delay:1.5s;"></span>
+    <span style="top:80%;left:50%;animation-delay:3s;"></span>
+  </div>
 
-        <label for="photoUrl">
-          <span>Profile photo URL (optional)</span>
-          <span class="hint" id="urlHint"></span>
-        </label>
-        <input id="photoUrl" type="url" placeholder="https://…" />
+  <main class="wrap">
+    <section class="container">
+      <div class="hero">
+        <div class="avatar-wrap">
+          <img id="profilePic" class="profile-pic" alt="Profile picture" />
+          <div id="avatarFallback" class="avatar-fallback">U</div>
+        </div>
+
+        <div class="hero-copy">
+          <p class="eyebrow">Unlim8ted Account</p>
+          <h1 id="displayName">Loading…</h1>
+          <div class="meta">Email: <span id="email">Loading…</span></div>
+          <div id="verifiedBadge" class="badge muted">Checking verification…</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Profile</h2>
+            <p>Edit your public account details.</p>
+          </div>
+
+          <label for="username">
+            <span>Username</span>
+            <span class="hint" id="nameHint"></span>
+          </label>
+          <input id="username" type="text" placeholder="Enter a username" />
+
+          <label for="photoUrl">
+            <span>Profile photo URL</span>
+            <span class="hint" id="urlHint"></span>
+          </label>
+          <input id="photoUrl" type="url" placeholder="https://…" />
+
+          <div class="actions left">
+            <button id="saveBtn" class="btn">Save Profile</button>
+            <button id="resetPhotoBtn" class="btn secondary">Reset Photo</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Account Controls</h2>
+            <p>Manage security, verification, and session actions.</p>
+          </div>
+
+          <div class="control-row">
+            <div>
+              <strong>Email verification</strong>
+              <span id="verifyText">Checking…</span>
+            </div>
+            <button id="verifyBtn" class="mini-btn">Send Email</button>
+          </div>
+
+          <div class="control-row">
+            <div>
+              <strong>Session</strong>
+              <span>Sign out of this browser.</span>
+            </div>
+            <button id="logoutBtn" class="mini-btn">Log Out</button>
+          </div>
+
+          <div class="control-row danger-row">
+            <div>
+              <strong>Delete account</strong>
+              <span>Permanently removes your login account.</span>
+            </div>
+            <button id="deleteBtn" class="mini-btn danger">Delete</button>
+          </div>
+        </section>
       </div>
 
       <div class="actions">
-        <button id="saveBtn" class="btn">Save Profile</button>
         <button id="productsBtn" class="btn secondary">Browse Products</button>
-        <button id="logoutBtn" class="btn logout">Log Out</button>
       </div>
 
       <div id="status" class="status"></div>
@@ -45,11 +108,23 @@
       <div class="footer">
         <span id="footerText"></span>
       </div>
+    </section>
+  </main>
+
+  <div id="modalBackdrop" class="modal-backdrop" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button id="modalClose" class="modal-close" type="button">×</button>
+      <div id="modalIcon" class="modal-icon">!</div>
+      <h2 id="modalTitle">Title</h2>
+      <p id="modalMessage">Message</p>
+      <div id="modalFields" class="modal-fields"></div>
+      <div class="modal-actions">
+        <button id="modalCancel" class="btn secondary" type="button">Cancel</button>
+        <button id="modalConfirm" class="btn" type="button">OK</button>
+      </div>
     </div>
   </div>
 
   <script type="module" src="./resources/js/profile.01.js"></script>
+</body>
 </html>
-
-
-

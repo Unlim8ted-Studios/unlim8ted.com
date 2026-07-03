@@ -1,5 +1,5 @@
 ﻿import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signOut, sendEmailVerification } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, query } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
 class SiteNavbar extends HTMLElement {
@@ -22,6 +22,9 @@ class SiteNavbar extends HTMLElement {
     this._productsLoading = null;
     this._productById = new Map();
     this._variantByKey = new Map(); // `${productId}::${variantId}` -> variant
+
+    this.verifyCooldownUntil = 0;
+    this.verifyTimer = null;
   }
 
   connectedCallback() {
@@ -207,7 +210,7 @@ class SiteNavbar extends HTMLElement {
           left: 0;
           right: 0;
           top: 100%;
-          height: 12px;          /* >= your gap (8px) */
+          height: 12px;
           background: transparent;
         }
         .dropdown:hover .dropdown-content,
@@ -269,7 +272,50 @@ class SiteNavbar extends HTMLElement {
           transform: translate(20%, -20%);
         }
         .badge.hidden{ display:none; }
+        .verify-banner{
+          position:fixed;
+          top:var(--nav-h);
+          left:0;
+          right:0;
+          z-index:10000;
+          min-height:42px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          gap:10px;
+          padding:8px 12px;
+          box-sizing:border-box;
+          background:linear-gradient(135deg, rgba(255,193,7,.96), rgba(255,122,48,.96));
+          color:#130b05;
+          font-weight:900;
+          font-size:13px;
+          text-align:center;
+          box-shadow:0 12px 30px rgba(0,0,0,.28);
+        }
 
+        .verify-banner.hidden{
+          display:none;
+        }
+
+        .verify-banner button{
+          width:auto;
+          border:none;
+          border-radius:999px;
+          padding:7px 10px;
+          cursor:pointer;
+          background:rgba(10,8,18,.88);
+          color:white;
+          font-weight:900;
+          font-size:12px;
+        }
+
+        @media(max-width:820px){
+          .verify-banner{
+            flex-wrap:wrap;
+            top:56px;
+            padding:8px 70px 8px 12px;
+          }
+        }
         .menu{
           display:none;
           position:absolute;
@@ -398,10 +444,14 @@ class SiteNavbar extends HTMLElement {
           }
 
           .menu{
-            right:12px;
+            position: fixed;
+            left: 12px;
+            right: 64px;
             top: 56px;
-            min-width: 92vw;
-            max-width: 380px;
+            width: auto;
+            min-width: 0;
+            max-width: none;
+            box-sizing: border-box;
           }
 
           .dropdown:hover .dropdown-content{ display:none; }
@@ -413,6 +463,11 @@ class SiteNavbar extends HTMLElement {
       </style>
 
       <nav class="navbar" role="navigation" aria-label="Primary">
+        <div id="verifyBanner" class="verify-banner hidden">
+          <span id="verifyText">Email not verified.</span>
+          <button id="verifyBtn" type="button">Send verification email</button>
+          <button id="verifyRefreshBtn" type="button">I verified</button>
+        </div>
         <div class="navbar-header">
           <a class="brand" href="${base}/" aria-label="Unlim8ted Home">
             <svg class="brand-logo" viewBox="0 0 960 720" fill="none" stroke="none" stroke-linecap="square" stroke-miterlimit="10"
@@ -451,7 +506,7 @@ class SiteNavbar extends HTMLElement {
             <span>Unlim8ted</span>
           </a>
 
-          <button class="navbar-toggle" id="toggleBtn" aria-label="Toggle menu" aria-expanded="false">â˜°</button>
+          <button class="navbar-toggle" id="toggleBtn" aria-label="Toggle menu" aria-expanded="false">☰</button>
 
           <ul id="links" role="menubar">
             <li><a href="${base}/" role="menuitem">Home</a></li>
@@ -519,7 +574,7 @@ class SiteNavbar extends HTMLElement {
     // Preload products
     this.loadProducts().then(() => {
       this.renderCartMenu();
-    }).catch(() => {});
+    }).catch(() => { });
 
     // Mobile toggle
     const toggleBtn = this.shadowRoot.getElementById("toggleBtn");
@@ -546,7 +601,7 @@ class SiteNavbar extends HTMLElement {
       try {
         const href = new URL(a.getAttribute("href"), window.location.origin).pathname.replace(/\/$/, "");
         if (href === path) a.classList.add("active");
-      } catch {}
+      } catch { }
     });
 
     // Menus
@@ -597,11 +652,28 @@ class SiteNavbar extends HTMLElement {
       }
     });
 
+    this.shadowRoot.getElementById("verifyBtn").addEventListener("click", async () => {
+      await this.sendVerificationEmail();
+    });
+
+    this.shadowRoot.getElementById("verifyRefreshBtn").addEventListener("click", async () => {
+      await this.refreshVerificationState();
+    });
+
     // Auth state
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       this.currentUser = user || null;
-      this.updateAccountMenu({ user, signInHref, profileHref });
-      this.bindCartListener({ db, user });
+
+      if (user) {
+        try {
+          await user.reload();
+          this.currentUser = auth.currentUser;
+        } catch {}
+      }
+
+      this.updateAccountMenu({ user: this.currentUser, signInHref, profileHref });
+      this.updateVerifyBanner(this.currentUser);
+      this.bindCartListener({ db, user: this.currentUser });
     });
 
     // Logged-out cart initial
@@ -624,7 +696,6 @@ class SiteNavbar extends HTMLElement {
     this.removeSpacer();
   }
 
-  // NEW: allow toggling no-spacer dynamically if attribute changes
   static get observedAttributes() {
     return ["no-spacer"];
   }
@@ -637,6 +708,87 @@ class SiteNavbar extends HTMLElement {
 
     if (noSpacer) this.removeSpacer();
     else this.syncSpacer();
+  }
+  
+  getVerifyDaysLeft(user) {
+    if (!user?.metadata?.creationTime) return null;
+
+    const created = new Date(user.metadata.creationTime).getTime();
+    const limitMs = 7 * 24 * 60 * 60 * 1000;
+    const leftMs = created + limitMs - Date.now();
+
+    return Math.max(0, Math.ceil(leftMs / (24 * 60 * 60 * 1000)));
+  }
+
+  updateVerifyBanner(user) {
+    const banner = this.shadowRoot.getElementById("verifyBanner");
+    const text = this.shadowRoot.getElementById("verifyText");
+
+    if (!banner || !text) return;
+
+    if (!user || user.emailVerified) {
+      banner.classList.add("hidden");
+      return;
+    }
+
+    const daysLeft = this.getVerifyDaysLeft(user);
+
+    text.textContent =
+      daysLeft == null
+        ? "Email not verified. Please verify your email."
+        : `Email not verified. Days left: ${daysLeft}`;
+
+    banner.classList.remove("hidden");
+  }
+
+  async sendVerificationEmail() {
+    const user = this.currentUser;
+    if (!user || user.emailVerified) return;
+
+    const now = Date.now();
+
+    if (now < this.verifyCooldownUntil) {
+      const seconds = Math.ceil((this.verifyCooldownUntil - now) / 1000);
+      alert(`Please wait ${seconds}s before sending another verification email.`);
+      return;
+    }
+
+    try {
+      await sendEmailVerification(user, {
+        url: "https://unlim8ted.com/sign-in",
+        handleCodeInApp: false,
+      });
+
+      this.verifyCooldownUntil = Date.now() + 60_000;
+
+      const btn = this.shadowRoot.getElementById("verifyBtn");
+      if (btn) btn.textContent = "Email sent";
+
+      setTimeout(() => {
+        const b = this.shadowRoot.getElementById("verifyBtn");
+        if (b) b.textContent = "Send verification email";
+      }, 4000);
+    } catch (err) {
+      console.error("Verification email failed:", err);
+      alert("Could not send verification email. Try again later.");
+    }
+  }
+
+  async refreshVerificationState() {
+    if (!this.currentUser) return;
+
+    try {
+      await this.currentUser.reload();
+      this.currentUser = this.currentUser.auth.currentUser;
+      this.updateVerifyBanner(this.currentUser);
+      this.updateAccountMenu({
+        user: this.currentUser,
+        signInHref: this.getAttribute("signin-href") || "https://unlim8ted.com/sign-in",
+        profileHref: this.getAttribute("profile-href") || "https://unlim8ted.com/profile",
+      });
+    } catch (err) {
+      console.error("Verification refresh failed:", err);
+    }
   }
 
   // ===== https://assets.unlim8ted.com/data/products.json =====
@@ -704,7 +856,7 @@ class SiteNavbar extends HTMLElement {
       String(v?.name || "").trim();
 
     const parsedItem = this.parsePriceAny(it.price);
-    const parsedVar  = this.parsePriceAny(v?.price);
+    const parsedVar = this.parsePriceAny(v?.price);
     const parsedProd = this.parsePriceAny(p?.price);
 
     const currency =
@@ -797,7 +949,7 @@ class SiteNavbar extends HTMLElement {
 
     if (!user) {
       this.cartItems = this.getLocalCartItems();
-      this.loadProducts().then(() => this.renderCartMenu()).catch(() => {});
+      this.loadProducts().then(() => this.renderCartMenu()).catch(() => { });
       this.renderCartMenu();
       this.updateCartBadge(this.countCart(this.cartItems));
       return;
@@ -828,7 +980,7 @@ class SiteNavbar extends HTMLElement {
       (err) => {
         console.error("Cart listener error:", err);
         this.cartItems = this.getLocalCartItems();
-        this.loadProducts().then(() => this.renderCartMenu()).catch(() => {});
+        this.loadProducts().then(() => this.renderCartMenu()).catch(() => { });
         this.renderCartMenu();
         this.updateCartBadge(this.countCart(this.cartItems));
       }
