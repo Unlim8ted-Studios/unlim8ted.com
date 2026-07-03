@@ -1657,7 +1657,6 @@ if (/^it(?:'?s|\s+is)?\s+[a-z0-9_'-]+$/i.test(rawInput.trim())) {
     route.animation = "neutral";
     return route;
   }
-  const normalized = rawInput.trim().toLowerCase();
 
 if (normalized === "whoops") {
   return {
