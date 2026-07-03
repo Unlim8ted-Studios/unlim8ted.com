@@ -210,6 +210,11 @@ async function addUserToFirestore(user){
   await user.reload();
   await user.getIdToken(true);
 
+  console.log("Passed-in UID:", user.uid);
+  console.log("Current user:", auth.currentUser);
+  console.log("Current UID:", auth.currentUser?.uid);
+  console.log("ID token:", await auth.currentUser?.getIdToken());
+
   const liveUser = auth.currentUser;
   if (!liveUser) throw new Error("No authenticated Firebase user before Firestore write.");
 
