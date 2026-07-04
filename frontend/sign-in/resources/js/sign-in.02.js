@@ -197,15 +197,13 @@ async function addUserToFirestore(user){
   await user.reload();
   await user.getIdToken(true);
 
-  console.log("Passed-in UID:", user.uid);
-  console.log("Current user:", auth.currentUser);
-  console.log("Current UID:", auth.currentUser?.uid);
-  console.log("ID token:", await auth.currentUser?.getIdToken());
-
   const liveUser = auth.currentUser;
   if (!liveUser) throw new Error("No authenticated Firebase user before Firestore write.");
 
   const userRef = doc(db, "users", liveUser.uid);
+  const snap = await getDoc(userRef);
+
+  if (snap.exists()) return;
 
   await setDoc(userRef, {
     email: liveUser.email || "",
@@ -213,6 +211,7 @@ async function addUserToFirestore(user){
     profilePicture: liveUser.photoURL || "",
   });
 }
+
 async function applyPersistenceFromCheckbox(){
   const remember = document.getElementById("rememberMe")?.checked ?? true;
 
