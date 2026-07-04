@@ -1,6 +1,6 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getFirebase } from "https://unlim8ted.com/components/firebase-init.js";
+
 import {
-  getAuth,
   GoogleAuthProvider,
   signInWithPopup,
   signInWithEmailAndPassword,
@@ -15,24 +15,11 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
 import {
-  getFirestore,
   doc,
   setDoc,
-  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyC8rw6kaFhJ2taebKRKKEA7iLqBvak_Dbc",
-  authDomain: "auth.unlim8ted.com",
-  projectId: "unlim8ted-db",
-  storageBucket: "unlim8ted-db.appspot.com",
-  messagingSenderId: "1059428499872",
-  appId: "1:1059428499872:web:855308683718237de6e4c5",
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const { auth, db } = getFirebase();
 
 const DEFAULT_AFTER_LOGIN = "https://unlim8ted.com/profile";
 const VERIFY_EMAIL_COOLDOWN_MS = 60_000;

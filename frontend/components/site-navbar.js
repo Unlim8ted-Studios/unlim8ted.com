@@ -1,6 +1,6 @@
-﻿import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut, sendEmailVerification } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-import { getFirestore, collection, onSnapshot, query } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+﻿import { getFirebase } from "https://unlim8ted.com/components/firebase-init.js";
+import { onAuthStateChanged, signOut, sendEmailVerification } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+import { collection, onSnapshot, query } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
 class SiteNavbar extends HTMLElement {
   constructor() {
@@ -39,18 +39,7 @@ class SiteNavbar extends HTMLElement {
       String(noSpacerAttr).toLowerCase() !== "false" &&
       String(noSpacerAttr).trim() !== "0";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyC8rw6kaFhJ2taebKRKKEA7iLqBvak_Dbc",
-      authDomain: "auth.unlim8ted.com",
-      projectId: "unlim8ted-db",
-      storageBucket: "unlim8ted-db.appspot.com",
-      messagingSenderId: "1059428499872",
-      appId: "1:1059428499872:web:855308683718237de6e4c5",
-    };
-
-    const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    const { auth, db } = getFirebase();
 
     this.shadowRoot.innerHTML = `
       <style>
