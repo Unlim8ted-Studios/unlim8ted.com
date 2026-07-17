@@ -4,103 +4,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <!-- Primary Meta Tags -->
     <title>Unlim8ted - Books</title>
-    <meta name="title" content="Products - Unlim8ted" />
-    <meta name="description"
-        content="Explore a wide range of books from Unlim8ted Studio Productions." />
+    <meta name="title" content="Books - Unlim8ted">
+    <meta
+        name="description"
+        content="Explore scripts, stories, parodies, documentaries, and other written works from Unlim8ted Studio Productions."
+    >
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://unlim8ted.com/products/">
-    <meta property="og:title" content="Products - Unlim8ted Studio Productions">
-    <meta property="og:description"
-        content="Explore a wide range of products from Unlim8ted Studio Productions, including films, music, games, AI, and more.">
-    <meta property="og:image" content="https://unlim8ted.com/images/products-meta-image.jpg">
+    <meta property="og:url" content="https://unlim8ted.com/products/books/">
+    <meta property="og:title" content="Books - Unlim8ted Studio Productions">
+    <meta
+        property="og:description"
+        content="Explore scripts, stories, parodies, documentaries, and other written works from Unlim8ted Studio Productions."
+    >
+    <meta property="og:image" content="https://unlim8ted.com/images/products/products-meta-image.jpg">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://unlim8ted.com/products/">
-    <meta property="twitter:title" content="Products - Unlim8ted Studio Productions">
-    <meta property="twitter:description"
-        content="Explore a wide range of products from Unlim8ted Studio Productions, including films, music, games, AI, and more.">
-    <meta property="twitter:image" content="https://unlim8ted.com/images/products-meta-image.jpg">
+    <meta property="twitter:url" content="https://unlim8ted.com/products/books/">
+    <meta property="twitter:title" content="Books - Unlim8ted Studio Productions">
+    <meta
+        property="twitter:description"
+        content="Explore scripts, stories, parodies, documentaries, and other written works from Unlim8ted Studio Productions."
+    >
+    <meta property="twitter:image" content="https://unlim8ted.com/images/products/products-meta-image.jpg">
 
     <link rel="stylesheet" href="./resources/css/books.01.css">
-    <script src="./resources/js/books.01.js"></script>
     <link rel="stylesheet" href="./resources/css/books.02.css">
-    <link rel="stylesheet" href="./resources/css/books.03.css"><link rel="stylesheet" href="/products/ai/meatball/resources/css/meatball-assistant.css"><link rel="stylesheet" href="../resources/css/legacy-category.css"><script type="module" src="https://unlim8ted.com/components/site-navbar.js"></script>
-      <script type="module" src="./resources/js/books.02.js"></script>
+    <link rel="stylesheet" href="./resources/css/books.03.css">
+    <link rel="stylesheet" href="/products/ai/meatball/resources/css/meatball-assistant.css">
+    <link rel="stylesheet" href="../resources/css/legacy-category.css">
+
+    <script src="./resources/js/books.01.js" defer></script>
+    <script type="module" src="https://unlim8ted.com/components/site-navbar.js"></script>
+    <script type="module" src="./resources/js/books.02.js"></script>
 </head>
+
 <body>
-       <site-navbar cart-href="https://unlim8ted.com/sign-in/cart" signin-href="https://unlim8ted.com/sign-in" profile-href="https://unlim8ted.com/profile"></site-navbar>
+    <site-navbar
+        cart-href="https://unlim8ted.com/sign-in/cart"
+        signin-href="https://unlim8ted.com/sign-in"
+        profile-href="https://unlim8ted.com/profile"
+    ></site-navbar>
 
     <div id="books" class="content-section">
         <h1>Books</h1>
+
         <div class="search-bar">
-            <input type="text" id="book-search" placeholder="Search books...">
-            <select id="book-filter">
+            <input
+                type="text"
+                id="book-search"
+                placeholder="Search books..."
+                aria-label="Search books"
+            >
+
+            <select id="book-filter" aria-label="Filter books by category">
                 <option value="all">All</option>
                 <option value="fiction">Fiction</option>
                 <option value="non-fiction">Non-fiction</option>
                 <option value="sci-fi">Sci-Fi</option>
-                <option value="fantasy">Fantasy</option>
+                <option value="thriller">Thriller</option>
                 <option value="comedy">Comedy</option>
-
-
-                <!-- Add more filter options as needed -->
+                <option value="gaming">Gaming</option>
+                <option value="documentary">Documentary</option>
             </select>
         </div>
+
         <div class="item-category" id="book-items">
-            <a href="/products/product#theglitchbook" class="item-box" data-category="sci-fi">
-                <img src="https://unlim8ted.com/images/products/fiction-book.jpg">
-                <h3>The Glitch (book)</h3>
-            </a>
-            <a href="/products/product#theglitchscreenplay" class="item-box" data-category="sci-fi">
-                <img src="https://unlim8ted.com/images/products/fiction-book.jpg">
-                <h3>The Glitch (screen play)</h3>
-            </a>
-            <a href="/products/product#alien" class="item-box" data-category="sci-fi">
-                <img src="https://unlim8ted.com/images/products/fiction-book.jpg">
-                <h3>Alien</h3>
-            </a>
-            <a href="/products/product#the-pool-world-war" class="item-box" data-category="comedy">
-                <img src="https://unlim8ted.com/images/products/fiction-book.jpg">
-                <h3>The pool world war.</h3>
-            </a>
-            <a href="/products/product#the-crystals-conflict" class="item-box" data-category="fantasy">
-                <img src="https://unlim8ted.com/images/products/fiction-book.jpg">
-                <h3>The Crystal's Conflict</h3>
-            </a>
-            <a href="/products/product#the-hidden-magic-school" class="item-box" data-category="fantasy">
-                <img src="https://unlim8ted.com/images/products/fiction-book.jpg">
-                <h3>The Hidden Magic School</h3>
-            </a>
-            <a href="/products/product#the-holes-in-space-and-time" class="item-box" data-category="non-fiction">
-                <img src="https://unlim8ted.com/images/products/non-fiction-book.jpg">
-                <h3>Holes in space and time.</h3>
+            <a
+                href="/products/product#Don't-Kill-Me"
+                class="item-box"
+                data-category="thriller"
+            >
+                <img
+                    src="https://unlim8ted.com/images/products/fiction-book.jpg"
+                    alt="Don't Kill Me"
+                    loading="lazy"
+                >
+                <h3>Don't Kill Me</h3>
             </a>
 
-            <a href="/products/product#stranded" class="item-box" data-category="fiction">
-                <img src="https://unlim8ted.com/images/products/non-fiction-book.jpg">
-                <h3>Stranded</h3>
+            <a
+                href="/products/product#Exploring-the-Impacts-of-Generative-Artificial-Intelligence"
+                class="item-box"
+                data-category="non-fiction documentary"
+            >
+                <img
+                    src="https://unlim8ted.com/images/products/non-fiction-book.jpg"
+                    alt="Exploring the Impacts of Generative Artificial Intelligence"
+                    loading="lazy"
+                >
+                <h3>Exploring the Impacts of Generative Artificial Intelligence</h3>
             </a>
-            <a href="/products/product#ancient" class="item-box" data-category="fiction">
-                <img src="https://unlim8ted.com/images/products/non-fiction-book.jpg">
-                <h3>Ancient</h3>
+
+            <a
+                href="/products/product#Failed-Unlim8ted-Advertisement"
+                class="item-box"
+                data-category="comedy"
+            >
+                <img
+                    src="https://unlim8ted.com/images/products/fiction-book.jpg"
+                    alt="Failed Unlim8ted Advertisement"
+                    loading="lazy"
+                >
+                <h3>Failed Unlim8ted Advertisement</h3>
             </a>
-            <!-- Add more book items here -->
+
+            <a
+                href="/products/product#Watch-Till-End-Be-Like"
+                class="item-box"
+                data-category="comedy"
+            >
+                <img
+                    src="https://unlim8ted.com/images/products/fiction-book.jpg"
+                    alt="Watch Till End Be Like"
+                    loading="lazy"
+                >
+                <h3>Watch Till End Be Like</h3>
+            </a>
+
+            <a
+                href="/products/product#I-(Unwillfully)-Let-My-Cat-Answer-My-Emails-for-~1-Week"
+                class="item-box"
+                data-category="comedy"
+            >
+                <img
+                    src="https://unlim8ted.com/images/products/fiction-book.jpg"
+                    alt="I Unwillfully Let My Cat Answer My Emails for Approximately One Week"
+                    loading="lazy"
+                >
+                <h3>I (Unwillfully) Let My Cat Answer My Emails for ~1 Week</h3>
+            </a>
+
+            <a
+                href="/products/product#If-Video-Games-Had-Realistic-Physics"
+                class="item-box"
+                data-category="comedy gaming"
+            >
+                <img
+                    src="https://unlim8ted.com/images/products/fiction-book.jpg"
+                    alt="If Video Games Had Realistic Physics"
+                    loading="lazy"
+                >
+                <h3>If Video Games Had Realistic Physics</h3>
+            </a>
+
+            <a
+                href="/products/product#Natural™-Water"
+                class="item-box"
+                data-category="comedy"
+            >
+                <img
+                    src="https://unlim8ted.com/images/products/fiction-book.jpg"
+                    alt="Natural Water"
+                    loading="lazy"
+                >
+                <h3>Natural™ Water</h3>
+            </a>
+
+            <a
+                href="/products/product#Office-Wildlife-Documentary"
+                class="item-box"
+                data-category="comedy documentary"
+            >
+                <img
+                    src="https://unlim8ted.com/images/products/fiction-book.jpg"
+                    alt="Office Wildlife Documentary"
+                    loading="lazy"
+                >
+                <h3>Office Wildlife Documentary</h3>
+            </a>
+
+            <a
+                href="/products/product#The-Chicken-Crosses-the-Road...-Why?"
+                class="item-box"
+                data-category="comedy"
+            >
+                <img
+                    src="https://unlim8ted.com/images/products/fiction-book.jpg"
+                    alt="The Chicken Crosses the Road, Why?"
+                    loading="lazy"
+                >
+                <h3>The Chicken Crosses the Road... Why?</h3>
+            </a>
+
+            <a
+                href="/products/product#The-Glitch"
+                class="item-box"
+                data-category="fiction sci-fi"
+            >
+                <img
+                    src="https://unlim8ted.com/images/products/fiction-book.jpg"
+                    alt="The Glitch"
+                    loading="lazy"
+                >
+                <h3>The Glitch</h3>
+            </a>
+
+            <a
+                href="/products/product#Trackmania-Be-Like"
+                class="item-box"
+                data-category="comedy gaming"
+            >
+                <img
+                    src="https://unlim8ted.com/images/products/fiction-book.jpg"
+                    alt="Trackmania Be Like"
+                    loading="lazy"
+                >
+                <h3>Trackmania Be Like</h3>
+            </a>
+
+            <a
+                href="/products/product#Trailers-Be-Like"
+                class="item-box"
+                data-category="comedy"
+            >
+                <img
+                    src="https://unlim8ted.com/images/products/fiction-book.jpg"
+                    alt="Trailers Be Like"
+                    loading="lazy"
+                >
+                <h3>Trailers Be Like</h3>
+            </a>
+
+            <a
+                href="/products/product#The-Glitch-Trailer"
+                class="item-box"
+                data-category="fiction sci-fi"
+            >
+                <img
+                    src="https://unlim8ted.com/images/products/fiction-book.jpg"
+                    alt="The Glitch Trailer"
+                    loading="lazy"
+                >
+                <h3>The Glitch Trailer</h3>
+            </a>
+
+            <a
+                href="/products/product#Celeste-Be-Like"
+                class="item-box"
+                data-category="comedy gaming"
+            >
+                <img
+                    src="https://unlim8ted.com/images/products/fiction-book.jpg"
+                    alt="Celeste Be Like"
+                    loading="lazy"
+                >
+                <h3>Celeste Be Like</h3>
+            </a>
         </div>
-        <!-- Copyright -->
-        <div style="margin-top: 20px;">
-            <p id="footer-text">&copy; 2019-2025 Unlim8ted Studio Productions. All rights reserved.</p>
-            <script src="./resources/js/books.03.js"></script><script src="./resources/js/books.04.js"></script>
 
+        <div style="margin-top: 20px;">
+            <p id="footer-text">
+                &copy; 2019-2026 Unlim8ted Studio Productions. All rights reserved.
+            </p>
         </div>
     </div>
+
+    <script src="./resources/js/books.03.js"></script>
+    <script src="./resources/js/books.04.js"></script>
     <script src="/products/ai/meatball/resources/js/meatball-assistant.js"></script>
 </body>
+
 </html>
-
-
-

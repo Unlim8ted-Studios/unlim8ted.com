@@ -845,3 +845,139 @@
         bottom: 20px;
       }
     }
+/* Book reader */
+.hero.book-reader-hero {
+  aspect-ratio: auto;
+  min-height: 640px;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      700px 400px at 50% 0%,
+      rgba(0, 255, 153, 0.06),
+      transparent 65%
+    ),
+    rgba(8, 8, 12, 0.96);
+}
+
+.bookReader {
+  width: 100%;
+  height: 640px;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: rgba(10, 10, 14, 0.98);
+}
+
+.bookReader-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.bookReader-title {
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bookReader-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.bookReader-control {
+  min-width: 36px;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.9);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.bookReader-control:hover {
+  border-color: rgba(0, 255, 153, 0.4);
+  background: rgba(0, 255, 153, 0.08);
+}
+
+.bookReader-control:focus-visible {
+  outline: 2px solid rgba(0, 255, 153, 0.75);
+  outline-offset: 2px;
+}
+
+.bookReader-content {
+  overflow: auto;
+  padding: clamp(22px, 4vw, 50px);
+  scroll-behavior: smooth;
+}
+
+.bookReader-text {
+  width: min(720px, 100%);
+  margin: 0 auto;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  line-height: 1.85;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.bookReader-loading,
+.bookReader-error {
+  display: flex;
+  min-height: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  color: rgba(255, 255, 255, 0.62);
+  line-height: 1.5;
+  text-align: center;
+}
+
+.bookReader-error {
+  color: rgba(255, 150, 170, 0.95);
+}
+
+.bookReader-download {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+@media (max-width: 720px) {
+  .hero.book-reader-hero {
+    min-height: 72vh;
+  }
+
+  .bookReader {
+    height: 72vh;
+    min-height: 520px;
+  }
+
+  .bookReader-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .bookReader-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .bookReader-text {
+    font-size: 17px;
+    line-height: 1.75;
+  }
+}
