@@ -359,8 +359,10 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  overflow: hidden;
+  overflow: visible;
   animation: meatballSauceFollow 3.8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 2;
 }
 
 .meatballEmotionStage .sauce::before {
@@ -374,6 +376,10 @@
   background: linear-gradient(180deg, #ff5838, #a51b12);
   box-shadow: 0 7px 0 rgba(92, 16, 10, 0.45);
   transform: rotate(-7deg);
+  transform-origin: 50% 50%;
+  backface-visibility: hidden;
+  clip-path: none;
+  will-change: transform;
 }
 
 .meatballEmotionStage .sauce::after {
@@ -386,6 +392,7 @@
   border-radius: 0 0 22px 22px;
   background: linear-gradient(180deg, #db2b1c, #86150f);
   animation: meatballDrip 3.1s ease-in-out infinite;
+  backface-visibility: hidden;
 }
 
 .meatballEmotionStage .eye {
@@ -715,6 +722,284 @@
 .meatballEmotionStage.is-cutscene .orbital.two { animation: cutsceneOrbit2 4.9s linear both; }
 .meatballEmotionStage.is-cutscene .bubble { animation: cutsceneBubble 4.9s ease both; }
 
+.meatballCutsceneOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: grid;
+  place-items: center;
+  background: #000;
+  color: #fff0cf;
+  overflow: hidden;
+  opacity: 1;
+  animation: none;
+}
+
+.meatballCutsceneText {
+  position: absolute;
+  z-index: 4;
+  width: min(920px, 86vw);
+  text-align: center;
+  font-size: clamp(34px, 7vw, 104px);
+  line-height: .88;
+  font-weight: 1000;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  text-shadow: 0 0 28px rgba(255, 20, 61, .76), 0 12px 40px rgba(0, 0, 0, .9);
+  opacity: 0;
+}
+
+.meatballCutsceneStage {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+}
+
+.meatballCutsceneWorldMount {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.meatballCutsceneOverlay--plain .meatballCutsceneStage .meatballEmotionStage {
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  min-height: 100vh;
+  border: 0;
+  border-radius: 0;
+  background: radial-gradient(circle at 50% 26%, rgba(255, 20, 61, 0.12), transparent 34%), linear-gradient(180deg, #070101, #000);
+  box-shadow: none;
+  overflow: hidden;
+  transform: none;
+}
+
+.meatballCutsceneOverlay--plain .meatballCutsceneStage .meatballEmotionStage .world {
+  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
+}
+
+.meatballCutsceneOverlay--plain .meatballCutsceneStage .meatballAstronaut {
+  display: none !important;
+}
+
+.meatballCutsceneOverlay.is-warning .meatballCutsceneText {
+  animation: meatballWarningText 2.2s ease both;
+}
+
+.meatballCutsceneOverlay.is-scene .meatballCutsceneStage {
+  animation: meatballFullscreenScene 5.2s ease both;
+}
+
+.meatballCutsceneMoon,
+.meatballCutsceneShock,
+.meatballCutsceneSlash {
+  position: absolute;
+  pointer-events: none;
+}
+
+.meatballCutsceneMoon {
+  right: 10vw;
+  top: 9vh;
+  width: clamp(90px, 16vw, 180px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 30%, rgba(255,255,255,.96), rgba(255,255,255,.16) 48%, rgba(255,20,61,.14) 74%, transparent 76%);
+  box-shadow: 0 0 64px rgba(255, 20, 61, .35);
+  opacity: 0;
+}
+
+.meatballCutsceneOverlay.is-scene .meatballCutsceneMoon {
+  animation: meatballMoonCut 4s ease both;
+}
+
+.meatballCutsceneShock {
+  inset: 0;
+  background: radial-gradient(circle, rgba(255, 20, 61, .32), transparent 48%);
+  opacity: 0;
+}
+
+.meatballCutsceneOverlay.is-scene .meatballCutsceneShock {
+  animation: meatballShockCut 4s ease both;
+}
+
+.meatballCutsceneSlash {
+  left: 50%;
+  top: 50%;
+  width: 120vw;
+  height: 10px;
+  margin-left: -60vw;
+  background: linear-gradient(90deg, transparent, rgba(255, 240, 207, .95), transparent);
+  box-shadow: 0 0 28px rgba(255, 240, 207, .62);
+  opacity: 0;
+}
+
+.meatballCutsceneSlash.one {
+  transform: rotate(-18deg);
+}
+
+.meatballCutsceneSlash.two {
+  transform: rotate(16deg);
+}
+
+.meatballCutsceneOverlay.is-scene .meatballCutsceneSlash.one {
+  animation: meatballSlashOne 4s ease both;
+}
+
+.meatballCutsceneOverlay.is-scene .meatballCutsceneSlash.two {
+  animation: meatballSlashTwo 4s ease both;
+}
+
+.meatballCutsceneMeatball {
+  position: relative;
+  width: clamp(235px, 34vw, 420px);
+  height: clamp(226px, 33vw, 405px);
+  border-radius: 48% 52% 46% 54% / 52% 44% 56% 48%;
+  background:
+    radial-gradient(circle at 35% 28%, #ff9a5f 0 8%, transparent 9%),
+    radial-gradient(circle at 70% 62%, #5b120d 0 8%, transparent 9%),
+    linear-gradient(145deg, #c1462d, #7b2119 52%, #310908 100%);
+  border: 4px solid rgba(41, 18, 12, .96);
+  box-shadow: inset 22px 24px 38px rgba(255, 215, 155, .15), inset -34px -36px 52px rgba(42, 11, 7, .48), 0 32px 70px rgba(255, 20, 61, .34);
+  opacity: 0;
+}
+
+.meatballCutsceneOverlay.is-scene .meatballCutsceneMeatball {
+  animation: meatballCutsceneBodyStandalone 4s cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.meatballCutsceneMeatball .sauce {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.meatballCutsceneMeatball .sauce::before {
+  content: "";
+  position: absolute;
+  left: 14%;
+  top: 2%;
+  width: 68%;
+  height: 23%;
+  border-radius: 48% 52% 68% 32%;
+  background: linear-gradient(180deg, #ff5838, #a51b12);
+  box-shadow: 0 7px 0 rgba(92, 16, 10, .45);
+  transform: rotate(-7deg);
+}
+
+.meatballCutsceneMeatball .eye {
+  position: absolute;
+  top: 38%;
+  width: 20%;
+  height: 25%;
+  background: #fff7df;
+  border: 4px solid #1b0b08;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.meatballCutsceneMeatball .eye.left { left: 24%; }
+.meatballCutsceneMeatball .eye.right { right: 24%; }
+
+.meatballCutsceneMeatball .pupil {
+  position: absolute;
+  left: 33%;
+  top: 34%;
+  width: 34%;
+  height: 40%;
+  background: #120605;
+  border-radius: 50%;
+}
+
+.meatballCutsceneOverlay.is-scene .meatballCutsceneMeatball .pupil {
+  animation: meatballCutscenePupilsStandalone 4s ease both;
+}
+
+.meatballCutsceneMeatball .brow {
+  position: absolute;
+  top: 31%;
+  width: 25%;
+  height: 5%;
+  border-radius: 999px;
+  background: #210806;
+  z-index: 2;
+}
+
+.meatballCutsceneMeatball .brow.left { left: 21%; transform: rotate(28deg); }
+.meatballCutsceneMeatball .brow.right { right: 21%; transform: rotate(-28deg); }
+
+.meatballCutsceneMeatball .mouth {
+  position: absolute;
+  left: 50%;
+  top: 66%;
+  width: 38%;
+  height: 20%;
+  transform: translateX(-50%);
+  background: #1b0504;
+  border: 4px solid #120302;
+  border-radius: 0 0 70px 70px;
+}
+
+@keyframes meatballWarningText {
+  0% { opacity: 0; transform: scale(.92); filter: blur(14px); }
+  18%, 70% { opacity: 1; transform: scale(1); filter: blur(0); }
+  100% { opacity: 0; transform: scale(1.04); filter: blur(12px); }
+}
+
+@keyframes meatballFullscreenScene {
+  0% { opacity: 0; transform: scale(1.03); filter: blur(10px); }
+  16%, 88% { opacity: 1; transform: scale(1); filter: blur(0); }
+  100% { opacity: 0; transform: scale(.98); filter: blur(8px); }
+}
+
+@keyframes meatballOverlayOut {
+  0%, 92% { opacity: 1; }
+  100% { opacity: 0; pointer-events: none; }
+}
+
+@keyframes meatballMoonCut {
+  0%, 34% { opacity: 0; transform: scale(.86); }
+  44%, 92% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; }
+}
+
+@keyframes meatballShockCut {
+  47%, 70% { opacity: .85; }
+  100% { opacity: 0; }
+}
+
+@keyframes meatballSlashOne {
+  48%, 52% { opacity: 1; transform: rotate(-18deg) translateX(0); }
+  58%, 100% { opacity: 0; transform: rotate(-18deg) translateX(24vw); }
+}
+
+@keyframes meatballSlashTwo {
+  60%, 64% { opacity: 1; transform: rotate(16deg) translateX(0); }
+  70%, 100% { opacity: 0; transform: rotate(16deg) translateX(-24vw); }
+}
+
+@keyframes meatballCutsceneBodyStandalone {
+  0%, 36% { opacity: 0; transform: translateY(20px) scale(.82) rotate(0); }
+  44% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+  54% { transform: translateY(-42px) translateX(18px) scale(1.12) rotate(-9deg); }
+  64% { transform: translateY(-86px) translateX(-58px) scale(.9) rotate(-24deg); }
+  74% { transform: translateY(-22px) translateX(44px) scale(1.18) rotate(18deg); }
+  86% { opacity: 1; transform: translateY(0) scale(1.05) rotate(0); }
+  100% { opacity: 0; transform: translateY(18px) scale(.9) rotate(0); }
+}
+
+@keyframes meatballCutscenePupilsStandalone {
+  0%, 45%, 100% { transform: translate(0, 0) scale(1); }
+  56% { transform: translateX(28%) scale(.82); }
+  68% { transform: translateX(-24%) translateY(-8%) scale(.72); }
+  78% { transform: translateY(-18%) scale(.64); }
+}
+
 @keyframes meatballScan { to { transform: translateX(18%); } }
 @keyframes meatballOrbit { to { transform: rotate(360deg); } }
 @keyframes meatballBaseFloat { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-15px) rotate(1deg); } }
@@ -766,7 +1051,7 @@
 @keyframes overwhelmedMarks { 50% { transform: scale(1.2) rotate(10deg); } }
 @keyframes glitchStageShift { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(6px); } 40% { transform: translateX(-8px) translateY(2px); } 60% { transform: translateX(10px) translateY(-2px); } 80% { transform: translateX(-4px); } }
 @keyframes glitchWrap { 0%, 100% { transform: translate3d(0, 0, 0); } 25% { transform: translate3d(-10px, 3px, 0) rotate(-2deg); } 50% { transform: translate3d(12px, -4px, 0) rotate(2deg); } 75% { transform: translate3d(-6px, 2px, 0) scaleX(1.03); } }
-@keyframes glitchMeat { 0%, 100% { clip-path: inset(0 0 0 0); transform: translateX(0); } 20% { clip-path: inset(12% 0 48% 0); transform: translateX(9px); } 40% { clip-path: inset(52% 0 16% 0); transform: translateX(-11px); } 60% { clip-path: inset(20% 0 58% 0); transform: translateX(7px); } 80% { clip-path: inset(68% 0 8% 0); transform: translateX(-5px); } }
+@keyframes glitchMeat { 0%, 100% { transform: translateX(0) skewX(0deg); } 20% { transform: translateX(9px) skewX(2deg); } 40% { transform: translateX(-11px) skewX(-2deg); } 60% { transform: translateX(7px) skewX(1.5deg); } 80% { transform: translateX(-5px) skewX(-1.5deg); } }
 @keyframes glitchSauce { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-14px) rotate(-8deg); } }
 @keyframes glitchParts { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(8px) skewX(-10deg); } }
 @keyframes glitchBand { 0%, 100% { transform: translateX(0) scaleX(1); } 25% { transform: translateX(18px) scaleX(1.05); } 50% { transform: translateX(-24px) scaleX(.98); } 75% { transform: translateX(10px) scaleX(1.08); } }

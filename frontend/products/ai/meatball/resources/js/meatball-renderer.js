@@ -182,19 +182,44 @@
   function playCutscene(target) {
     const root = resolveRoot(target);
     const state = getState(root);
-    if (!root || !state) return;
+    if (!root || !state) return 0;
 
     window.clearTimeout(state.cutsceneTimer);
     state.cutscene = false;
+    state.talking = false;
     render(root);
 
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        state.cutscene = true;
-        state.talking = false;
-        render(root);
-      });
-    });
+    const warningDuration = 2200;
+    const sceneDuration = 5200;
+    const duration = warningDuration + sceneDuration;
+    const overlay = document.createElement("div");
+    overlay.className = "meatballCutsceneOverlay meatballCutsceneOverlay--plain";
+    overlay.innerHTML = `
+      <div class="meatballCutsceneText">you have angered the meatball</div>
+      <div class="meatballCutsceneStage" aria-hidden="true">
+        <div class="meatballCutsceneWorldMount"></div>
+      </div>
+    `;
+    document.querySelectorAll(".meatballCutsceneOverlay").forEach(node => node.remove());
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add("is-warning"));
+    window.setTimeout(() => {
+      overlay.classList.remove("is-warning");
+      const mountNode = overlay.querySelector(".meatballCutsceneWorldMount");
+      if (mountNode) {
+        const cutsceneRoot = mount(mountNode);
+        const cutsceneState = getState(cutsceneRoot);
+        if (cutsceneRoot && cutsceneState) {
+          cutsceneState.cutscene = true;
+          cutsceneState.talking = false;
+          cutsceneState.emotion = "angry";
+          cutsceneState.statusHtml = "emotion: angry<br>state: cutscene";
+          cutsceneState.bubbleHtml = DEFAULT_LINES.angry;
+          render(cutsceneRoot);
+        }
+      }
+      overlay.classList.add("is-scene");
+    }, warningDuration);
 
     state.cutsceneTimer = window.setTimeout(() => {
       state.cutscene = false;
@@ -202,7 +227,10 @@
       state.statusHtml = "emotion: angry<br>talking: false";
       state.bubbleHtml = DEFAULT_LINES.angry;
       render(root);
-    }, 5000);
+      overlay.remove();
+    }, duration);
+
+    return duration;
   }
 
   function playGlitch(target, options) {

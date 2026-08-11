@@ -140,6 +140,7 @@
     inset 0 8px 10px rgba(255, 214, 165, 0.12),
     0 12px 26px rgba(28, 10, 5, 0.3);
   animation: meatballFloat 4.2s ease-in-out infinite, meatballIdleTilt 7.4s ease-in-out infinite;
+  overflow: visible;
 }
 
 .meatballAvatar:hover .meatballAvatar-body {
@@ -194,6 +195,22 @@
   box-shadow:
     inset 0 -2px 5px rgba(113, 8, 15, 0.28),
     0 2px 4px rgba(86, 10, 15, 0.18);
+  transform: rotate(-6deg);
+  transform-origin: 50% 50%;
+  clip-path: none;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.meatballAssistant.is-speaking .meatballAvatar-body::before,
+.meatballAssistant.is-hyped .meatballAvatar-body::before,
+.meatballAssistant.is-jamming .meatballAvatar-body::before,
+.meatballAssistant.is-sweating .meatballAvatar-body::before {
+  left: 12px;
+  right: 10px;
+  top: 6px;
+  height: 20px;
+  border-radius: 58% 42% 52% 48% / 65% 55% 45% 35%;
   transform: rotate(-6deg);
 }
 

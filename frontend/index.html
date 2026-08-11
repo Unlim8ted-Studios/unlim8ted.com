@@ -8,6 +8,7 @@
   <title>Unlim8ted - Home</title>
   <link rel="stylesheet" href="/products/ai/meatball/resources/css/meatball-assistant.css">
   <link rel="stylesheet" href="/products/ai/meatball/resources/css/meatball-astronaut.css">
+  <link rel="stylesheet" href="/products/ai/meatball/resources/css/meatball-renderer.css">
   <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
 
   <style>
@@ -1649,6 +1650,269 @@
       line-height: 1.4;
     }
 
+    .meatball-home-shell .loadingPanel {
+      display: grid;
+      gap: 8px;
+      padding: 12px 14px;
+    }
+
+    .meatball-home-shell .chatLoadingPanel {
+      width: min(100%, 420px);
+      align-self: flex-start;
+      max-height: none;
+      overflow: visible;
+      white-space: normal;
+    }
+
+    .meatball-home-shell .chatLoadingPanel .modelLabel,
+    .meatball-home-shell .chatLoadingPanel .modelMeta {
+      white-space: normal;
+    }
+
+    .meatball-home-shell .loadingBar {
+      position: relative;
+      width: 100%;
+      height: 10px;
+      overflow: hidden;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .02)), rgba(7, 13, 20, .78);
+    }
+
+    .meatball-home-shell .loadingBar[hidden] {
+      display: none;
+    }
+
+    .meatball-home-shell .loadingBarFill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, rgba(255, 180, 106, .86), rgba(98, 214, 255, .94) 55%, rgba(255, 240, 207, .95));
+      box-shadow: 0 0 18px rgba(98, 214, 255, .24), 0 0 28px rgba(255, 180, 106, .18);
+      transition: width 180ms ease;
+    }
+
+    .meatball-home-shell .loadingBar.is-indeterminate .loadingBarFill {
+      width: 42%;
+      animation: loadingSweep 1.05s cubic-bezier(.55, .08, .31, .96) infinite;
+    }
+
+    .meatball-home-shell .homeLoadingPanel {
+      display: none;
+      gap: 8px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255, 180, 106, .18);
+      border-radius: 18px;
+      background: rgba(255, 180, 106, .08);
+      color: rgba(255, 247, 238, .92);
+    }
+
+    .meatball-home-shell .homeLoadingPanel.show {
+      display: grid;
+    }
+
+    .meatball-home-shell .homeLoadingMeta {
+      margin: 0;
+      color: rgba(236, 231, 221, .72);
+      font-size: .92rem;
+      line-height: 1.4;
+    }
+
+    .meatball-home-shell .homeLoadingBar {
+      width: 100%;
+      height: 10px;
+      overflow: hidden;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .02)), rgba(7, 13, 20, .78);
+    }
+
+    .meatball-home-shell .homeLoadingBarFill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, rgba(255, 180, 106, .86), rgba(98, 214, 255, .94) 55%, rgba(255, 240, 207, .95));
+      box-shadow: 0 0 18px rgba(98, 214, 255, .24), 0 0 28px rgba(255, 180, 106, .18);
+      transition: width 220ms ease;
+    }
+
+    @keyframes loadingSweep {
+      0% {
+        transform: translateX(-115%);
+      }
+      100% {
+        transform: translateX(255%);
+      }
+    }
+
+    .meatballAstronaut-core .meatballAvatar {
+      overflow: visible;
+    }
+
+    .meatballAstronaut .meatballAstronaut-core {
+      top: 15%;
+      z-index: 5;
+      overflow: visible;
+    }
+
+    .meatballAstronaut .meatballAstronaut-helmet {
+      top: 11%;
+      z-index: 6;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 34% 24%, rgba(255, 255, 255, .34), rgba(255, 255, 255, .08) 18%, rgba(255, 255, 255, .025) 34%, rgba(255, 255, 255, .01) 58%, rgba(112, 170, 219, .035) 100%),
+        linear-gradient(180deg, rgba(214, 240, 255, .10), rgba(255, 255, 255, .015));
+    }
+
+    .meatballAstronaut .meatballAstronaut-helmetRim {
+      top: 9%;
+      z-index: 7;
+    }
+
+    .meatballAstronaut .meatballAstronaut-tube::before {
+      content: "";
+      position: absolute;
+      right: 72%;
+      bottom: -6px;
+      width: 145%;
+      height: 6px;
+      border-radius: 999px;
+      background: #c7d3df;
+      box-shadow:
+        inset -2px -2px 0 rgba(150, 167, 188, .65),
+        0 0 0 2px rgba(237, 244, 255, .22);
+      transform: rotate(-8deg);
+      transform-origin: right center;
+    }
+
+    .meatballAstronaut-core .meatballEmotionStage {
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      min-height: 0;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      box-shadow: none;
+      overflow: visible;
+    }
+
+    .meatballAstronaut-core .meatballEmotionStage::before,
+    .meatballAstronaut-core .meatballEmotionStage::after,
+    .meatballAstronaut-core .meatballEmotionStage .cutsceneLayer,
+    .meatballAstronaut-core .meatballEmotionStage .fx,
+    .meatballAstronaut-core .meatballEmotionStage .hud,
+    .meatballAstronaut-core .meatballEmotionStage .orbital,
+    .meatballAstronaut-core .meatballEmotionStage .symbol {
+      display: none;
+    }
+
+    .meatballAstronaut-core .meatballEmotionStage .world {
+      min-height: 100%;
+      width: 100%;
+      height: 100%;
+      perspective: none;
+      transform: none;
+      overflow: visible;
+      position: relative;
+    }
+
+    .meatballAstronaut-core .meatballEmotionStage .arm,
+    .meatballAstronaut-core .meatballEmotionStage .shadow {
+      display: none;
+    }
+
+    .meatballAstronaut-core .meatballEmotionStage .wrap {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 235px;
+      height: 226px;
+      transform: translate(-50%, -44%) scale(.92) !important;
+      transform-origin: center;
+      animation: none;
+      filter: none;
+    }
+
+    .meatballAstronaut-core .meatballEmotionStage .meatball {
+      overflow: visible;
+    }
+
+    .meatballAstronaut-core .meatballEmotionStage .sauce {
+      overflow: visible;
+    }
+
+    .meatballAstronaut-core .meatballEmotionStage .eye,
+    .meatballAstronaut-core .meatballEmotionStage .pupil,
+    .meatballAstronaut-core .meatballEmotionStage .brow,
+    .meatballAstronaut-core .meatballEmotionStage .mouth {
+      position: absolute;
+      z-index: 12;
+    }
+
+    .meatballAstronaut-core .meatballEmotionStage .eye {
+      top: 86px !important;
+      width: 47px !important;
+      height: 57px !important;
+      background: radial-gradient(circle at 34% 28%, #fffdf4 0 32%, #f4ead3 68%, #d8c49f 100%);
+      border-color: #1b0b08;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, .18), inset 0 -5px 7px rgba(70, 28, 12, .18);
+      overflow: hidden;
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+    }
+
+    .meatballAstronaut-core .meatballEmotionStage .eye.left {
+      left: 56px !important;
+    }
+
+    .meatballAstronaut-core .meatballEmotionStage .eye.right {
+      right: 56px !important;
+    }
+
+    .meatballAstronaut-core .meatballEmotionStage .pupil {
+      left: 15px !important;
+      top: 19px !important;
+      width: 17px !important;
+      height: 22px !important;
+      background: #140605;
+      box-shadow: inset 4px 3px 0 rgba(255, 255, 255, .22);
+      z-index: 13;
+      display: block !important;
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+    }
+
+    .meatballAstronaut-core .meatballEmotionStage[data-emotion="neutral"] .eye {
+      top: 86px;
+      width: 47px;
+      height: 57px;
+      transform: none;
+    }
+
+    .meatballAstronaut-core .meatballEmotionStage[data-emotion="neutral"] .pupil {
+      left: 15px;
+      top: 19px;
+      width: 17px;
+      height: 22px;
+      animation: none;
+    }
+
+    .meatball-home-display {
+      --meatball-size: 156px;
+      --astronaut-shell-width: 284px;
+      --astronaut-shell-height: 312px;
+      --astronaut-core-scale: 1.14;
+      --astronaut-helmet-scale: 1.4;
+    }
+
+    .meatball-home-display > #bigMeatballMount {
+      width: min(284px, 92vw);
+      height: min(312px, 96vw);
+    }
+
     .meatball-home-shell textarea {
       width: 100%;
       border: 1px solid rgba(255, 255, 255, .12);
@@ -2195,6 +2459,19 @@
             <div class="chatShell">
               <div id="chatLog" class="chatLog" aria-label="Conversation log">
                 <div class="msg bot">I am loading my tiny brain. Sauce may take one second.</div>
+                <div id="loadingPanel" class="msg bot loadingPanel chatLoadingPanel" aria-live="polite" hidden>
+                  <p class="modelLabel">Runtime status</p>
+                  <p id="modelMeta" class="modelMeta">Models stay asleep until you talk to Meatball.</p>
+                  <div id="loadingBar" class="loadingBar" hidden aria-hidden="true">
+                    <div id="loadingBarFill" class="loadingBarFill"></div>
+                  </div>
+                </div>
+              </div>
+              <div id="homeLoadingPanel" class="homeLoadingPanel" aria-live="polite">
+                <p id="homeLoadingMeta" class="homeLoadingMeta">Meatball runtime is idle.</p>
+                <div class="homeLoadingBar" aria-hidden="true">
+                  <div id="homeLoadingBarFill" class="homeLoadingBarFill"></div>
+                </div>
               </div>
 
               <form id="chatForm" class="composer" aria-label="Meatball chat composer">
@@ -2353,12 +2630,71 @@ Z"></path>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
 <script src="/products/ai/meatball/resources/js/meatball-avatar-embed.js"></script>
+<script src="/products/ai/meatball/resources/js/meatball-renderer.js"></script>
 <script>
   window.MeatballAvatarEmbed.mount("#bigMeatballMount", {
-    avatarId: "bigMeatballAvatar",
+    avatarId: "homepageMeatballHelmet",
     variant: "astronaut",
     label: "Meatball in a space suit"
   });
+  window.MeatballPageConfig = {
+    useValidationModels: false
+  };
+  window.MeatballEmotionRenderer.mount("#homepageMeatballHelmet");
+  (function () {
+    const form = document.getElementById("chatForm");
+    const input = document.getElementById("chatInput");
+    const panel = document.getElementById("homeLoadingPanel");
+    const fill = document.getElementById("homeLoadingBarFill");
+    const meta = document.getElementById("homeLoadingMeta");
+    if (!form || !input || !panel || !fill || !meta) return;
+
+    let timer = null;
+    let value = 0;
+    let initialLoadStarted = false;
+    let initialLoadComplete = false;
+
+    function setHomeProgress(nextValue, label) {
+      value = Math.max(0, Math.min(100, nextValue));
+      panel.classList.add("show");
+      fill.style.width = value.toFixed(0) + "%";
+      if (label) meta.textContent = label;
+    }
+
+    function startHomeProgress() {
+      if (initialLoadStarted || initialLoadComplete) return;
+      initialLoadStarted = true;
+      clearInterval(timer);
+      setHomeProgress(6, "Loading Meatball runtime.");
+      timer = setInterval(() => {
+        const remaining = 96 - value;
+        const step = Math.max(.6, remaining * .055);
+        setHomeProgress(Math.min(96, value + step), value < 50 ? "Loading Meatball models." : "Plating the answer.");
+      }, 180);
+    }
+
+    function finishHomeProgress() {
+      if (!initialLoadStarted || initialLoadComplete) return;
+      initialLoadComplete = true;
+      clearInterval(timer);
+      if (!panel.classList.contains("show")) return;
+      setHomeProgress(100, "Answer ready.");
+      setTimeout(() => {
+        panel.classList.remove("show");
+        fill.style.width = "0%";
+        meta.textContent = "Meatball runtime is idle.";
+        value = 0;
+      }, 360);
+    }
+
+    form.addEventListener("submit", () => {
+      if (input.value.trim() && !initialLoadStarted) startHomeProgress();
+    }, true);
+
+    new MutationObserver(() => {
+      if (!input.disabled) finishHomeProgress();
+    }).observe(input, { attributes: true, attributeFilter: ["disabled"] });
+  })();
 </script>
 <script src="/products/ai/meatball/resources/js/meatball-chat-app.js"></script>
 <script>

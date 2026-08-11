@@ -200,12 +200,12 @@ async function playAnimationPath(animationPath, finalReaction, answer) {
     animateMeatballTalk(answer, finalReaction);
     return;
   }
-  setMeatballEmotion("angry", "emotion: angry<br>talking: false");
-  await sleep(180);
   if (window.MeatballEmotionRenderer?.playCutscene) {
-    window.MeatballEmotionRenderer.playCutscene(meatballStage);
+    const duration = window.MeatballEmotionRenderer.playCutscene(meatballStage);
+    await sleep(duration || 6400);
+  } else {
+    await sleep(180);
   }
-  await sleep(5000);
   setMeatballEmotion("angry", "emotion: angry<br>talking: false");
 }
 
@@ -1817,6 +1817,14 @@ async function processUserMessage(rawInput) {
   };
 
   const routed = await routeRequest(correctedInput, staged);
+  if ((routed.animation || reaction.label) === "angry" && !routed.animationPath && runtimeMemory.angryStreak >= 1 && runtimeMemory.sauceAttackCooldown <= 0) {
+    routed.route = "anger_escalation_attack";
+    routed.animation = "angry";
+    routed.animationPath = "sad_to_sauce_attack_cutscene";
+    runtimeMemory.sauceAttackCooldown = 15;
+    runtimeMemory.angryStreak = 0;
+    runtimeMemory.previousReaction = "angry";
+  }
   setLoadingProgress(0.92, "Plating the answer.");
   const finalAnswer = postProcessAnswerPreserveLines(routed.answer);
   const sanity = await runOutputSanityCheck(correctedInput, finalAnswer, loaded.outputSanity);
