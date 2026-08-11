@@ -173,12 +173,37 @@
 
     .hero-copy-blur {
       display: block;
+      position: relative;
+      z-index: 0;
+      isolation: isolate;
+      overflow: hidden;
       padding: 18px 20px;
       border-radius: 24px;
-      background: rgba(7, 7, 7, .18);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-      box-shadow: 0 10px 36px rgba(0, 0, 0, .22);
+      background: transparent;
+      box-shadow: 0 10px 36px rgba(0, 0, 0, .16);
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+      will-change: transform;
+      contain: paint;
+    }
+
+    .hero-copy-blur::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: rgba(255, 255, 255, .035);
+      backdrop-filter: blur(22px) saturate(1.15);
+      -webkit-backdrop-filter: blur(22px) saturate(1.15);
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+      will-change: backdrop-filter, -webkit-backdrop-filter, opacity;
+    }
+
+    .hero-copy-blur.blur-refresh::before {
+      opacity: .999;
+      backdrop-filter: blur(22.1px) saturate(1.15);
+      -webkit-backdrop-filter: blur(22.1px) saturate(1.15);
     }
 
     .btn {
@@ -307,6 +332,16 @@
       text-shadow: 0 4px 16px rgba(0, 0, 0, .45);
       letter-spacing: .18em;
       text-transform: uppercase;
+    }
+
+    .hero-mobile-scroll {
+      display: block;
+      color: var(--muted);
+      font-size: clamp(18px, 2.2vw, 32px);
+      font-weight: 900;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      text-shadow: 0 4px 16px rgba(0, 0, 0, .45);
     }
 
     .hero-cta {
@@ -1251,7 +1286,9 @@
       z-index: 3;
       pointer-events: auto;
     }
-
+      .mobile-scroll-note{
+        display: none;
+      }
     @media(max-width:1100px) {
       .cards {
         grid-template-columns: repeat(2, 1fr)
@@ -1316,7 +1353,9 @@
       .hero-index {
         display: none
       }
-
+      .mobile-scroll-note{
+        display: block;
+      }
       .hero-mobile-title {
         display: block;
         order: 2;
@@ -1334,6 +1373,11 @@
 
       .hero-cta {
         order: 3;
+      }
+
+      .hero-mobile-scroll {
+        order: 4;
+        margin-top: 4px;
       }
 
       .hero-copy-blur {
@@ -1765,7 +1809,7 @@
   mix-blend-mode:screen;
 }
 .cityDescent{
-  height:500vh;
+  height:720vh;
   margin-top:-58vh;
   position:relative;
   background:transparent;
@@ -1773,7 +1817,7 @@
   z-index:4;
   contain:layout paint;
 }
-.cityDescent + .philosophy{margin-top:-138vh;position:relative;z-index:5}
+.cityDescent + .philosophy{margin-top:-20vh;position:relative;z-index:5}
 .orbital-neon-viewport{
   position:sticky;
   top:0;
@@ -1785,6 +1829,34 @@
   will-change:opacity;
 }
 .cityDescent canvas{position:absolute;inset:0;width:100vw;height:100vh;display:block;will-change:transform;opacity:var(--orbitalCanvasOpacity,1)}
+
+.cityDescent.has-baked-city canvas,
+.cityDescent.has-baked-city .gpu-city-layer,
+.cityDescent.has-baked-city .city-overlay-layer{
+  visibility:hidden;
+}
+
+.cityDescent.has-baked-city #bars{
+  display:none;
+}
+
+.city-bake-frame{
+  position:absolute;
+  inset:0;
+  z-index:3;
+  width:100vw;
+  height:100vh;
+  pointer-events:none;
+  background:rgba(0,0,0,var(--orbitalBars,0));
+  opacity:var(--orbitalCanvasOpacity,1);
+}
+
+.city-bake-frame video{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:contain;
+}
 
 .cityDescent .gpu-city-layer,
 .cityDescent .city-overlay-layer{
@@ -1921,9 +1993,9 @@
               <a class="btn" href="/products/">See products</a>
               <a class="btn primary" href="/products/software/wise-size/">Explore Wise Size</a>
             </div>
+            <div class="hero-mobile-scroll mobile-scroll-note">Scroll to enter</div>
             <div class="hero-index">
-              <span>Scroll to enter</span>
-              <span>08</span>
+              <div class="hero-mobile-scroll">Scroll to enter</div>
             </div>
           </div>
         </div>
@@ -1933,6 +2005,9 @@
 
     <section class="section cityDescent" id="cityDescent" aria-label="Unlim8ted films games tools descent">
       <div class="orbital-neon-viewport">
+        <div class="city-bake-frame" aria-hidden="true">
+          <video id="cityBakeVideo" muted playsinline preload="auto"></video>
+        </div>
         <canvas id="c"></canvas>
         <div id="fade"></div>
         <div id="grade"></div>
@@ -2288,6 +2363,24 @@ Z"></path>
 <script src="/products/ai/meatball/resources/js/meatball-chat-app.js"></script>
 <script>
     (function () {
+      const heroCopyBlur = document.querySelector(".hero-copy-blur");
+      let heroBlurRefreshTimer = null;
+
+      function refreshHeroCopyBlur() {
+        if (!heroCopyBlur) return;
+        heroCopyBlur.classList.remove("blur-refresh");
+        void heroCopyBlur.offsetHeight;
+        heroCopyBlur.classList.add("blur-refresh");
+        clearTimeout(heroBlurRefreshTimer);
+        heroBlurRefreshTimer = setTimeout(() => {
+          heroCopyBlur.classList.remove("blur-refresh");
+        }, 220);
+      }
+
+      addEventListener("resize", refreshHeroCopyBlur, { passive: true });
+      addEventListener("orientationchange", refreshHeroCopyBlur, { passive: true });
+      requestAnimationFrame(refreshHeroCopyBlur);
+
       const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const isMobile = window.matchMedia("(max-width: 900px)").matches;
 
@@ -3214,8 +3307,17 @@ let gpuCity = null;
 const fade = root.querySelector("#fade");
 //const progress = root.querySelector("#progress");
 const bottomVignette = root.querySelector("#bottomVignette");
+const bakedVideo = root.querySelector("#cityBakeVideo");
 let rootRect = root.getBoundingClientRect();
 let active = false;
+let bakedCityReady = false;
+let bakedCityWanted = true;
+let bakedCityFailed = false;
+let bakedCurrentSrc = "";
+let bakedTargetProgress = 0;
+let bakedSmoothProgress = 0;
+let bakedLastSeekTime = -1;
+let proceduralBuilt = false;
 
 let W = innerWidth;
 let H = innerHeight;
@@ -3239,6 +3341,73 @@ const inv = (a,b,v)=>sat((v-a)/(b-a));
 const ease = t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
 const out = t=>1-Math.pow(1-t,3);
 const inout = ease;
+
+const bakedCitySources = {
+  desktop: "https://assets.unlim8ted.com/videos/city-descent-desktop.webm",
+  tablet: "https://assets.unlim8ted.com/videos/city-descent-tablet.webm",
+  mobile: "https://assets.unlim8ted.com/videos/city-descent-mobile.webm"
+};
+
+function selectBakedCitySource(){
+  if(innerWidth <= 760) return bakedCitySources.mobile;
+  if(innerWidth <= 1280) return bakedCitySources.tablet;
+  return bakedCitySources.desktop;
+}
+
+function loadBakedCity(){
+  if(!bakedVideo || !bakedCityWanted) return;
+  const src = selectBakedCitySource();
+  if(src === bakedCurrentSrc) return;
+  bakedCurrentSrc = src;
+  bakedCityReady = false;
+  bakedCityFailed = false;
+  bakedTargetProgress = 0;
+  bakedSmoothProgress = 0;
+  bakedLastSeekTime = -1;
+  proceduralBuilt = false;
+  root.classList.remove("has-baked-city");
+  bakedVideo.removeAttribute("src");
+  bakedVideo.load();
+  bakedVideo.src = src;
+  bakedVideo.preload = "auto";
+  bakedVideo.muted = true;
+  bakedVideo.playsInline = true;
+  bakedVideo.load();
+}
+
+function scrubBakedCity(progress){
+  if(!bakedCityReady || !bakedVideo.duration) return;
+  bakedTargetProgress = sat(progress);
+  const diff = bakedTargetProgress - bakedSmoothProgress;
+  const catchup = Math.abs(diff) > .18 ? 1 : .16;
+  bakedSmoothProgress += diff * catchup;
+  if(Math.abs(diff) < .0008) bakedSmoothProgress = bakedTargetProgress;
+
+  const endTime = Math.max(0, bakedVideo.duration - .04);
+  const target = bakedSmoothProgress >= .999 ? endTime : bakedSmoothProgress * endTime;
+  if(Math.abs(bakedLastSeekTime - target) > .018){
+    bakedVideo.currentTime = target;
+    bakedLastSeekTime = target;
+  }
+}
+
+if(bakedVideo){
+  bakedVideo.addEventListener("loadedmetadata", () => {
+    if(Number.isFinite(bakedVideo.duration) && bakedVideo.duration > 0){
+      bakedCityReady = true;
+      root.classList.add("has-baked-city");
+      bakedVideo.pause();
+      scrubBakedCity(rawScroll);
+    }
+  });
+  bakedVideo.addEventListener("error", () => {
+    bakedCityReady = false;
+    bakedCityFailed = true;
+    root.classList.remove("has-baked-city");
+    ensureProceduralBuild();
+  });
+  loadBakedCity();
+}
 
 function hash(seed,a=0,b=0,c=0){
   const x = Math.sin(seed*127.1+a*311.7+b*74.7+c*19.19)*43758.5453123;
@@ -3457,9 +3626,10 @@ function resize(){
   baseCtx.setTransform(DPR,0,0,DPR,0,0);
   overlayCtx.setTransform(DPR,0,0,DPR,0,0);
   maxScroll=Math.max(1,root.offsetHeight-innerHeight);
-  build();
-  if(gpuCity) gpuCity.setSize();
-  buildTextCaches();
+  loadBakedCity();
+  if(!bakedCityWanted || bakedCityFailed){
+    ensureProceduralBuild(true);
+  }
 }
 
 function wrapTextLines(text, font, maxW){
@@ -3621,6 +3791,14 @@ function build(){
   Scene.carSprites=makeCarSprites();
   const gpu = ensureGpuCity();
   if(gpu) gpu.rebuild();
+}
+
+function ensureProceduralBuild(force=false){
+  if(proceduralBuilt && !force) return;
+  build();
+  if(gpuCity) gpuCity.setSize();
+  buildTextCaches();
+  proceduralBuilt = true;
 }
 
 function makeSkyline({count,step,alpha,scale,seed,dark=false}){
@@ -4864,6 +5042,20 @@ function render(now=0){
   fade.style.opacity=(entryMist*.42).toFixed(4);
   const bottomFog = inout(inv(.18,.70,scroll)) * out(inv(.08,.22,scroll)) * .92;
   root.style.setProperty("--orbitalBottomFog", bottomFog.toFixed(4));
+
+  if(bakedCityReady){
+    scrubBakedCity(scroll);
+    if(gpuCity && gpuCity.ready) gpuCity.app.view.style.visibility = "hidden";
+    baseCtx.clearRect(0,0,W,H);
+    overlayCtx.clearRect(0,0,W,H);
+    requestAnimationFrame(render);
+    return;
+  }
+
+  if(!proceduralBuilt){
+    requestAnimationFrame(render);
+    return;
+  }
 
   const drop=inout(inv(.06,.44,scroll));
   const burn=inv(.12,.42,scroll);
