@@ -1,0 +1,3906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Celeste Mobile Port — Unlim8ted Studios</title>
+
+  <meta
+    name="description"
+    content="Celeste + Everest on mobile, powered by threaded .NET WebAssembly and platform-specific wrappers. An unofficial mobile port by Unlim8ted Studios."
+  />
+
+  <meta name="theme-color" content="#100c24" />
+
+  <meta property="og:title" content="Celeste Mobile Port — Unlim8ted Studios" />
+  <meta
+    property="og:description"
+    content="Celeste + Everest on mobile. Touch controls, haptics, mods, saves, multiplayer, map editing, and a shared threaded WebAssembly runtime."
+  />
+  <meta property="og:type" content="website" />
+
+  <script type="module" src="/components/site-navbar.js"></script>
+
+  <style>
+    /* =========================================================
+       CELESTE MOBILE PORT
+       Unlim8ted Studios
+       ========================================================= */
+
+    :root {
+      --bg: #090718;
+      --bg-deep: #05040d;
+      --bg-purple: #130d2b;
+
+      --surface: rgba(21, 16, 48, 0.72);
+      --surface-strong: rgba(28, 20, 63, 0.92);
+      --surface-light: rgba(255, 255, 255, 0.065);
+
+      --white: #fffaff;
+      --text: #f7f1ff;
+      --muted: #bdb3d6;
+      --muted-2: #8e85a8;
+
+      --pink: #ff5f9f;
+      --pink-hot: #ff3d83;
+      --rose: #ff7b9d;
+      --purple: #9b70ff;
+      --purple-dark: #6541c8;
+      --blue: #68d8ff;
+      --blue-bright: #9be9ff;
+      --cyan: #6ff6ff;
+      --gold: #ffd877;
+      --green: #75f0b0;
+
+      --line: rgba(255, 255, 255, 0.11);
+      --line-bright: rgba(255, 255, 255, 0.2);
+
+      --shadow:
+        0 30px 80px rgba(0, 0, 0, 0.42),
+        0 8px 24px rgba(0, 0, 0, 0.28);
+
+      --glow-pink:
+        0 0 28px rgba(255, 75, 144, 0.26),
+        0 0 70px rgba(255, 75, 144, 0.12);
+
+      --glow-blue:
+        0 0 28px rgba(104, 216, 255, 0.25),
+        0 0 70px rgba(104, 216, 255, 0.1);
+
+      --max: 1240px;
+      --radius: 26px;
+      --radius-small: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--bg-deep);
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      overflow-x: hidden;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 50% -10%, #30215c 0, transparent 30%),
+        linear-gradient(180deg, #15102e 0%, #090718 38%, #060511 100%);
+      font-family:
+        Inter,
+        ui-sans-serif,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    }
+
+    body::selection {
+      background: var(--pink);
+      color: white;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    button,
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    img,
+    svg {
+      display: block;
+      max-width: 100%;
+    }
+
+    .page {
+      position: relative;
+      overflow: clip;
+    }
+
+    .container {
+      width: min(calc(100% - 40px), var(--max));
+      margin-inline: auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* =========================================================
+       GLOBAL BACKGROUND
+       ========================================================= */
+
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.55;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,.9) 0 1px, transparent 1.5px),
+        radial-gradient(circle, rgba(132,211,255,.8) 0 1px, transparent 1.5px),
+        radial-gradient(circle, rgba(255,140,192,.65) 0 1px, transparent 1.5px);
+      background-size:
+        131px 131px,
+        173px 173px,
+        227px 227px;
+      background-position:
+        12px 24px,
+        81px 53px,
+        36px 111px;
+      mask-image: linear-gradient(to bottom, black 0%, black 65%, transparent 100%);
+    }
+
+    .grain {
+      position: fixed;
+      inset: -50%;
+      width: 200%;
+      height: 200%;
+      pointer-events: none;
+      z-index: 50;
+      opacity: 0.028;
+      background-image:
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.8'/%3E%3C/svg%3E");
+    }
+
+    .ambient {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+      opacity: 0.3;
+    }
+
+    .ambient.a {
+      width: 520px;
+      height: 520px;
+      top: 700px;
+      left: -260px;
+      background: #7b42ff;
+    }
+
+    .ambient.b {
+      width: 480px;
+      height: 480px;
+      top: 1750px;
+      right: -260px;
+      background: #ff3c88;
+    }
+
+    .ambient.c {
+      width: 500px;
+      height: 500px;
+      top: 3300px;
+      left: -280px;
+      background: #248cff;
+    }
+
+    /* =========================================================
+       SHARED TYPOGRAPHY
+       ========================================================= */
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      color: var(--blue-bright);
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.17em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 26px;
+      height: 2px;
+      border-radius: 10px;
+      background: linear-gradient(90deg, var(--pink), var(--blue));
+      box-shadow: var(--glow-blue);
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    .section-title {
+      margin-bottom: 18px;
+      max-width: 850px;
+      font-size: clamp(2.5rem, 6vw, 5.4rem);
+      line-height: 0.94;
+      letter-spacing: -0.065em;
+      font-weight: 900;
+    }
+
+    .section-title em {
+      color: var(--pink);
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 400;
+    }
+
+    .section-copy {
+      max-width: 720px;
+      color: var(--muted);
+      font-size: clamp(1rem, 1.7vw, 1.18rem);
+      line-height: 1.75;
+    }
+
+    .section-head {
+      margin-bottom: 52px;
+    }
+
+    /* =========================================================
+       BUTTONS
+       ========================================================= */
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .button {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 52px;
+      padding: 0 21px;
+      overflow: hidden;
+      border: 1px solid var(--line-bright);
+      border-radius: 14px;
+      color: var(--white);
+      background: rgba(255,255,255,.055);
+      box-shadow: 0 10px 30px rgba(0,0,0,.18);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 800;
+      transition:
+        transform 180ms ease,
+        border-color 180ms ease,
+        background 180ms ease,
+        box-shadow 180ms ease;
+    }
+
+    .button::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      background: linear-gradient(
+        115deg,
+        transparent 20%,
+        rgba(255,255,255,.16) 50%,
+        transparent 80%
+      );
+      transform: translateX(-70%);
+      transition: opacity 180ms ease, transform 450ms ease;
+    }
+
+    .button:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255,255,255,.35);
+      background: rgba(255,255,255,.09);
+      box-shadow: 0 16px 35px rgba(0,0,0,.28);
+    }
+
+    .button:hover::before {
+      opacity: 1;
+      transform: translateX(70%);
+    }
+
+    .button.primary {
+      border-color: rgba(255, 109, 165, 0.55);
+      background:
+        linear-gradient(135deg, #ff477f, #bb55df 55%, #6975f5);
+      box-shadow:
+        0 15px 38px rgba(216, 72, 166, 0.28),
+        inset 0 1px rgba(255,255,255,.25);
+    }
+
+    .button svg {
+      width: 19px;
+      height: 19px;
+      flex: none;
+    }
+
+    /* =========================================================
+       HERO
+       ========================================================= */
+
+    .hero {
+      position: relative;
+      min-height: min(920px, calc(100vh - 50px));
+      display: grid;
+      align-items: center;
+      padding: 76px 0 130px;
+      isolation: isolate;
+    }
+
+    .hero-sky {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      z-index: -4;
+      background:
+        radial-gradient(circle at 72% 18%, rgba(255,167,207,.23), transparent 22%),
+        radial-gradient(circle at 55% 33%, rgba(107,101,226,.2), transparent 30%),
+        linear-gradient(
+          180deg,
+          #1d1740 0%,
+          #2d1c50 30%,
+          #5b285e 58%,
+          #e06987 82%,
+          #f7a0a3 100%
+        );
+    }
+
+    .hero-sky::before {
+      content: "";
+      position: absolute;
+      width: 520px;
+      height: 520px;
+      right: 5%;
+      top: 6%;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, rgba(255,233,202,.7) 0%, rgba(255,194,189,.24) 32%, transparent 70%);
+      filter: blur(3px);
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      z-index: -3;
+      opacity: 0.12;
+      background-image:
+        linear-gradient(rgba(255,255,255,.18) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.18) 1px, transparent 1px);
+      background-size: 70px 70px;
+      mask-image: linear-gradient(to bottom, black, transparent 65%);
+    }
+
+    .hero-mountains {
+      position: absolute;
+      inset: auto 0 0;
+      height: 67%;
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .hero-mountains svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .hero-mist {
+      position: absolute;
+      left: -10%;
+      right: -10%;
+      bottom: 2%;
+      height: 28%;
+      z-index: -1;
+      background:
+        radial-gradient(ellipse at 18% 60%, rgba(255,220,231,.55), transparent 40%),
+        radial-gradient(ellipse at 52% 70%, rgba(218,201,255,.46), transparent 43%),
+        radial-gradient(ellipse at 84% 64%, rgba(255,224,236,.48), transparent 39%);
+      filter: blur(20px);
+      opacity: 0.7;
+    }
+
+    .hero-inner {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(310px, .72fr);
+      gap: clamp(40px, 7vw, 100px);
+      align-items: center;
+    }
+
+    .hero-copy {
+      padding-top: 12px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 12px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 999px;
+      color: rgba(255,255,255,.9);
+      background: rgba(8,7,24,.25);
+      backdrop-filter: blur(14px);
+      font-size: .75rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      box-shadow: 0 10px 30px rgba(0,0,0,.15);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 5px rgba(117,240,176,.1), 0 0 15px var(--green);
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(.9);
+        opacity: .8;
+      }
+      50% {
+        transform: scale(1.15);
+        opacity: 1;
+      }
+    }
+
+    .hero h1 {
+      max-width: 790px;
+      margin-bottom: 24px;
+      font-size: clamp(4rem, 9vw, 8.8rem);
+      line-height: .82;
+      letter-spacing: -.085em;
+      font-weight: 950;
+      text-shadow: 0 10px 40px rgba(38, 16, 67, .38);
+    }
+
+    .hero h1 .mobile {
+      display: block;
+      color: transparent;
+      -webkit-text-stroke: 1.5px rgba(255,255,255,.8);
+      text-shadow: none;
+    }
+
+    .hero h1 .port {
+      position: relative;
+      color: #fff;
+    }
+
+    .hero h1 .port::after {
+      content: "";
+      position: absolute;
+      left: 3%;
+      right: -2%;
+      bottom: .04em;
+      height: .12em;
+      z-index: -1;
+      border-radius: 100%;
+      background: var(--pink);
+      transform: rotate(-2deg);
+      opacity: .75;
+    }
+
+    .hero-lead {
+      max-width: 660px;
+      margin-bottom: 30px;
+      color: rgba(255,255,255,.82);
+      font-size: clamp(1.02rem, 1.9vw, 1.25rem);
+      line-height: 1.68;
+      text-shadow: 0 2px 15px rgba(0,0,0,.2);
+    }
+
+    .hero-lead strong {
+      color: white;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 22px;
+      margin-top: 24px;
+      color: rgba(255,255,255,.66);
+      font-size: .8rem;
+      font-weight: 700;
+    }
+
+    .hero-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .hero-meta svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    /* =========================================================
+       PHONE ART
+       ========================================================= */
+
+    .phone-stage {
+      position: relative;
+      min-height: 620px;
+      display: grid;
+      place-items: center;
+      perspective: 1300px;
+    }
+
+    .phone-aura {
+      position: absolute;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, rgba(255,122,174,.34), rgba(119,102,255,.15) 45%, transparent 70%);
+      filter: blur(10px);
+      animation: breathe 5s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      50% {
+        transform: scale(1.08);
+        opacity: .8;
+      }
+    }
+
+    .phone-orbit {
+      position: absolute;
+      width: 510px;
+      height: 510px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 50%;
+      transform: rotateX(70deg) rotateZ(-13deg);
+    }
+
+    .phone-orbit::before,
+    .phone-orbit::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.09);
+    }
+
+    .phone-orbit::before {
+      inset: 42px;
+    }
+
+    .phone-orbit::after {
+      inset: 95px;
+    }
+
+    .phone {
+      position: relative;
+      width: min(310px, 72vw);
+      aspect-ratio: 0.49;
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 42px;
+      background:
+        linear-gradient(145deg, #383346, #0b0a12 40%, #211c2b);
+      box-shadow:
+        0 60px 100px rgba(0,0,0,.52),
+        0 20px 35px rgba(0,0,0,.35),
+        inset 0 1px rgba(255,255,255,.5),
+        inset 0 -1px rgba(255,255,255,.1);
+      transform: rotateY(-10deg) rotateX(4deg) rotateZ(3deg);
+      animation: phoneFloat 5s ease-in-out infinite;
+    }
+
+    @keyframes phoneFloat {
+      0%, 100% {
+        transform: rotateY(-10deg) rotateX(4deg) rotateZ(3deg) translateY(0);
+      }
+      50% {
+        transform: rotateY(-7deg) rotateX(2deg) rotateZ(1.5deg) translateY(-14px);
+      }
+    }
+
+    .phone::before {
+      content: "";
+      position: absolute;
+      width: 4px;
+      height: 80px;
+      left: -5px;
+      top: 118px;
+      border-radius: 4px 0 0 4px;
+      background: #24202e;
+    }
+
+    .phone-screen {
+      position: relative;
+      height: 100%;
+      overflow: hidden;
+      border-radius: 33px;
+      background:
+        linear-gradient(180deg, #211a45 0%, #7d3e77 46%, #f08b9d 75%, #f7b1ad 100%);
+    }
+
+    .phone-island {
+      position: absolute;
+      z-index: 20;
+      top: 10px;
+      left: 50%;
+      width: 88px;
+      height: 24px;
+      border-radius: 20px;
+      background: #08070c;
+      transform: translateX(-50%);
+    }
+
+    .phone-screen .mini-stars {
+      position: absolute;
+      inset: 0;
+      opacity: .8;
+      background-image:
+        radial-gradient(circle, #fff 0 1px, transparent 1.4px),
+        radial-gradient(circle, #ffd1ea 0 1px, transparent 1.4px);
+      background-size: 46px 46px, 73px 73px;
+      background-position: 8px 4px, 20px 31px;
+    }
+
+    .mini-mountain {
+      position: absolute;
+      inset: auto -10% 0;
+      height: 73%;
+    }
+
+    .mini-mountain svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .game-logo {
+      position: absolute;
+      z-index: 5;
+      top: 65px;
+      left: 50%;
+      width: 75%;
+      transform: translateX(-50%);
+      text-align: center;
+    }
+
+    .game-logo strong {
+      display: block;
+      color: white;
+      font-size: 2.25rem;
+      font-weight: 950;
+      letter-spacing: -.08em;
+      text-shadow:
+        0 4px 0 rgba(94,46,122,.5),
+        0 8px 25px rgba(42,12,64,.45);
+    }
+
+    .game-logo span {
+      display: block;
+      margin-top: 2px;
+      color: rgba(255,255,255,.82);
+      font-size: .55rem;
+      font-weight: 900;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+    }
+
+    .touch-ui {
+      position: absolute;
+      inset: 0;
+      z-index: 8;
+      pointer-events: none;
+    }
+
+    .touch-stick {
+      position: absolute;
+      left: 22px;
+      bottom: 34px;
+      width: 82px;
+      height: 82px;
+      border: 2px solid rgba(255,255,255,.35);
+      border-radius: 50%;
+      background: rgba(15,11,33,.24);
+      box-shadow: inset 0 0 20px rgba(255,255,255,.04);
+      backdrop-filter: blur(3px);
+    }
+
+    .touch-stick::after {
+      content: "";
+      position: absolute;
+      inset: 22px;
+      border: 2px solid rgba(255,255,255,.65);
+      border-radius: 50%;
+      background: rgba(255,255,255,.08);
+    }
+
+    .touch-button {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      width: 54px;
+      height: 54px;
+      border: 2px solid rgba(255,255,255,.42);
+      border-radius: 50%;
+      color: rgba(255,255,255,.78);
+      background: rgba(15,11,33,.25);
+      backdrop-filter: blur(3px);
+      font-size: .6rem;
+      font-weight: 900;
+    }
+
+    .touch-button.a {
+      right: 22px;
+      bottom: 35px;
+    }
+
+    .touch-button.b {
+      right: 78px;
+      bottom: 74px;
+    }
+
+    .touch-button.c {
+      right: 21px;
+      bottom: 96px;
+      width: 45px;
+      height: 45px;
+    }
+
+    .phone-badge {
+      position: absolute;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      border: 1px solid rgba(255,255,255,.19);
+      border-radius: 14px;
+      color: white;
+      background: rgba(12,9,28,.64);
+      box-shadow: 0 18px 45px rgba(0,0,0,.28);
+      backdrop-filter: blur(16px);
+      font-size: .75rem;
+      font-weight: 800;
+    }
+
+    .phone-badge svg {
+      width: 20px;
+      height: 20px;
+      color: var(--blue);
+    }
+
+    .phone-badge.one {
+      top: 18%;
+      right: -3%;
+      animation: badgeFloat 4s ease-in-out infinite;
+    }
+
+    .phone-badge.two {
+      left: -8%;
+      bottom: 21%;
+      animation: badgeFloat 4.8s ease-in-out infinite reverse;
+    }
+
+    @keyframes badgeFloat {
+      50% {
+        transform: translateY(-9px);
+      }
+    }
+
+    /* =========================================================
+       NOTICE
+       ========================================================= */
+
+    .notice-wrap {
+      position: relative;
+      z-index: 5;
+      margin-top: -48px;
+    }
+
+    .notice {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 18px;
+      align-items: center;
+      padding: 19px 22px;
+      border: 1px solid rgba(255, 213, 119, .28);
+      border-radius: 20px;
+      background:
+        linear-gradient(120deg, rgba(255,209,111,.11), rgba(255,255,255,.045));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .notice-icon {
+      display: grid;
+      place-items: center;
+      width: 43px;
+      height: 43px;
+      border: 1px solid rgba(255,216,119,.32);
+      border-radius: 13px;
+      color: var(--gold);
+      background: rgba(255,216,119,.09);
+    }
+
+    .notice-icon svg {
+      width: 23px;
+      height: 23px;
+    }
+
+    .notice strong {
+      display: block;
+      margin-bottom: 4px;
+      color: white;
+      font-size: .9rem;
+    }
+
+    .notice p {
+      margin: 0;
+      color: var(--muted);
+      font-size: .85rem;
+      line-height: 1.55;
+    }
+
+    .notice-tag {
+      color: var(--gold);
+      font-size: .67rem;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* =========================================================
+       STATS STRIP
+       ========================================================= */
+
+    .stats {
+      padding: 80px 0 40px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .stat {
+      position: relative;
+      padding: 30px 28px;
+    }
+
+    .stat + .stat {
+      border-left: 1px solid var(--line);
+    }
+
+    .stat strong {
+      display: block;
+      margin-bottom: 5px;
+      color: white;
+      font-size: clamp(1.6rem, 3vw, 2.5rem);
+      letter-spacing: -.06em;
+    }
+
+    .stat span {
+      color: var(--muted-2);
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+
+    /* =========================================================
+       FEATURE SECTION
+       ========================================================= */
+
+    .features {
+      padding: 120px 0 140px;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+    }
+
+    .feature-card {
+      position: relative;
+      min-height: 270px;
+      overflow: hidden;
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.025));
+      box-shadow: 0 18px 50px rgba(0,0,0,.17);
+      transition:
+        transform 250ms ease,
+        border-color 250ms ease,
+        background 250ms ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255,255,255,.22);
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.095), rgba(255,255,255,.035));
+    }
+
+    .feature-card.large {
+      grid-column: span 7;
+      min-height: 370px;
+    }
+
+    .feature-card.medium {
+      grid-column: span 5;
+      min-height: 370px;
+    }
+
+    .feature-card.third {
+      grid-column: span 4;
+    }
+
+    .feature-icon {
+      position: relative;
+      z-index: 3;
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 22px;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 15px;
+      color: var(--blue);
+      background: rgba(255,255,255,.055);
+    }
+
+    .feature-icon svg {
+      width: 25px;
+      height: 25px;
+    }
+
+    .feature-card h3 {
+      position: relative;
+      z-index: 3;
+      margin-bottom: 10px;
+      color: white;
+      font-size: 1.3rem;
+      letter-spacing: -.035em;
+    }
+
+    .feature-card p {
+      position: relative;
+      z-index: 3;
+      max-width: 500px;
+      margin: 0;
+      color: var(--muted);
+      font-size: .91rem;
+      line-height: 1.65;
+    }
+
+    .feature-art {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .controls-art {
+      right: -20px;
+      bottom: -32px;
+      width: 56%;
+      aspect-ratio: 1;
+    }
+
+    .controls-ring {
+      position: absolute;
+      inset: 10%;
+      border: 1px solid rgba(108,223,255,.25);
+      border-radius: 50%;
+      box-shadow:
+        0 0 0 22px rgba(108,223,255,.025),
+        0 0 0 45px rgba(108,223,255,.018);
+    }
+
+    .controls-ring::before,
+    .controls-ring::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.24);
+    }
+
+    .controls-ring::before {
+      inset: 30%;
+      background: rgba(104,216,255,.06);
+    }
+
+    .controls-ring::after {
+      width: 55px;
+      height: 55px;
+      right: -40px;
+      bottom: 40px;
+      border-color: rgba(255,104,158,.5);
+      box-shadow: var(--glow-pink);
+    }
+
+    .mods-art {
+      right: -12px;
+      bottom: -10px;
+      width: 210px;
+      height: 220px;
+      opacity: .9;
+    }
+
+    .mod-block {
+      position: absolute;
+      width: 105px;
+      height: 105px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 20px;
+      background: linear-gradient(145deg, rgba(126,83,221,.3), rgba(32,21,70,.55));
+      box-shadow: 0 18px 40px rgba(0,0,0,.24);
+      transform: rotate(10deg);
+    }
+
+    .mod-block:nth-child(1) {
+      left: 15px;
+      top: 65px;
+    }
+
+    .mod-block:nth-child(2) {
+      left: 78px;
+      top: 20px;
+      transform: rotate(-9deg);
+      background: linear-gradient(145deg, rgba(255,82,144,.32), rgba(54,23,67,.55));
+    }
+
+    .mod-block:nth-child(3) {
+      left: 91px;
+      top: 100px;
+      transform: rotate(6deg);
+      background: linear-gradient(145deg, rgba(75,192,255,.28), rgba(20,43,73,.55));
+    }
+
+    .mod-block::before,
+    .mod-block::after {
+      content: "";
+      position: absolute;
+      background: rgba(255,255,255,.22);
+      border-radius: 10px;
+    }
+
+    .mod-block::before {
+      width: 26px;
+      height: 26px;
+      top: 18px;
+      left: 18px;
+    }
+
+    .mod-block::after {
+      left: 18px;
+      right: 18px;
+      height: 7px;
+      bottom: 23px;
+    }
+
+    /* =========================================================
+       RUNTIME / ARCHITECTURE
+       ========================================================= */
+
+    .architecture {
+      position: relative;
+      padding: 140px 0;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(93,68,184,.12), transparent 42%),
+        linear-gradient(180deg, transparent, rgba(9,7,24,.6), transparent);
+    }
+
+    .architecture-grid {
+      display: grid;
+      grid-template-columns: minmax(0, .78fr) minmax(450px, 1.22fr);
+      gap: 70px;
+      align-items: center;
+    }
+
+    .arch-copy {
+      position: sticky;
+      top: 120px;
+    }
+
+    .arch-copy .section-title {
+      font-size: clamp(2.8rem, 5vw, 5rem);
+    }
+
+    .arch-points {
+      display: grid;
+      gap: 14px;
+      margin-top: 32px;
+    }
+
+    .arch-point {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 12px;
+      align-items: start;
+      color: var(--muted);
+      font-size: .91rem;
+      line-height: 1.55;
+    }
+
+    .arch-point .num {
+      display: grid;
+      place-items: center;
+      width: 29px;
+      height: 29px;
+      border: 1px solid var(--line-bright);
+      border-radius: 9px;
+      color: var(--blue);
+      background: rgba(255,255,255,.045);
+      font-size: .68rem;
+      font-weight: 900;
+    }
+
+    .arch-visual {
+      position: relative;
+      padding: 32px;
+      border: 1px solid var(--line);
+      border-radius: 32px;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.018));
+      box-shadow: var(--shadow);
+    }
+
+    .arch-visual::before {
+      content: "";
+      position: absolute;
+      inset: 10%;
+      z-index: -1;
+      border-radius: 50%;
+      background: rgba(113,80,220,.16);
+      filter: blur(70px);
+    }
+
+    .arch-layer {
+      position: relative;
+      padding: 22px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 20px;
+      background: rgba(7,6,18,.56);
+      box-shadow: 0 14px 35px rgba(0,0,0,.18);
+    }
+
+    .arch-layer + .arch-connector {
+      height: 42px;
+    }
+
+    .arch-layer-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .arch-layer-head strong {
+      color: white;
+      font-size: .88rem;
+      letter-spacing: -.02em;
+    }
+
+    .arch-layer-head span {
+      color: var(--muted-2);
+      font-size: .65rem;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .arch-nodes {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .arch-node {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 48px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 13px;
+      color: var(--muted);
+      background: rgba(255,255,255,.035);
+      font-size: .75rem;
+      font-weight: 700;
+    }
+
+    .arch-node svg {
+      width: 18px;
+      height: 18px;
+      color: var(--blue);
+    }
+
+    .arch-layer.runtime {
+      border-color: rgba(155,112,255,.3);
+      background:
+        linear-gradient(145deg, rgba(93,58,167,.24), rgba(7,6,18,.66));
+    }
+
+    .arch-layer.mods {
+      border-color: rgba(255,95,159,.24);
+    }
+
+    .arch-connector {
+      position: relative;
+    }
+
+    .arch-connector::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: linear-gradient(var(--blue), var(--purple));
+    }
+
+    .arch-connector::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 4px;
+      width: 7px;
+      height: 7px;
+      border-right: 1px solid var(--purple);
+      border-bottom: 1px solid var(--purple);
+      transform: translateX(-50%) rotate(45deg);
+    }
+
+    /* =========================================================
+       MODS
+       ========================================================= */
+
+    .mods {
+      padding: 140px 0;
+    }
+
+    .mod-list {
+      display: grid;
+      gap: 16px;
+    }
+
+    .mod-card {
+      position: relative;
+      display: grid;
+      grid-template-columns: 70px minmax(170px, .4fr) 1fr auto;
+      gap: 22px;
+      align-items: center;
+      padding: 22px 24px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(255,255,255,.035);
+      transition:
+        transform 220ms ease,
+        background 220ms ease,
+        border-color 220ms ease;
+    }
+
+    .mod-card:hover {
+      transform: translateX(7px);
+      border-color: rgba(255,255,255,.22);
+      background: rgba(255,255,255,.055);
+    }
+
+    .mod-card::after {
+      content: "";
+      position: absolute;
+      right: -50px;
+      top: 50%;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: var(--mod-color, var(--purple));
+      opacity: .06;
+      filter: blur(35px);
+      transform: translateY(-50%);
+    }
+
+    .mod-icon {
+      display: grid;
+      place-items: center;
+      width: 58px;
+      height: 58px;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 17px;
+      color: var(--mod-color, var(--blue));
+      background: rgba(255,255,255,.05);
+      box-shadow: inset 0 1px rgba(255,255,255,.07);
+    }
+
+    .mod-icon svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .mod-name strong {
+      display: block;
+      margin-bottom: 4px;
+      color: white;
+      font-size: 1.05rem;
+      letter-spacing: -.03em;
+    }
+
+    .mod-name span {
+      color: var(--muted-2);
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    .mod-desc {
+      color: var(--muted);
+      font-size: .87rem;
+      line-height: 1.55;
+    }
+
+    .mod-state {
+      position: relative;
+      z-index: 2;
+      padding: 7px 10px;
+      border: 1px solid rgba(117,240,176,.18);
+      border-radius: 999px;
+      color: var(--green);
+      background: rgba(117,240,176,.06);
+      font-size: .63rem;
+      font-weight: 900;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    /* =========================================================
+       MOBILE UI SHOWCASE
+       ========================================================= */
+
+    .interface {
+      padding: 120px 0 150px;
+    }
+
+    .ui-stage {
+      position: relative;
+      min-height: 700px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+      padding: 70px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 38px;
+      background:
+        radial-gradient(circle at 76% 35%, rgba(255,93,154,.17), transparent 28%),
+        radial-gradient(circle at 24% 68%, rgba(89,143,255,.16), transparent 30%),
+        linear-gradient(145deg, #17112e, #0c091d 70%);
+      box-shadow: var(--shadow);
+    }
+
+    .ui-stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: .1;
+      background-image:
+        linear-gradient(rgba(255,255,255,.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.15) 1px, transparent 1px);
+      background-size: 45px 45px;
+    }
+
+    .ui-copy {
+      position: relative;
+      z-index: 3;
+    }
+
+    .ui-copy h3 {
+      max-width: 460px;
+      margin-bottom: 18px;
+      color: white;
+      font-size: clamp(2.3rem, 5vw, 4.8rem);
+      line-height: .98;
+      letter-spacing: -.06em;
+    }
+
+    .ui-copy p {
+      max-width: 490px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .menu-demo {
+      position: relative;
+      z-index: 3;
+      width: min(100%, 430px);
+      margin-left: auto;
+      padding: 26px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 26px;
+      background:
+        linear-gradient(160deg, rgba(44,28,78,.92), rgba(13,10,29,.92));
+      box-shadow:
+        0 45px 90px rgba(0,0,0,.4),
+        inset 0 1px rgba(255,255,255,.08);
+      transform: rotate(2.2deg);
+    }
+
+    .menu-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      color: rgba(255,255,255,.6);
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .menu-title {
+      margin-bottom: 18px;
+      color: white;
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: -.05em;
+    }
+
+    .menu-items {
+      display: grid;
+      gap: 7px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 48px;
+      padding: 0 15px;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      color: rgba(255,255,255,.7);
+      font-size: .83rem;
+      font-weight: 800;
+    }
+
+    .menu-item.active {
+      border-color: rgba(255,255,255,.22);
+      color: white;
+      background:
+        linear-gradient(90deg, rgba(255,83,146,.23), rgba(116,100,245,.14));
+      box-shadow: inset 3px 0 var(--pink);
+    }
+
+    .menu-item svg {
+      width: 16px;
+      height: 16px;
+      color: var(--pink);
+    }
+
+    /* =========================================================
+       PLATFORM
+       ========================================================= */
+
+    .platforms {
+      padding: 110px 0 150px;
+    }
+
+    .platform-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .platform {
+      position: relative;
+      min-height: 360px;
+      padding: 34px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.065), rgba(255,255,255,.025));
+    }
+
+    .platform.android {
+      border-color: rgba(117,240,176,.17);
+    }
+
+    .platform.ios {
+      border-color: rgba(150,194,255,.16);
+    }
+
+    .platform-icon {
+      display: grid;
+      place-items: center;
+      width: 56px;
+      height: 56px;
+      margin-bottom: 30px;
+      border: 1px solid var(--line-bright);
+      border-radius: 17px;
+      background: rgba(255,255,255,.055);
+    }
+
+    .platform-icon svg {
+      width: 30px;
+      height: 30px;
+    }
+
+    .platform.android .platform-icon {
+      color: var(--green);
+    }
+
+    .platform.ios .platform-icon {
+      color: #b9d8ff;
+    }
+
+    .platform h3 {
+      margin-bottom: 12px;
+      color: white;
+      font-size: 1.8rem;
+      letter-spacing: -.05em;
+    }
+
+    .platform p {
+      max-width: 470px;
+      color: var(--muted);
+      font-size: .9rem;
+      line-height: 1.65;
+    }
+
+    .platform-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 18px;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: .66rem;
+      font-weight: 900;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    .platform-status::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 12px currentColor;
+    }
+
+    .platform.android .platform-status {
+      color: var(--green);
+    }
+
+    .platform.ios .platform-status {
+      color: var(--gold);
+    }
+
+    .platform-art {
+      position: absolute;
+      right: -55px;
+      bottom: -65px;
+      width: 280px;
+      height: 280px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 50%;
+    }
+
+    .platform-art::before,
+    .platform-art::after {
+      content: "";
+      position: absolute;
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 50%;
+    }
+
+    .platform-art::before {
+      inset: 38px;
+    }
+
+    .platform-art::after {
+      inset: 78px;
+    }
+
+    /* =========================================================
+       ROADMAP
+       ========================================================= */
+
+    .roadmap {
+      padding: 120px 0 150px;
+    }
+
+    .roadmap-track {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      margin-top: 70px;
+    }
+
+    .roadmap-track::before {
+      content: "";
+      position: absolute;
+      top: 17px;
+      left: 5%;
+      right: 5%;
+      height: 1px;
+      background: linear-gradient(90deg, var(--pink), var(--purple), var(--blue));
+      opacity: .5;
+    }
+
+    .roadmap-item {
+      position: relative;
+      padding: 54px 24px 0 0;
+    }
+
+    .roadmap-dot {
+      position: absolute;
+      top: 8px;
+      left: 0;
+      width: 19px;
+      height: 19px;
+      border: 4px solid var(--bg);
+      border-radius: 50%;
+      background: var(--road-color, var(--purple));
+      box-shadow: 0 0 18px var(--road-color, var(--purple));
+    }
+
+    .roadmap-item small {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--road-color, var(--blue));
+      font-size: .65rem;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .roadmap-item h3 {
+      margin-bottom: 8px;
+      color: white;
+      font-size: 1rem;
+    }
+
+    .roadmap-item p {
+      margin: 0;
+      color: var(--muted-2);
+      font-size: .8rem;
+      line-height: 1.55;
+    }
+
+    /* =========================================================
+       OPEN SOURCE CTA
+       ========================================================= */
+
+    .github-section {
+      padding: 60px 0 150px;
+    }
+
+    .github-card {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 50px;
+      align-items: center;
+      padding: clamp(34px, 6vw, 72px);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 36px;
+      background:
+        radial-gradient(circle at 85% 50%, rgba(255,94,155,.2), transparent 28%),
+        radial-gradient(circle at 70% 10%, rgba(102,135,255,.16), transparent 30%),
+        linear-gradient(135deg, #21143e, #0d0a20 70%);
+      box-shadow: var(--shadow);
+    }
+
+    .github-card::before {
+      content: "";
+      position: absolute;
+      width: 340px;
+      height: 340px;
+      right: -70px;
+      top: -80px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 50%;
+      box-shadow:
+        0 0 0 45px rgba(255,255,255,.018),
+        0 0 0 90px rgba(255,255,255,.012);
+    }
+
+    .github-card h2 {
+      max-width: 700px;
+      margin-bottom: 15px;
+      color: white;
+      font-size: clamp(2.5rem, 5vw, 5rem);
+      line-height: .95;
+      letter-spacing: -.065em;
+    }
+
+    .github-card p {
+      max-width: 670px;
+      margin-bottom: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .github-mark {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      place-items: center;
+      width: 130px;
+      height: 130px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 35px;
+      color: white;
+      background: rgba(255,255,255,.06);
+      box-shadow: 0 25px 60px rgba(0,0,0,.3);
+      transform: rotate(5deg);
+    }
+
+    .github-mark svg {
+      width: 66px;
+      height: 66px;
+    }
+
+    .github-actions {
+      margin-top: 28px;
+    }
+
+    /* =========================================================
+       CREDITS
+       ========================================================= */
+
+    .credits {
+      padding: 100px 0 130px;
+      border-top: 1px solid var(--line);
+    }
+
+    .credit-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 44px;
+    }
+
+    .credit {
+      min-height: 150px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.025);
+    }
+
+    .credit strong {
+      display: block;
+      margin-bottom: 8px;
+      color: white;
+      font-size: .9rem;
+    }
+
+    .credit p {
+      margin: 0;
+      color: var(--muted-2);
+      font-size: .77rem;
+      line-height: 1.55;
+    }
+
+    .credit a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    .credit a:hover {
+      text-decoration: underline;
+    }
+
+    /* =========================================================
+       FOOTER
+       ========================================================= */
+
+    .footer {
+      position: relative;
+      padding: 70px 0 35px;
+      overflow: hidden;
+      border-top: 1px solid var(--line);
+      background: #05040c;
+    }
+
+    .footer-mountain {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -2px;
+      height: 250px;
+      opacity: .22;
+      pointer-events: none;
+    }
+
+    .footer-mountain svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .footer-inner {
+      position: relative;
+      z-index: 2;
+    }
+
+    .footer-brand {
+      margin-bottom: 70px;
+    }
+
+    .footer-brand .mini {
+      margin-bottom: 8px;
+      color: var(--muted-2);
+      font-size: .7rem;
+      font-weight: 900;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    .footer-brand strong {
+      display: block;
+      color: white;
+      font-size: clamp(2.7rem, 7vw, 6rem);
+      line-height: .95;
+      letter-spacing: -.07em;
+    }
+
+    .footer-brand strong span {
+      color: var(--pink);
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      gap: 30px;
+      align-items: flex-end;
+      padding-top: 25px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      color: var(--muted-2);
+      font-size: .72rem;
+      line-height: 1.6;
+    }
+
+    .footer-bottom p {
+      margin: 0;
+      max-width: 760px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 18px;
+      white-space: nowrap;
+    }
+
+    .footer-links a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .footer-links a:hover {
+      color: white;
+    }
+
+    /* =========================================================
+       REVEALS
+       ========================================================= */
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition:
+        opacity 700ms cubic-bezier(.2,.7,.2,1),
+        transform 700ms cubic-bezier(.2,.7,.2,1);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+
+    @media (max-width: 1050px) {
+      .hero-inner {
+        grid-template-columns: 1fr .62fr;
+        gap: 30px;
+      }
+
+      .phone-stage {
+        min-height: 560px;
+      }
+
+      .phone {
+        width: 260px;
+      }
+
+      .phone-orbit {
+        width: 410px;
+        height: 410px;
+      }
+
+      .architecture-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .arch-copy {
+        position: relative;
+        top: auto;
+      }
+
+      .feature-card.large,
+      .feature-card.medium {
+        grid-column: span 6;
+      }
+
+      .feature-card.third {
+        grid-column: span 6;
+      }
+
+      .mod-card {
+        grid-template-columns: 64px 180px 1fr;
+      }
+
+      .mod-state {
+        grid-column: 2 / -1;
+        justify-self: start;
+      }
+    }
+
+    @media (max-width: 800px) {
+      .container {
+        width: min(calc(100% - 28px), var(--max));
+      }
+
+      .hero {
+        min-height: auto;
+        padding-top: 55px;
+        padding-bottom: 120px;
+      }
+
+      .hero-inner {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-copy {
+        position: relative;
+        z-index: 5;
+      }
+
+      .hero h1 {
+        max-width: 650px;
+        font-size: clamp(4rem, 18vw, 7rem);
+      }
+
+      .phone-stage {
+        min-height: 560px;
+        margin-top: -20px;
+      }
+
+      .phone {
+        width: min(290px, 68vw);
+      }
+
+      .notice {
+        grid-template-columns: auto 1fr;
+      }
+
+      .notice-tag {
+        grid-column: 2;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .stat:nth-child(3) {
+        border-left: 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .stat:nth-child(4) {
+        border-top: 1px solid var(--line);
+      }
+
+      .feature-card.large,
+      .feature-card.medium,
+      .feature-card.third {
+        grid-column: span 12;
+      }
+
+      .ui-stage {
+        grid-template-columns: 1fr;
+        padding: 40px 28px;
+      }
+
+      .menu-demo {
+        margin: 20px auto 0;
+      }
+
+      .platform-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .roadmap-track {
+        grid-template-columns: 1fr;
+        gap: 0;
+        margin-left: 8px;
+      }
+
+      .roadmap-track::before {
+        top: 0;
+        bottom: 0;
+        left: 9px;
+        right: auto;
+        width: 1px;
+        height: auto;
+      }
+
+      .roadmap-item {
+        padding: 5px 0 45px 48px;
+      }
+
+      .roadmap-dot {
+        top: 5px;
+      }
+
+      .github-card {
+        grid-template-columns: 1fr;
+      }
+
+      .github-mark {
+        display: none;
+      }
+
+      .credit-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .footer-bottom {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+.mod-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 11px;
+  color: var(--mod-color, var(--blue));
+  text-decoration: none;
+  font-size: .74rem;
+  font-weight: 850;
+  letter-spacing: -.01em;
+  transition:
+    gap 180ms ease,
+    color 180ms ease,
+    opacity 180ms ease;
+}
+
+.mod-link svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  transition: transform 180ms ease;
+}
+
+.mod-link:hover {
+  gap: 10px;
+  color: white;
+}
+
+.mod-link:hover svg {
+  transform: translate(2px, -2px);
+}
+    @media (max-width: 560px) {
+      .hero {
+        padding-top: 42px;
+      }
+
+      .status-pill {
+        font-size: .64rem;
+      }
+
+      .hero-lead {
+        font-size: .98rem;
+      }
+
+      .phone-stage {
+        min-height: 510px;
+      }
+
+      .phone {
+        width: 240px;
+      }
+
+      .phone-orbit {
+        width: 350px;
+        height: 350px;
+      }
+
+      .phone-badge {
+        font-size: .65rem;
+      }
+
+      .phone-badge.one {
+        right: -1%;
+      }
+
+      .phone-badge.two {
+        left: -1%;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .stat {
+        padding: 23px 18px;
+      }
+
+      .feature-card {
+        min-height: 300px;
+        padding: 23px;
+      }
+
+      .controls-art {
+        width: 70%;
+        opacity: .8;
+      }
+
+      .arch-visual {
+        padding: 18px;
+      }
+
+      .arch-nodes {
+        grid-template-columns: 1fr;
+      }
+
+      .mod-card {
+        grid-template-columns: 54px 1fr;
+        gap: 14px;
+      }
+
+      .mod-icon {
+        width: 50px;
+        height: 50px;
+      }
+
+      .mod-desc {
+        grid-column: 1 / -1;
+      }
+
+      .mod-state {
+        grid-column: 1 / -1;
+      }
+
+      .ui-stage {
+        min-height: 0;
+        border-radius: 27px;
+      }
+
+      .menu-demo {
+        padding: 20px;
+      }
+
+      .credit-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-links {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
+
+      .reveal {
+        opacity: 1;
+        transform: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <script type="module">
+    import { getFirebase } from "/components/firebase-init.js";
+
+    /*
+      Initialize the shared Unlim8ted Firebase instance.
+      This page does not currently need to read/write user data,
+      but initializing here keeps it connected to the standard
+      Unlim8ted application environment.
+    */
+    try {
+      const firebase = getFirebase();
+      window.unlim8tedFirebase = firebase;
+    } catch (error) {
+      console.warn("Firebase initialization was unavailable:", error);
+    }
+  </script>
+
+  <site-navbar
+    cart-href="/cart"
+    signin-href="/sign-in"
+    profile-href="/profile">
+  </site-navbar>
+
+  <div class="stars" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <div class="page">
+
+    <div class="ambient a" aria-hidden="true"></div>
+    <div class="ambient b" aria-hidden="true"></div>
+    <div class="ambient c" aria-hidden="true"></div>
+
+    <!-- =====================================================
+         HERO
+         ===================================================== -->
+
+    <header class="hero">
+
+      <div class="hero-sky" aria-hidden="true"></div>
+      <div class="hero-grid" aria-hidden="true"></div>
+
+      <div class="hero-mountains" aria-hidden="true">
+        <svg
+          viewBox="0 0 1600 700"
+          preserveAspectRatio="none"
+          xmlns="http://www.w3.org/2000/svg">
+
+          <defs>
+            <linearGradient id="mountainBack" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#76548e"/>
+              <stop offset="100%" stop-color="#2a214f"/>
+            </linearGradient>
+
+            <linearGradient id="mountainMid" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#4f3c75"/>
+              <stop offset="100%" stop-color="#18142f"/>
+            </linearGradient>
+
+            <linearGradient id="mountainFront" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#292247"/>
+              <stop offset="100%" stop-color="#090718"/>
+            </linearGradient>
+          </defs>
+
+          <path
+            d="M0 430
+               L140 310
+               L230 360
+               L360 195
+               L470 330
+               L600 235
+               L720 370
+               L865 110
+               L1020 330
+               L1135 235
+               L1250 355
+               L1395 205
+               L1600 410
+               L1600 700
+               L0 700 Z"
+            fill="url(#mountainBack)"
+            opacity=".72"/>
+
+          <path
+            d="M620 285
+               L865 110
+               L1020 330
+               L946 280
+               L885 206
+               L850 238
+               L814 194
+               L750 275 Z"
+            fill="#d9d7f5"
+            opacity=".78"/>
+
+          <path
+            d="M0 520
+               L180 395
+               L300 470
+               L455 300
+               L610 480
+               L745 355
+               L900 490
+               L1080 285
+               L1210 460
+               L1355 330
+               L1600 510
+               L1600 700
+               L0 700 Z"
+            fill="url(#mountainMid)"
+            opacity=".88"/>
+
+          <path
+            d="M0 600
+               L200 480
+               L360 575
+               L520 430
+               L720 590
+               L900 440
+               L1100 590
+               L1290 435
+               L1600 610
+               L1600 700
+               L0 700 Z"
+            fill="url(#mountainFront)"/>
+
+          <path
+            d="M0 620
+               C180 590 280 630 420 605
+               C580 575 680 635 840 608
+               C1020 575 1110 635 1290 600
+               C1430 575 1510 600 1600 585
+               L1600 700
+               L0 700 Z"
+            fill="#090718"/>
+        </svg>
+      </div>
+
+      <div class="hero-mist" aria-hidden="true"></div>
+
+      <div class="container hero-inner">
+
+        <div class="hero-copy">
+
+          <div class="status-pill">
+            <span class="status-dot"></span>
+            Active development
+          </div>
+
+          <h1>
+            Celeste
+            <span class="mobile">Mobile</span>
+            <span class="port">Port</span>
+          </h1>
+
+          <p class="hero-lead">
+            <strong>Celeste + Everest on mobile.</strong>
+            A mod-capable mobile runtime powered by threaded .NET
+            WebAssembly, customizable touch controls, native platform
+            bridges, multiplayer, map creation, and mobile-first UI.
+          </p>
+
+          <div class="buttons">
+
+            <a
+              class="button primary"
+              href="https://github.com/Unlim8ted-Studios/Celeste-Mobile-Port"
+              target="_blank"
+              rel="noopener noreferrer">
+
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 .8a11.4 11.4 0 0 0-3.6 22.2c.57.1.78-.25.78-.55v-2.14c-3.18.69-3.85-1.35-3.85-1.35-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.68 1.24 3.33.95.1-.74.4-1.24.73-1.53-2.54-.29-5.21-1.27-5.21-5.65 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.45.11-3.02 0 0 .96-.31 3.14 1.17A10.9 10.9 0 0 1 12 6.28c.97 0 1.93.13 2.84.38 2.18-1.48 3.14-1.17 3.14-1.17.62 1.57.23 2.73.11 3.02.73.8 1.18 1.82 1.18 3.07 0 4.39-2.68 5.35-5.22 5.64.41.35.77 1.04.77 2.1v3.12c0 .3.21.66.79.55A11.4 11.4 0 0 0 12 .8Z"/>
+              </svg>
+
+              View on GitHub
+            </a>
+
+            <a class="button" href="#features">
+              Explore the port
+
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true">
+                <path d="M5 12h14"/>
+                <path d="m13 6 6 6-6 6"/>
+              </svg>
+            </a>
+
+          </div>
+
+          <div class="hero-meta">
+
+            <span>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true">
+                <rect x="5" y="2" width="14" height="20" rx="3"/>
+                <path d="M9 18h6"/>
+              </svg>
+              Android functional
+            </span>
+
+            <span>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true">
+                <path d="M8 18 4 14l4-4"/>
+                <path d="m16 6 4 4-4 4"/>
+                <path d="m14 4-4 16"/>
+              </svg>
+              Open development
+            </span>
+
+            <span>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true">
+                <path d="M12 3v18"/>
+                <path d="m6 9 6-6 6 6"/>
+              </svg>
+              Threaded WASM
+            </span>
+
+          </div>
+        </div>
+
+        <!-- PHONE / GAME ART -->
+
+        <div class="phone-stage" aria-label="Stylized Celeste mobile interface">
+
+          <div class="phone-aura" aria-hidden="true"></div>
+          <div class="phone-orbit" aria-hidden="true"></div>
+
+          <div class="phone">
+
+            <div class="phone-screen">
+
+              <div class="phone-island"></div>
+              <div class="mini-stars"></div>
+
+              <div class="game-logo">
+                <strong>CELESTE</strong>
+                <span>Mobile Port</span>
+              </div>
+
+              <div class="mini-mountain" aria-hidden="true">
+                <svg
+                  viewBox="0 0 300 500"
+                  preserveAspectRatio="none"
+                  xmlns="http://www.w3.org/2000/svg">
+
+                  <defs>
+                    <linearGradient id="miniM1" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stop-color="#6f4b87"/>
+                      <stop offset="1" stop-color="#1a1636"/>
+                    </linearGradient>
+                    <linearGradient id="miniM2" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stop-color="#352957"/>
+                      <stop offset="1" stop-color="#090817"/>
+                    </linearGradient>
+                  </defs>
+
+                  <path
+                    d="M-20 410 L35 310 L72 345 L137 165 L185 270 L222 215 L325 410 L325 510 L-20 510Z"
+                    fill="url(#miniM1)"/>
+
+                  <path
+                    d="M101 260 L137 165 L185 270 L157 237 L139 210 L126 239Z"
+                    fill="#e9e2f3"
+                    opacity=".85"/>
+
+                  <path
+                    d="M-20 445 L55 370 L105 420 L166 305 L220 412 L270 340 L325 420 L325 510 L-20 510Z"
+                    fill="url(#miniM2)"/>
+
+                  <path
+                    d="M-20 470 C60 450 115 490 175 463 C220 445 265 475 325 450 L325 510 L-20 510Z"
+                    fill="#080713"/>
+                </svg>
+              </div>
+
+              <div class="touch-ui" aria-hidden="true">
+                <div class="touch-stick"></div>
+                <div class="touch-button a">JUMP</div>
+                <div class="touch-button b">DASH</div>
+                <div class="touch-button c">GRAB</div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="phone-badge one">
+
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true">
+              <path d="M4 8h16v8H4z"/>
+              <path d="M8 12h4"/>
+              <path d="M10 10v4"/>
+              <circle cx="16.5" cy="11" r=".5" fill="currentColor"/>
+              <circle cx="18.5" cy="13" r=".5" fill="currentColor"/>
+            </svg>
+
+            Custom touch controls
+          </div>
+
+          <div class="phone-badge two">
+
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true">
+              <path d="M12 2 4 6v6c0 5 3.4 8.5 8 10 4.6-1.5 8-5 8-10V6l-8-4Z"/>
+              <path d="m9 12 2 2 4-5"/>
+            </svg>
+
+            Everest + Mods
+          </div>
+
+        </div>
+
+      </div>
+    </header>
+
+    <!-- =====================================================
+         GAME FILE NOTICE
+         ===================================================== -->
+
+    <div class="notice-wrap">
+      <div class="container">
+
+        <div class="notice reveal">
+
+          <div class="notice-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true">
+              <path d="M12 3 2.5 20h19L12 3Z"/>
+              <path d="M12 9v5"/>
+              <path d="M12 17.5h.01"/>
+            </svg>
+          </div>
+
+          <div>
+            <strong>Bring your own Celeste copy.</strong>
+            <p>
+              Commercial Celeste game files are not distributed by this
+              project. A playable build requires files from a legally
+              obtained copy of Celeste.
+            </p>
+          </div>
+
+          <div class="notice-tag">Unofficial project</div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- =====================================================
+         STATS
+         ===================================================== -->
+
+    <section class="stats">
+      <div class="container">
+
+        <div class="stats-grid reveal">
+
+          <div class="stat">
+            <strong>5</strong>
+            <span>Mobile modules</span>
+          </div>
+
+          <div class="stat">
+            <strong>2</strong>
+            <span>Platform wrappers</span>
+          </div>
+
+          <div class="stat">
+            <strong>1</strong>
+            <span>Shared runtime</span>
+          </div>
+
+          <div class="stat">
+            <strong>∞</strong>
+            <span>Everest possibilities</span>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =====================================================
+         FEATURES
+         ===================================================== -->
+
+    <section class="features" id="features">
+
+      <div class="container">
+
+        <div class="section-head reveal">
+          <div class="eyebrow">The mobile climb</div>
+
+          <h2 class="section-title">
+            Celeste without turning it into a
+            <em>different game.</em>
+          </h2>
+
+          <p class="section-copy">
+            The project keeps Celeste, Everest, mods, and the core game
+            runtime together inside a shared WebAssembly environment.
+            The native wrappers handle the parts that actually belong
+            to the phone.
+          </p>
+        </div>
+
+        <div class="feature-grid">
+
+          <article class="feature-card large reveal">
+
+            <div class="feature-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true">
+                <circle cx="8" cy="12" r="5"/>
+                <circle cx="8" cy="12" r="1.5"/>
+                <circle cx="18" cy="9" r="2"/>
+                <circle cx="17" cy="16" r="2"/>
+              </svg>
+            </div>
+
+            <h3>Controls built for glass</h3>
+
+            <p>
+              Drag, resize, reposition, save layouts, switch between a
+              joystick and arrows, enable 8-way snapping, and interact
+              with Celeste's menus directly through touch.
+            </p>
+
+            <div class="feature-art controls-art" aria-hidden="true">
+              <div class="controls-ring"></div>
+            </div>
+
+          </article>
+
+          <article class="feature-card medium reveal">
+
+            <div class="feature-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3"/>
+                <path d="M16 3h3a2 2 0 0 1 2 2v3"/>
+                <path d="M8 21H5a2 2 0 0 1-2-2v-3"/>
+                <path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </div>
+
+            <h3>Mobile-aware camera</h3>
+
+            <p>
+              Optional camera centering helps keep the player away from
+              fingers while respecting room boundaries, cutscenes, and
+              transitions.
+            </p>
+
+          </article>
+
+          <article class="feature-card third reveal">
+
+            <div class="feature-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true">
+                <path d="M6 4h12v16H6z"/>
+                <path d="M9 8h6"/>
+                <path d="M9 12h6"/>
+                <path d="M9 16h3"/>
+              </svg>
+            </div>
+
+            <h3>Saves that stay saved</h3>
+
+            <p>
+              IndexedDB-backed persistence, explicit runtime restore,
+              save export/import, file management, and mod persistence.
+            </p>
+
+          </article>
+
+          <article class="feature-card third reveal">
+
+            <div class="feature-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true">
+                <path d="M7 7h10v10H7z"/>
+                <path d="M3 9h4M17 9h4M3 15h4M17 15h4"/>
+                <path d="M9 3v4M15 3v4M9 17v4M15 17v4"/>
+              </svg>
+            </div>
+
+            <h3>Native haptics</h3>
+
+            <p>
+              Celeste's existing rumble events are routed through the
+              mobile bridge to native haptic feedback, configurable
+              from the normal Options menu.
+            </p>
+
+          </article>
+
+          <article class="feature-card third reveal">
+
+            <div class="feature-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M3 12h18"/>
+                <path d="M12 3c3 3 4.5 6 4.5 9S15 18 12 21"/>
+                <path d="M12 3c-3 3-4.5 6-4.5 9S9 18 12 21"/>
+              </svg>
+            </div>
+
+            <h3>CelesteNet integration</h3>
+
+            <p>
+              Join official, custom, saved, LAN, and discovered servers
+              from a mobile-first multiplayer interface.
+            </p>
+
+          </article>
+
+          <article class="feature-card large reveal">
+
+            <div class="feature-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true">
+                <path d="M8 3H3v5h5V3Z"/>
+                <path d="M21 3h-5v5h5V3Z"/>
+                <path d="M8 16H3v5h5v-5Z"/>
+                <path d="M21 16h-5v5h5v-5Z"/>
+                <path d="M8 5.5h8M5.5 8v8M18.5 8v8M8 18.5h8"/>
+              </svg>
+            </div>
+
+            <h3>Everest comes with you</h3>
+
+            <p>
+              The runtime supports Everest, persistent mods, a mod
+              browser, third-party Mod Options, and independent mobile
+              modules instead of baking every mobile feature into one
+              giant patch.
+            </p>
+
+            <div class="feature-art mods-art" aria-hidden="true">
+              <div class="mod-block"></div>
+              <div class="mod-block"></div>
+              <div class="mod-block"></div>
+            </div>
+
+          </article>
+
+          <article class="feature-card medium reveal">
+
+            <div class="feature-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true">
+                <path d="M4 19V5h16v14H4Z"/>
+                <path d="M8 15 11 9l2 4 2-2 2 4"/>
+                <circle cx="8" cy="8" r="1"/>
+              </svg>
+            </div>
+
+            <h3>Build maps on the mountain</h3>
+
+            <p>
+              BetterMapEditor provides an in-game, touch-capable
+              environment for creating projects, chapters, rooms,
+              solids, spawns, strawberries, springs, spikes, and real
+              Celeste map binaries.
+            </p>
+
+          </article>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =====================================================
+         ARCHITECTURE
+         ===================================================== -->
+
+    <section class="architecture" id="architecture">
+
+      <div class="container architecture-grid">
+
+        <div class="arch-copy reveal">
+
+          <div class="eyebrow">Architecture</div>
+
+          <h2 class="section-title">
+            One runtime.
+            <em>Thin wrappers.</em>
+          </h2>
+
+          <p class="section-copy">
+            Celeste is not being rewritten as an Android or iOS game.
+            Nearly all game logic stays inside the same threaded
+            WebAssembly environment.
+          </p>
+
+          <div class="arch-points">
+
+            <div class="arch-point">
+              <div class="num">01</div>
+              <div>
+                Android and iOS provide platform-specific services such
+                as haptics, storage, lifecycle handling, and native
+                hosting.
+              </div>
+            </div>
+
+            <div class="arch-point">
+              <div class="num">02</div>
+              <div>
+                Celeste + Everest run together in the shared threaded
+                .NET WebAssembly runtime.
+              </div>
+            </div>
+
+            <div class="arch-point">
+              <div class="num">03</div>
+              <div>
+                Mobile behavior is divided into independent Everest
+                modules with clearly separated responsibilities.
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="arch-visual reveal">
+
+          <div class="arch-layer">
+
+            <div class="arch-layer-head">
+              <strong>Platform Wrappers</strong>
+              <span>Native layer</span>
+            </div>
+
+            <div class="arch-nodes">
+
+              <div class="arch-node">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true">
+                  <rect x="6" y="2" width="12" height="20" rx="3"/>
+                </svg>
+                AndroidWrapper
+              </div>
+
+              <div class="arch-node">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true">
+                  <rect x="6" y="2" width="12" height="20" rx="3"/>
+                  <path d="M10 5h4"/>
+                </svg>
+                IOSWrapper
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="arch-connector"></div>
+
+          <div class="arch-layer runtime">
+
+            <div class="arch-layer-head">
+              <strong>CelesteRuntime</strong>
+              <span>Shared</span>
+            </div>
+
+            <div class="arch-nodes">
+
+              <div class="arch-node">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true">
+                  <path d="M4 18 10 8l3 5 2-3 5 8H4Z"/>
+                </svg>
+                Celeste
+              </div>
+
+              <div class="arch-node">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true">
+                  <path d="M4 7h16M4 12h16M4 17h16"/>
+                </svg>
+                Everest
+              </div>
+
+              <div class="arch-node">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true">
+                  <path d="M8 4 3 12l5 8"/>
+                  <path d="m16 4 5 8-5 8"/>
+                  <path d="m14 3-4 18"/>
+                </svg>
+                .NET WASM
+              </div>
+
+              <div class="arch-node">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true">
+                  <circle cx="12" cy="12" r="9"/>
+                  <path d="M3 12h18"/>
+                </svg>
+                Web Runtime
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="arch-connector"></div>
+
+          <div class="arch-layer mods">
+
+            <div class="arch-layer-head">
+              <strong>CelesteMobileMods</strong>
+              <span>Everest layer</span>
+            </div>
+
+            <div class="arch-nodes">
+
+              <div class="arch-node">MobileBridge</div>
+              <div class="arch-node">MouseUI</div>
+              <div class="arch-node">MobileTweaks</div>
+              <div class="arch-node">MobileMultiplayer</div>
+              <div class="arch-node">BetterMapEditor</div>
+              <div class="arch-node">Third-party mods</div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =====================================================
+         MODULAR COMPONENTS
+         ===================================================== -->
+
+    <section class="mods" id="mods">
+
+      <div class="container">
+
+        <div class="section-head reveal">
+
+          <div class="eyebrow">CelesteMobileMods</div>
+
+          <h2 class="section-title">
+            Mobile isn't
+            <em>one mod.</em>
+          </h2>
+
+          <p class="section-copy">
+            Platform communication, pointer input, mobile UI policy,
+            multiplayer, and map creation live in separate modules.
+            Each piece can do one job well.
+          </p>
+
+        </div>
+
+        <div class="mod-list">
+
+          <article
+            class="mod-card reveal"
+            style="--mod-color:#6ff6ff">
+
+            <div class="mod-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true">
+                <path d="M7 7h10v10H7z"/>
+                <path d="M3 12h4M17 12h4"/>
+                <path d="M12 3v4M12 17v4"/>
+              </svg>
+            </div>
+
+            <div class="mod-name">
+              <strong>MobileBridge</strong>
+              <span>Platform communication</span>
+            </div>
+
+            <div class="mod-desc">
+              Haptics, touch events, storage requests, file management,
+              mod-browser requests, platform detection, multiplayer
+              discovery, and native host services.
+            </div>
+
+            <div class="mod-state">Functional</div>
+
+          </article>
+
+          <article
+            class="mod-card reveal"
+            style="--mod-color:#ff6aa7">
+
+            <div class="mod-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true">
+                <path d="m5 3 13 9-6 1-3 6L5 3Z"/>
+              </svg>
+            </div>
+
+            <div class="mod-name">
+              <strong>MouseUI</strong>
+              <span>Pointer interface</span>
+            </div>
+
+              <div class="mod-desc">
+    Generic mouse navigation for Celeste menus, clickable UI,
+    scrolling, chapter and file selection, and automatic touch
+    input when MobileBridge is present. Works on desktop also!
+
+    <a
+      class="mod-link"
+      href="https://gamebanana.com/mods/702624"
+      target="_blank"
+      rel="noopener noreferrer">
+      Get MouseUI on GameBanana
+
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        aria-hidden="true">
+        <path d="M7 17 17 7"/>
+        <path d="M8 7h9v9"/>
+      </svg>
+    </a>
+  </div>
+
+            <div class="mod-state">Functional</div>
+
+          </article>
+
+          <article
+            class="mod-card reveal"
+            style="--mod-color:#a982ff">
+
+            <div class="mod-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true">
+                <path d="M4 6h16"/>
+                <path d="M4 12h16"/>
+                <path d="M4 18h16"/>
+                <circle cx="8" cy="6" r="2"/>
+                <circle cx="16" cy="12" r="2"/>
+                <circle cx="10" cy="18" r="2"/>
+              </svg>
+            </div>
+
+            <div class="mod-name">
+              <strong>MobileTweaks</strong>
+              <span>Mobile experience</span>
+            </div>
+
+            <div class="mod-desc">
+              Camera centering, startup flow, main-menu organization,
+              mobile Options integration, fullscreen suppression, and
+              multi-column menu overflow.
+            </div>
+
+            <div class="mod-state">Functional</div>
+
+          </article>
+
+          <article
+            class="mod-card reveal"
+            style="--mod-color:#75f0b0">
+
+            <div class="mod-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M3 12h18"/>
+                <path d="M12 3c3 3 4.5 6 4.5 9S15 18 12 21"/>
+                <path d="M12 3c-3 3-4.5 6-4.5 9S9 18 12 21"/>
+              </svg>
+            </div>
+
+            <div class="mod-name">
+              <strong>MobileMultiplayer</strong>
+              <span>CelesteNet interface</span>
+            </div>
+
+            <div class="mod-desc">
+              A dedicated multiplayer menu, username configuration,
+              custom and discovered servers, Join flows, and native
+              hosting requests through MobileBridge.
+            </div>
+
+            <div class="mod-state">In development</div>
+
+          </article>
+
+          <article
+            class="mod-card reveal"
+            style="--mod-color:#ffd877">
+
+            <div class="mod-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true">
+                <path d="M4 4h16v16H4z"/>
+                <path d="M8 8h8v8H8z"/>
+                <path d="m15 4 5 5M4 15l5 5"/>
+              </svg>
+            </div>
+
+            <div class="mod-name">
+              <strong>BetterMapEditor</strong>
+              <span>In-game mapping</span>
+            </div>
+
+            <div class="mod-desc">
+              Projects, chapters, rooms, tile editing, basic entities,
+              spawns, pan, zoom, undo/redo, resizing, and real Celeste
+              map-binary generation.
+            </div>
+
+            <div class="mod-state">In development</div>
+
+          </article>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =====================================================
+         INTERFACE
+         ===================================================== -->
+
+    <section class="interface">
+
+      <div class="container">
+
+        <div class="ui-stage reveal">
+
+          <div class="ui-copy">
+
+            <div class="eyebrow">Mobile-first UI</div>
+
+            <h3>
+              No maze of mod settings.
+            </h3>
+
+            <p>
+              Mobile functionality is moved into Celeste's normal menus
+              where it makes sense. Third-party Everest mods still keep
+              their own Mod Options.
+            </p>
+
+          </div>
+
+          <div class="menu-demo">
+
+            <div class="menu-top">
+              <span>Celeste Mobile</span>
+              <span>Menu</span>
+            </div>
+
+            <div class="menu-title">Main Menu</div>
+
+            <div class="menu-items">
+
+              <div class="menu-item">
+                <span>Climb</span>
+              </div>
+
+              <div class="menu-item active">
+                <span>Multiplayer</span>
+
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true">
+                  <path d="m9 18 6-6-6-6"/>
+                </svg>
+              </div>
+
+              <div class="menu-item">
+                <span>Map Editor</span>
+              </div>
+
+              <div class="menu-item">
+                <span>Mod Manager</span>
+              </div>
+
+              <div class="menu-item">
+                <span>Options</span>
+              </div>
+
+              <div class="menu-item">
+                <span>About the Port</span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =====================================================
+         PLATFORMS
+         ===================================================== -->
+
+    <section class="platforms">
+
+      <div class="container">
+
+        <div class="section-head reveal">
+
+          <div class="eyebrow">Platform wrappers</div>
+
+          <h2 class="section-title">
+            Same mountain.
+            <em>Different host.</em>
+          </h2>
+
+          <p class="section-copy">
+            Android and iOS are intended to share CelesteRuntime and
+            CelesteMobileMods. Only the native platform layer changes.
+          </p>
+
+        </div>
+
+        <div class="platform-grid">
+
+          <article class="platform android reveal">
+
+            <div class="platform-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true">
+                <path d="M7 8h10a3 3 0 0 1 3 3v7H4v-7a3 3 0 0 1 3-3Z"/>
+                <path d="m8 8-2-3M16 8l2-3"/>
+                <path d="M8 12h.01M16 12h.01"/>
+                <path d="M7 18v3M17 18v3"/>
+              </svg>
+            </div>
+
+            <h3>Android + GeckoView</h3>
+
+            <p>
+              The primary implementation today. GeckoView hosts the
+              threaded runtime with SharedArrayBuffer, WebAssembly
+              threads, cross-origin isolation, local asset serving,
+              native haptics, storage, and Android lifecycle support.
+            </p>
+
+            <div class="platform-status">Functional</div>
+            <div class="platform-art" aria-hidden="true"></div>
+
+          </article>
+
+          <article class="platform ios reveal">
+
+            <div class="platform-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true">
+                <rect x="6" y="2" width="12" height="20" rx="3"/>
+                <path d="M10 5h4"/>
+                <path d="M11 19h2"/>
+              </svg>
+            </div>
+
+            <h3>iOS</h3>
+  
+            <p>
+              The iOS wrapper is intended to host the same shared
+              runtime while implementing equivalent Apple-platform
+              storage, haptics, file access, persistence, lifecycle,
+              and multiplayer services.
+            </p>
+
+            <div class="platform-status">In development</div>
+            <div class="platform-art" aria-hidden="true"></div>
+
+          </article>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =====================================================
+         ROADMAP
+         ===================================================== -->
+
+    <section class="roadmap">
+
+      <div class="container">
+
+        <div class="section-head reveal">
+
+          <div class="eyebrow">What's next</div>
+
+          <h2 class="section-title">
+            Still
+            <em>climbing.</em>
+          </h2>
+
+          <p class="section-copy">
+            The foundation works. Development is now focused on making
+            the mobile experience deeper, cleaner, and more compatible.
+          </p>
+
+        </div>
+
+        <div class="roadmap-track reveal">
+
+          <article
+            class="roadmap-item"
+            style="--road-color:#ff5f9f">
+
+            <div class="roadmap-dot"></div>
+
+            <small>01 / UI</small>
+
+            <h3>Complete pointer coverage</h3>
+
+            <p>
+              Consistent mouse and touch behavior throughout Celeste
+              and Everest menus.
+            </p>
+
+          </article>
+
+          <article
+            class="roadmap-item"
+            style="--road-color:#aa7cff">
+
+            <div class="roadmap-dot"></div>
+
+            <small>02 / Network</small>
+
+            <h3>Native multiplayer hosting</h3>
+
+            <p>
+              Finish Android CelesteNet hosting and implement its iOS
+              equivalent.
+            </p>
+
+          </article>
+
+          <article
+            class="roadmap-item"
+            style="--road-color:#68d8ff">
+
+            <div class="roadmap-dot"></div>
+
+            <small>03 / Creation</small>
+
+            <h3>Expand BetterMapEditor</h3>
+
+            <p>
+              More entities, triggers, decals, stylegrounds, and
+              Lönn-inspired editing tools.
+            </p>
+
+          </article>
+
+          <article
+            class="roadmap-item"
+            style="--road-color:#75f0b0">
+
+            <div class="roadmap-dot"></div>
+
+            <small>04 / Platform</small>
+
+            <h3>Complete iOS</h3>
+
+            <p>
+              Bring the shared runtime and platform bridge to a complete
+              iOS wrapper.
+            </p>
+
+          </article>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =====================================================
+         GITHUB CTA
+         ===================================================== -->
+
+    <section class="github-section">
+
+      <div class="container">
+
+        <div class="github-card reveal">
+
+          <div>
+
+            <div class="eyebrow">The repository</div>
+
+            <h2>
+              Follow the climb on GitHub.
+            </h2>
+
+            <p>
+              Explore the Android wrapper, shared Celeste runtime,
+              mobile Everest modules, build scripts, architecture,
+              current development status, and source.
+            </p>
+
+            <div class="buttons github-actions">
+
+              <a
+                class="button primary"
+                href="https://github.com/Unlim8ted-Studios/Celeste-Mobile-Port"
+                target="_blank"
+                rel="noopener noreferrer">
+
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 .8a11.4 11.4 0 0 0-3.6 22.2c.57.1.78-.25.78-.55v-2.14c-3.18.69-3.85-1.35-3.85-1.35-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.68 1.24 3.33.95.1-.74.4-1.24.73-1.53-2.54-.29-5.21-1.27-5.21-5.65 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.45.11-3.02 0 0 .96-.31 3.14 1.17A10.9 10.9 0 0 1 12 6.28c.97 0 1.93.13 2.84.38 2.18-1.48 3.14-1.17 3.14-1.17.62 1.57.23 2.73.11 3.02.73.8 1.18 1.82 1.18 3.07 0 4.39-2.68 5.35-5.22 5.64.41.35.77 1.04.77 2.1v3.12c0 .3.21.66.79.55A11.4 11.4 0 0 0 12 .8Z"/>
+                </svg>
+
+                Open repository
+              </a>
+
+              <a
+                class="button"
+                href="https://unlim8ted.com"
+                target="_blank"
+                rel="noopener noreferrer">
+
+                Unlim8ted Studios
+              </a>
+
+            </div>
+
+          </div>
+
+          <div class="github-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 .8a11.4 11.4 0 0 0-3.6 22.2c.57.1.78-.25.78-.55v-2.14c-3.18.69-3.85-1.35-3.85-1.35-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.68 1.24 3.33.95.1-.74.4-1.24.73-1.53-2.54-.29-5.21-1.27-5.21-5.65 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.45.11-3.02 0 0 .96-.31 3.14 1.17A10.9 10.9 0 0 1 12 6.28c.97 0 1.93.13 2.84.38 2.18-1.48 3.14-1.17 3.14-1.17.62 1.57.23 2.73.11 3.02.73.8 1.18 1.82 1.18 3.07 0 4.39-2.68 5.35-5.22 5.64.41.35.77 1.04.77 2.1v3.12c0 .3.21.66.79.55A11.4 11.4 0 0 0 12 .8Z"/>
+            </svg>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =====================================================
+         CREDITS
+         ===================================================== -->
+
+    <section class="credits">
+
+      <div class="container">
+
+        <div class="section-head reveal">
+
+          <div class="eyebrow">Built on great work</div>
+
+          <h2 class="section-title">
+            Credits &
+            <em>attribution.</em>
+          </h2>
+
+          <p class="section-copy">
+            Celeste Mobile Port is an unofficial community project.
+            It exists because of the work of the Celeste, Everest,
+            Webleste, CelesteNet, Mozilla, and broader modding
+            communities.
+          </p>
+
+        </div>
+
+        <div class="credit-grid reveal">
+
+          <div class="credit">
+            <strong>Unlim8ted Studios</strong>
+            <p>
+              Mobile port architecture, platform integration, mobile UI,
+              bridge, modular Everest integration, multiplayer UI, and
+              map editor.
+            </p>
+          </div>
+
+          <div class="credit">
+            <strong>Mercury Workshop</strong>
+            <p>
+              Webleste / Celeste WASM foundation used by this project.
+              <br />
+              <a
+                href="https://github.com/MercuryWorkshop/celeste-wasm"
+                target="_blank"
+                rel="noopener noreferrer">
+                celeste-wasm
+              </a>
+            </p>
+          </div>
+
+          <div class="credit">
+            <strong>Everest</strong>
+            <p>
+              The Celeste mod loader and API powering the mobile mod
+              ecosystem.
+            </p>
+          </div>
+
+          <div class="credit">
+            <strong>CelesteNet</strong>
+            <p>
+              Multiplayer infrastructure used by MobileMultiplayer.
+            </p>
+          </div>
+
+          <div class="credit">
+            <strong>Mozilla</strong>
+            <p>
+              GeckoView provides the embedded Android browser engine
+              used by the current threaded WebAssembly runtime.
+            </p>
+          </div>
+
+          <div class="credit">
+            <strong>Extremely OK Games</strong>
+            <p>
+              Creators and rights holders of Celeste. This project is
+              not affiliated with, sponsored by, or endorsed by
+              Extremely OK Games.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =====================================================
+         FOOTER
+         ===================================================== -->
+
+    <footer class="footer">
+
+      <div class="footer-mountain" aria-hidden="true">
+
+        <svg
+          viewBox="0 0 1600 300"
+          preserveAspectRatio="none"
+          xmlns="http://www.w3.org/2000/svg">
+
+          <path
+            d="M0 300
+               L0 245
+               L150 185
+               L260 225
+               L420 100
+               L565 225
+               L690 160
+               L800 225
+               L965 55
+               L1110 220
+               L1260 125
+               L1430 230
+               L1600 170
+               L1600 300 Z"
+            fill="#7655c7"/>
+
+          <path
+            d="M0 300
+               L0 270
+               L220 220
+               L360 260
+               L530 185
+               L710 265
+               L870 205
+               L1050 270
+               L1240 195
+               L1440 265
+               L1600 220
+               L1600 300 Z"
+            fill="#33245c"/>
+        </svg>
+
+      </div>
+
+      <div class="container footer-inner">
+
+        <div class="footer-brand">
+          <div class="mini">A project by</div>
+          <strong>Unlim<span>8</span>ted</strong>
+        </div>
+
+        <div class="footer-bottom">
+
+          <p>
+            <span id="copyright"></span>
+            Unlim8ted Studios. All rights reserved.
+            Original Unlim8ted contributions are subject to the
+            project's applicable license and notices. Celeste and
+            third-party software, trademarks, game assets, and
+            intellectual property remain the property of their
+            respective owners.
+          </p>
+
+          <div class="footer-links">
+
+            <a href="https://unlim8ted.com">Home</a>
+
+            <a
+              href="https://github.com/Unlim8ted-Studios/Celeste-Mobile-Port"
+              target="_blank"
+              rel="noopener noreferrer">
+              GitHub
+            </a>
+
+          </div>
+
+        </div>
+
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    /* =========================================================
+       COPYRIGHT
+       ========================================================= */
+
+    (() => {
+      const startYear = 2019;
+      const currentYear = new Date().getFullYear();
+
+      const yearText =
+        currentYear > startYear
+          ? `${startYear}–${currentYear}`
+          : `${startYear}`;
+
+      const element = document.getElementById("copyright");
+
+      if (element) {
+        element.textContent = `© ${yearText} `;
+      }
+    })();
+
+
+    /* =========================================================
+       SCROLL REVEALS
+       ========================================================= */
+
+    (() => {
+      const elements = document.querySelectorAll(".reveal");
+
+      if (
+        !("IntersectionObserver" in window) ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ) {
+        elements.forEach((element) => {
+          element.classList.add("visible");
+        });
+
+        return;
+      }
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) {
+              return;
+            }
+
+            entry.target.classList.add("visible");
+            observer.unobserve(entry.target);
+          });
+        },
+        {
+          threshold: 0.12,
+          rootMargin: "0px 0px -45px 0px"
+        }
+      );
+
+      elements.forEach((element) => {
+        observer.observe(element);
+      });
+    })();
+
+
+    /* =========================================================
+       LIGHT HERO PARALLAX
+       ========================================================= */
+
+    (() => {
+      const mountain = document.querySelector(".hero-mountains");
+      const mist = document.querySelector(".hero-mist");
+
+      if (
+        !mountain ||
+        !mist ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ) {
+        return;
+      }
+
+      let ticking = false;
+
+      function updateParallax() {
+        const scrollY = window.scrollY;
+
+        if (scrollY < window.innerHeight * 1.3) {
+          mountain.style.transform =
+            `translate3d(0, ${scrollY * 0.075}px, 0)`;
+
+          mist.style.transform =
+            `translate3d(0, ${scrollY * 0.035}px, 0)`;
+        }
+
+        ticking = false;
+      }
+
+      window.addEventListener(
+        "scroll",
+        () => {
+          if (!ticking) {
+            window.requestAnimationFrame(updateParallax);
+            ticking = true;
+          }
+        },
+        {
+          passive: true
+        }
+      );
+
+      updateParallax();
+    })();
+  </script>
+
+</body>
+                </html>
