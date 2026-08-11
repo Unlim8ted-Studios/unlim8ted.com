@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>TimeCat – Two timelines, One chance to fix the past…</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <style>
     /* logo */
@@ -1902,6 +1902,344 @@
       height: 90vh;
       max-width: none;
       max-height: none;
+    }
+
+    @media (max-width: 760px) {
+      html,
+      body {
+        width: 100%;
+        min-height: 100%;
+        overflow-x: hidden;
+      }
+
+      .scanlines,
+      .dust {
+        display: none;
+      }
+
+      .page {
+        width: 100%;
+        overflow-x: hidden;
+      }
+
+      header {
+        position: relative;
+      }
+
+      .header-inner {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.8rem;
+      }
+
+      .brand {
+        justify-content: center;
+      }
+
+      .brand-logo {
+        width: 64px;
+        height: 42px;
+        border-radius: 12px;
+      }
+
+      .brand-title {
+        font-size: 0.68rem;
+        letter-spacing: 0.08em;
+      }
+
+      .brand-tagline {
+        font-size: 0.62rem;
+        letter-spacing: 0.08em;
+      }
+
+      nav {
+        width: 100%;
+        justify-content: center;
+        gap: 0.45rem;
+      }
+
+      nav a,
+      .time-toggle,
+      .btn-wishlist,
+      nav button {
+        min-height: 40px;
+        max-width: 100%;
+        padding: 0.55rem 0.75rem;
+        font-size: 0.68rem;
+        letter-spacing: 0.08em;
+        white-space: normal;
+        text-align: center;
+      }
+
+      .hero {
+        min-height: auto;
+        padding: 2rem 1rem 2.25rem;
+      }
+
+      .hero-inner {
+        width: 100%;
+        gap: 1rem;
+      }
+
+      .hero-copy,
+      .hero-right,
+      .panel,
+      .feature-card,
+      .character-card,
+      .boss-text,
+      .env-main,
+      .env-compare,
+      .cutscene-strip,
+      .ui-panel {
+        border-radius: 16px;
+        padding: 1rem;
+      }
+
+      .hero-title-row {
+        align-items: flex-start;
+        gap: 0.65rem;
+      }
+
+      .hero-logo {
+        width: 46px;
+        height: 46px;
+        flex: 0 0 46px;
+      }
+
+      .hero-title {
+        font-size: 1.25rem;
+        line-height: 1.35;
+        letter-spacing: 0.08em;
+        overflow-wrap: anywhere;
+      }
+
+      .hero-eyebrow,
+      .section-eyebrow,
+      .hero-meta-item span.label,
+      .time-rule-index,
+      .character-label,
+      .character-tagline,
+      .env-label,
+      .env-compare-label,
+      .cutscene-label {
+        letter-spacing: 0.08em;
+      }
+
+      .hero-slogan,
+      .hero-slogan-main,
+      .section-subtitle,
+      .panel p,
+      .feature-card p,
+      .character-desc,
+      .boss-text p,
+      .env-compare-text,
+      .ui-panel p,
+      .time-rule p {
+        font-size: 0.9rem;
+        line-height: 1.5;
+      }
+
+      .hero-cta-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn-primary,
+      .btn-ghost {
+        width: 100%;
+        justify-content: center;
+        min-height: 46px;
+        padding: 0.78rem 1rem;
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+        text-align: center;
+      }
+
+      .hero-meta {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+
+      .hero-video-mock video,
+      .hero-video-mock img {
+        max-width: 100%;
+        height: auto;
+      }
+
+      .hero-sprites-strip,
+      .cutscene-scroll {
+        margin-inline: -1rem;
+        padding-inline: 1rem;
+        scroll-padding-inline: 1rem;
+      }
+
+      main {
+        width: 100%;
+        padding: 2rem 1rem 3rem;
+        gap: 2.25rem;
+      }
+
+      .section-header {
+        gap: 0.6rem;
+        margin-bottom: 1rem;
+      }
+
+      .section-title {
+        font-size: 1.32rem;
+        line-height: 1.25;
+      }
+
+      .panel-row,
+      .boss-layout,
+      .world-grid,
+      .cutscene-layout,
+      .boss-inner {
+        grid-template-columns: 1fr;
+      }
+
+      .time-rule {
+        padding: 0.72rem;
+      }
+
+      .time-rule-index {
+        position: static;
+        display: block;
+        margin-bottom: 0.35rem;
+        font-size: 0.62rem;
+      }
+
+      .time-rule h4 {
+        padding-right: 0;
+        overflow-wrap: anywhere;
+      }
+
+      .timeline-row {
+        align-items: flex-start;
+        gap: 0.45rem;
+      }
+
+      .timeline-label {
+        width: 54px;
+        letter-spacing: 0.08em;
+        font-size: 0.62rem;
+      }
+
+      .timeline-object {
+        width: 46px;
+        height: 46px;
+      }
+
+      .boss-inner {
+        padding: 0.85rem;
+        min-height: 0;
+      }
+
+      .boss-warning {
+        position: relative;
+        left: auto;
+        top: auto;
+        align-self: flex-start;
+        margin-bottom: 0.65rem;
+        white-space: normal;
+        letter-spacing: 0.08em;
+      }
+
+      .env-grid,
+      .env-compare-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .cutscene-card {
+        width: min(78vw, 260px);
+      }
+
+      .ui-images-row img {
+        max-width: calc(50% - 0.2rem);
+        height: auto;
+      }
+
+      audio {
+        max-width: 100%;
+      }
+
+      footer {
+        padding: 0 1rem 2rem;
+      }
+
+      .footer-right {
+        align-items: flex-start;
+      }
+
+      .footer-right img {
+        width: 52px;
+        flex: 0 0 52px;
+      }
+
+      .popup {
+        width: calc(100vw - 20px);
+        height: auto;
+        max-width: calc(100vw - 20px);
+        max-height: calc(100dvh - 20px);
+        border-width: 2px;
+      }
+
+      .popup-content,
+      .demo-content {
+        width: 100%;
+        height: min(56.25vw, calc(100dvh - 90px));
+        min-height: 220px;
+        max-width: none;
+        max-height: none;
+      }
+
+      .popup-close {
+        min-width: 40px;
+        min-height: 40px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .header-inner,
+      .hero,
+      main,
+      footer {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+      }
+
+      .hero-title {
+        font-size: 1.05rem;
+      }
+
+      .hero-title-row {
+        flex-direction: column;
+      }
+
+      .hero-logo {
+        width: 42px;
+        height: 42px;
+      }
+
+      .section-title {
+        font-size: 1.15rem;
+      }
+
+      nav {
+        align-items: stretch;
+      }
+
+      nav .nav-item,
+      nav .dropdown {
+        flex: 1 1 calc(50% - 0.45rem);
+      }
+
+      nav a,
+      nav button {
+        width: 100%;
+      }
     }
   </style>
   <script>

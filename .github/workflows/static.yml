@@ -86,7 +86,7 @@ jobs:
             products_changed=true
           fi
 
-          if echo "$CHANGED" | grep -qE '^(assets/data/products\.json|product-templates/|tools/generate_product_pages_and_sitemap\.ps1)$'; then
+          if echo "$CHANGED" | grep -qE '^(assets/data/products\.json|frontend/products/product/template\.html|tools/generate_product_pages_and_sitemap\.ps1)$'; then
             product_pages_changed=true
           fi
 
@@ -496,7 +496,7 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Copy 404 page into published subdirectories
+      - name: Ensure root 404 page exists
         shell: bash
         run: |
           set -euo pipefail
@@ -509,17 +509,7 @@ jobs:
             exit 1
           fi
 
-          find "$OUT_DIR" -type f -name "index.html" -print0 | while IFS= read -r -d '' index_file; do
-            target_dir="$(dirname "$index_file")"
-            target_404="${target_dir}/404.html"
-
-            if [ "$target_404" = "$SOURCE_404" ]; then
-              continue
-            fi
-
-            cp "$SOURCE_404" "$target_404"
-            echo "Copied 404.html to $target_dir"
-          done
+          echo "Using root 404 page: $SOURCE_404"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

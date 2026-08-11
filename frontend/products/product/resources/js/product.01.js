@@ -1409,7 +1409,10 @@ window.addEventListener("scroll", () => {
 // Page render
 // ----------------------------
 function getProductIdFromUrl() {
-  const rawId = (window.location.hash || "")
+  const bootstrappedId = typeof window.UNLIM8TED_PRODUCT_ID === "string"
+    ? window.UNLIM8TED_PRODUCT_ID.trim()
+    : "";
+  const rawId = bootstrappedId || (window.location.hash || "")
     .replace(/^#/, "")
     .trim();
 
@@ -1470,8 +1473,12 @@ async function renderCurrentProduct(force = false) {
     return;
   }
 
-  const products = await getProductsOnce();
-  const raw = products.find((p) => String(p.id) === String(pid));
+  const embeddedProduct = window.UNLIM8TED_PRODUCT && typeof window.UNLIM8TED_PRODUCT === "object"
+    ? window.UNLIM8TED_PRODUCT
+    : null;
+  const raw = embeddedProduct && String(embeddedProduct.id) === String(pid)
+    ? embeddedProduct
+    : (await getProductsOnce()).find((p) => String(p.id) === String(pid));
   const item = raw ? normalizeItemForPage(raw) : null;
 
   if (!item) {

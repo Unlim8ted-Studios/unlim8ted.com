@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -23,8 +23,8 @@
 
   <div class="page">
     <div class="topbar">
-      <a class="back" href="#" onclick="history.back(); return false;">← Back</a>
-      <h1 class="title">Product</h1>
+      <a class="back" href="#" onclick="history.back(); return false;">&larr; Back</a>
+      <h1 class="title">{{PRODUCT_NAME}}</h1>
       <div style="width:72px"></div>
     </div>
 
@@ -33,21 +33,21 @@
       <section class="card">
         <div class="card-inner">
           <div class="media">
-            <div class="hero" id="hero"></div>
-            <div class="thumbs" id="thumbs"></div>
+            <div class="hero" id="hero">{{PRODUCT_HERO}}</div>
+            <div class="thumbs" id="thumbs">{{PRODUCT_THUMBS}}</div>
           </div>
 
           <div class="product" style="margin-top:14px;">
-            <h2 id="pName">Loading…</h2>
-            <p class="desc" id="pDesc"></p>
+            <h2 id="pName">{{PRODUCT_NAME}}</h2>
+            <p class="desc" id="pDesc">{{PRODUCT_DESCRIPTION}}</p>
 
             <div class="price-row">
-              <div class="price" id="pPrice">$—</div>
+              <div class="price" id="pPrice">{{PRODUCT_PRICE}}</div>
               <div class="stars" id="avgStars" aria-label="Average rating stars"></div>
             </div>
 
             <div class="btns">
-              <a class="btn secondary" id="buyBtn" href="#" rel="noopener">Buy Now</a>
+              <a class="btn secondary" id="buyBtn" href="{{BUY_HREF}}" rel="noopener">Buy Now</a>
               <button class="btn" id="addBtn">Add to Cart</button>
             </div>
           </div>
@@ -59,7 +59,7 @@
         <div class="card-inner ratingBox">
           <div class="avgRow">
             <div class="avg">
-              <div class="avgNum" id="avgNum">—</div>
+              <div class="avgNum" id="avgNum">â€”</div>
               <div class="avgMeta">
                 <div id="avgLabel">No ratings yet</div>
                 <div id="countLabel">0 reviews</div>
@@ -97,7 +97,7 @@
 
               <div>
                 <label for="commentText">Comment</label>
-                <textarea id="commentText" placeholder="Write a review…" required></textarea>
+                <textarea id="commentText" placeholder="Write a reviewâ€¦" required></textarea>
               </div>
 
               <div class="formActions">
@@ -147,3 +147,4 @@
 </body>
 
 </html>
+

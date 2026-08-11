@@ -4,15 +4,16 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Unity WebGL Player | TimeCat</title>
   <link rel="shortcut icon" href="TemplateData/favicon.ico">
   <link rel="stylesheet" href="TemplateData/style.css">
 </head>
 
 <body>
-  <div id="unity-container" class="unity-desktop">
+  <div id="unity-shell">
     <div class="demo-content">
-      <div id="unity-container">
+      <div id="unity-container" class="unity-desktop">
         <canvas id="unity-canvas"></canvas>
         <!-- Loading bar stays on top of canvas -->
         <div id="unity-loading-bar">
@@ -36,7 +37,6 @@
 
   <div id="unity-warning"> </div>
 
-  </div>
   <script>
     var container = document.querySelector("#unity-container");
     var canvas = document.querySelector("#unity-canvas");
@@ -112,7 +112,7 @@
       // performance, uncomment the following line:
       // config.devicePixelRatio = 1;
 
-      unityShowBanner('WebGL builds are not supported on mobile devices.');
+      unityShowBanner('For best results on mobile, rotate your device to landscape and use fullscreen.', 'warning');
     } else {
       // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
 
