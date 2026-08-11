@@ -31,6 +31,7 @@ jobs:
       frontend_changed: ${{ steps.changes.outputs.frontend_changed }}
       auth_changed: ${{ steps.changes.outputs.auth_changed }}
       products_changed: ${{ steps.changes.outputs.products_changed }}
+      product_pages_changed: ${{ steps.changes.outputs.product_pages_changed }}
     steps:
       - name: Checkout main repo
         uses: actions/checkout@v4
@@ -63,6 +64,7 @@ jobs:
           frontend_changed=false
           auth_changed=false
           products_changed=false
+          product_pages_changed=false
 
           if echo "$CHANGED" | grep -qE '^assets/'; then
             assets_changed=true
@@ -84,11 +86,16 @@ jobs:
             products_changed=true
           fi
 
+          if echo "$CHANGED" | grep -qE '^(assets/data/products\.json|product-templates/|tools/generate_product_pages_and_sitemap\.ps1)$'; then
+            product_pages_changed=true
+          fi
+
           echo "assets_changed=$assets_changed" | tee -a "$GITHUB_OUTPUT"
           echo "api_changed=$api_changed" | tee -a "$GITHUB_OUTPUT"
           echo "frontend_changed=$frontend_changed" | tee -a "$GITHUB_OUTPUT"
           echo "auth_changed=$auth_changed" | tee -a "$GITHUB_OUTPUT"
           echo "products_changed=$products_changed" | tee -a "$GITHUB_OUTPUT"
+          echo "product_pages_changed=$product_pages_changed" | tee -a "$GITHUB_OUTPUT"
 
   sync:
     name: Sync assets + services
@@ -399,7 +406,7 @@ jobs:
     name: Deploy frontend to GitHub Pages
     runs-on: ubuntu-latest
     needs: [detect]
-    if: needs.detect.outputs.frontend_changed == 'true'
+    if: needs.detect.outputs.frontend_changed == 'true' || needs.detect.outputs.product_pages_changed == 'true'
     permissions:
       contents: read
       pages: write
@@ -410,13 +417,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Prepare publish folder
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf publish
+          cp -R "${{ env.FRONTEND_DIR }}" publish
+
+      - name: Generate product pages and sitemap
+        shell: pwsh
+        run: ./tools/generate_product_pages_and_sitemap.ps1 -FrontendDir publish
+
       - name: Inject snippet into frontend HTML files
         shell: bash
         run: |
           set -euo pipefail
 
-          OUT_DIR="${{ env.FRONTEND_DIR }}"
-          SNIP_FILE="frontend/components/deploy-inject/head-snippet.html"
+          OUT_DIR="publish"
+          SNIP_FILE="publish/components/deploy-inject/head-snippet.html"
           MARK="<!--__INJECTED_FILE_PREFIX__-->"
 
           if [ ! -d "$OUT_DIR" ]; then
@@ -431,7 +449,7 @@ jobs:
 
           find "$OUT_DIR" -type f -name "*.html" \
             ! -path "$SNIP_FILE" \
-            ! -path "frontend/components/deploy-inject/*" \
+            ! -path "publish/components/deploy-inject/*" \
             -print0 | while IFS= read -r -d '' f; do
 
             if grep -qF "$MARK" "$f"; then
@@ -483,7 +501,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          OUT_DIR="${{ env.FRONTEND_DIR }}"
+          OUT_DIR="publish"
           SOURCE_404="${OUT_DIR}/404.html"
 
           if [ ! -f "$SOURCE_404" ]; then
@@ -506,7 +524,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "${{ env.FRONTEND_DIR }}"
+          path: publish
 
       - name: Deploy to GitHub Pages
         id: deployment

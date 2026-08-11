@@ -1465,7 +1465,7 @@ async function renderCurrentProduct(force = false) {
   if (!pid) {
     pageTitle.textContent = "Product Not Found";
     pName.textContent = "No product selected";
-    pDesc.textContent = "Open a product using a URL like /product#some-id";
+    pDesc.textContent = "Open a product using a URL like /products/images/smokey-area/";
     setBuyEnabled(false);
     return;
   }
@@ -1806,4 +1806,5 @@ window.addEventListener("pageshow", () => {
 
 const y = new Date().getFullYear();
 $("footerText").innerHTML = `&copy; 2019-${y} Unlim8ted Studio Productions. All rights reserved.`;
+
 

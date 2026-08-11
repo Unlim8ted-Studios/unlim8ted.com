@@ -8,8 +8,33 @@
       }[c]));
     }
 
-    function productHref(id) {
-      return `/products/product#${encodeURIComponent(id)}`;
+    function slugify(value) {
+      return String(value ?? "")
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/&/g, " and ")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .replace(/-{2,}/g, "-") || "product";
+    }
+
+    function productRoute(product) {
+      const type = String(product?.["product-type"] || product?.productType || product?.type || "").trim().toLowerCase();
+      if (type === "image") return "/products/images/";
+      if (type === "music") return "/products/music/";
+      if (type === "book") return "/products/books/";
+      if (type === "film") return "/products/films/";
+      if (type === "software") return "/products/software/";
+      if (type === "video-game" || type === "card-game") return "/products/games/";
+      if (type === "physical" || type === "instant") return "/products/physical-items/";
+      if (type === "ai") return "/products/ai/";
+      return "/products/product/";
+    }
+
+    function productHref(product) {
+      const slug = slugify(product?.slug || product?.handle || product?.id || product?.name);
+      return `${productRoute(product)}${slug}/`;
     }
 
     function stockFromVariants(item) {
@@ -158,7 +183,7 @@
 
       for (const p of shown) {
         const stock = stockFromVariants(p);
-        const href = productHref(p.id);
+        const href = productHref(p);
 
         const card = document.createElement("a");
         card.className = "card";
@@ -216,4 +241,5 @@
         grid.innerHTML = `<div class="empty"><strong>Could not load products.</strong><div style="margin-top:8px;color:rgba(255,255,255,.68)">Please refresh and try again.</div></div>`;
       }
     })();
+
 

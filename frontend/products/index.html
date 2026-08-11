@@ -1290,6 +1290,37 @@
                 .replace(/\s+/g, "-");
         }
 
+        function slugifyProduct(value) {
+            return String(value ?? "")
+                .normalize("NFKD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+                .replace(/&/g, " and ")
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "")
+                .replace(/-{2,}/g, "-") || "product";
+        }
+
+        function productRoute(product) {
+            const type = normalizeType(product?.["product-type"] || product?.productType || product?.type);
+            if (type === "music") return "/products/music/";
+            if (type === "image" || type === "images") return "/products/images/";
+            if (type === "film" || type === "films") return "/products/films/";
+            if (type === "physical" || type === "instant" || type === "clothes" || type === "merch" || type === "apparel") return "/products/physical-items/";
+            if (type === "hardware" || type === "device" || type === "embedded") return "/products/hardware/";
+            if (type === "software") return "/products/software/";
+            if (type === "video-game" || type === "card-game" || type === "videogame" || type === "game" || type === "games") return "/products/games/";
+            if (type === "book" || type === "books") return "/products/books/";
+            if (type === "podcast" || type === "podcasts") return "/products/podcasts/";
+            if (type === "ai") return "/products/ai/";
+            return "/products/product/";
+        }
+
+        function productUrl(product) {
+            const slug = slugifyProduct(product?.slug || product?.handle || product?.id || product?.name);
+            return `${productRoute(product)}${slug}/`;
+        }
+
         function categoryForProduct(product) {
             const id = product?.id || "";
             const type = normalizeType(product?.["product-type"]);
@@ -1298,7 +1329,7 @@
             // music -> /products/music
             // image -> /products/images
             // physical or film or software or video-game or book -> their category pages
-            // else -> /products/product#{id}
+            // else -> the generated product page
             if (type === "music") return { key: "music", label: "Music", link: "/products/music" };
             if (type === "image" || type === "images") return { key: "images", label: "Images", link: "/products/images" };
             if (type === "film" || type === "films") return { key: "films", label: "Films", link: "/products/films" };
@@ -1317,7 +1348,7 @@
             if (type === "ai") return { key: "ai", label: "AI", link: "/products/ai" };
 
             // fallback
-            return { key: "other", label: "Surprise", link: `/products/product#${encodeURIComponent(id)}` };
+            return { key: "other", label: "Surprise", link: productUrl(product) };
         }
 
         function getPrimaryImage(product) {
@@ -1505,27 +1536,14 @@
 
         function showRecommendation(product) {
             const cat = categoryForProduct(product);
-            const primaryLink = (function () {
-                const type = normalizeType(product?.["product-type"]);
-                if (type === "music") return "/products/music";
-                if (type === "image" || type === "images") return "/products/images";
-                if (type === "film" || type === "films") return "/products/films";
-                if (type === "physical" || type === "clothes" || type === "merch" || type === "apparel") return "/products/physical-items";
-                if (type === "hardware" || type === "device" || type === "embedded") return "/products/hardware";
-                if (type === "software") return "/products/software";
-                if (type === "video-game" || type === "videogame" || type === "game" || type === "games") return "/products/games";
-                if (type === "book" || type === "books") return "/products/books";
-                if (type === "podcast" || type === "podcasts") return "/products/podcasts";
-                if (type === "ai") return "/products/ai";
-                return `/products/product#${encodeURIComponent(product?.id || "")}`;
-            })();
+            const primaryLink = productUrl(product);
 
             const msg = buildMessage(product);
             modalTitle.textContent = msg.title;
             modalDesc.textContent = msg.desc;
 
             modalLink.href = primaryLink;
-            modalLink.textContent = `Go to ${cat.label}`;
+            modalLink.textContent = `View ${cat.label} product`;
 
             const img = getPrimaryImage(product);
             if (img) {
@@ -1647,6 +1665,7 @@
 
 
 </body></html>
+
 
 
 

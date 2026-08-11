@@ -7,6 +7,17 @@ fetch('https://assets.unlim8ted.com/data/products.json')
     const gallery = document.getElementById('gallery');
     if (!gallery) return;
 
+    function slugify(value) {
+      return String(value ?? '')
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/&/g, ' and ')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .replace(/-{2,}/g, '-') || 'product';
+    }
+
     products.forEach(product => {
       if (product['product-type'] !== 'image') return;
 
@@ -14,7 +25,7 @@ fetch('https://assets.unlim8ted.com/data/products.json')
       if (!src) return;
 
       const link = document.createElement('a');
-      link.href = `/products/product#${encodeURIComponent(product.id || '')}`;
+      link.href = `/products/images/${slugify(product.slug || product.handle || product.id || product.name)}/`;
       link.className = 'gallery-link';
 
       const card = document.createElement('article');
