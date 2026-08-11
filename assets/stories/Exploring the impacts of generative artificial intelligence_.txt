@@ -1,0 +1,161 @@
+﻿Screenplay:
+OPENING SEQUENCE
+BLACK SCREEN
+A slow, steady cinematic drone. Neutral, not ominous.
+
+FADE IN: EXT. DATACENTER - DAY
+Wide aerial shots. Large scale.
+NARRATOR (V.O)
+“Throughout history, revolutionary technologies have shaped the ways people live, work and think. The internet transformed communication. Electricity reshaped industries.”
+Beat.
+“Today, artificial intelligence represents another turning point.”
+ON SCREEN TEXT
+Exploring the impacts of generative artificial intelligence.
+Beat and music fade out.
+ON SCREEN TEXT
+ACT I – REVOLUTION
+New, more energetic (something with arpeggios or like portal influenced) music fades in.
+CAMERA FLYTHROUGH TO:
+INT. DATA CENTER - DAY
+Smooth tracking shot through server aisles.
+NARRATOR (V.O)
+“Artificial intelligence can feel abstract and almost magical, but it depends on very physical systems.”
+CUT TO: SIMPLE ANIMATED GRAPHIC
+Prompt -> Model -> Output
+(clean and minimal neural network visual)
+
+NARRATOR (V.O)
+“At its core generative AI is a large mathematical model.
+It takes inputs, like words, and predicts outputs based on patterns learned from massive amounts of data.”
+CUT TO: INT. STUDIO - DAY
+Expert 1 and Expert 2 seated casually.
+Expert 1 (to camera)
+“The more data a model has to learn from, the better it usually performs.”
+Expert 2
+“But that scale comes with consequences.”
+
+CUT TO: ARCHIVAL FOOTAGE
+Early rule based chatbots
+ELIZA
+Old computing labs
+NARRATOR (V.O)
+“Artificial intelligence is not new. Early systems followed simple rules— if this, then that.”
+ON SCREEN TEXT
+Rule-Based AI -> Machine Learning -> Generative AI
+NARRATOR (V.O.)
+“What changed in 2010 was scale and architecture. Generative AI models used more data, and processed that data more efficiently, causing dramatic growth in capability and impact.”
+Beat leading to music fade out.
+CUT TO: ON SCREEN TEXT
+ACT II – REACTION
+CUT TO: ON SCREEN TEXT
+ENERGY
+CAMERA FLYTHROUGH TO: EXT. POWER GRID - DAY
+Transmission lines stretching across land.
+NARRATOR (V.O.)
+“Running large AI models requires enormous computing power.
+Most of that power comes from data centers.”
+CUT TO: DATA CENTER - DAY
+Cooling systems, fans, servers.
+NARRATOR (V.O.)
+“As AI use has increased, global data center energy demand has risen sharply.”
+ON SCREEN TEXT WITH RISE IN DIAGRAM
+Global data center electricity use has more than doubled since 2010
+(MIT, Ding et al.)
+Expert 2 (to camera)
+“This has raised concerns about carbon emissions– especially in regions that still rely on fossil fuels.”
+CUT TO: POSITIVE COUNTERPOINT
+INT. CONTROL ROOM - DAY (STOCK FOOTAGE)Energy dashboards, graphs updating.
+NARRATOR (V.O.)
+“At the same time, AI has been used to reduce emissions by optimizing energy grids, improving efficiency, and supporting renewable energy.”
+Expert 1
+“So the technology that increases energy demand can also help manage it.”
+Beat leading to music fade out.
+CUT TO: ON SCREEN TEXT
+WATER
+Cinematic synth drone fades in.
+CAMERA FLYTHROUGH TO: EXT. DRY LANDSCAPE - DAY
+Slow pan.
+NARRATOR (V.O.)
+“Energy is not the only environmental cost.”
+Fade in new music.
+CUT TO: DATA CENTER COOLING
+Water vapor rises.
+NARRATOR (V.O.)
+“Many data centers rely on water-based cooling systems.”
+ON SCREEN TEXT WITH SLIDE IN DIAGRAM
+Projected AI water use by 2030 is equivalent to millions of people. (UNEP)
+Expert 2 (to camera)
+“That has raised concerns in water-stressed regions.”
+CUT TO: MODERN DATA CENTER FOOTAGE
+NARRATOR (V.O.)
+“However, newer facilities are experimenting with closed loop cooling, air cooling and water recycling– which could reduce overall impact in the future, although we still need to make more steps towards this."
+
+Beat leading to music fade out.
+CUT TO: ON SCREEN TEXT
+COMMUNITIES
+Cinematic synth drone fades in.
+CAMERA FLYTHROUGH TO: EXT. SMALL TOWN - DAY
+Homes near industrial areas.
+NARRATOR (V.O.)
+“The effects of AI infrastructure are often felt more strongly at the local level.”
+New music fades in.
+CUT TO: FOOTAGE OF TOWNS WITH DATA CENTERS
+Slow panning shots.
+NARRATOR (V.O.)
+“There are economic benefits — jobs, although very few, and tax revenue, but also concerns about infrastructure strain and property value loss.
+Expert 2 (TO CAMERA -> V.O.)
+“One danger that is imperative to consider is the health effects which AI Data centers can cause. In one case, the Professor of biostatistics at Harvard’s School of Public Health had a team investigate a town which was planning to create a power plant to power a new AI Data Center. While the developers of the plant stated to the community that there would be minimal impacts, once the professor investigated the situation his team found that ‘the plant’s emissions would expose 1.2 million people to increased health risks from air pollution and lead to $625 million in additional healthcare costs.’”
+CUT TO: COMMUNITY INTERVIEW
+Interview footage
+NARRATOR (V.O.)
+“Research shows these outcomes vary widely depending on regulation, transparency, and community involvement.”
+CUT TO: ON SCREEN TEXT
+RELIABILITY AND USE
+CAMERA FLYTHROUGH TO: INT. MEDICAL SETTING - DAY
+Doctors review data.
+NARRATOR (V.O.)
+“AI’s rapid growth has also raised questions beyond the environment.”
+ON SCREEN TEXT
+Many doctors support AI assistance– but not AI-only diagnoses (Chaieb et al.)
+Expert 1 (to camera)
+“AI can be powerful when used as a support tool.”
+Expert 2 (also to camera)
+“But experts agree human oversight is essential.”
+(light subtle - NEUTRAL)
+“Computers are fast. Humans are careful.”
+Beat leading to music fade.
+ON SCREEN TEXT
+ACT III - REFORMATION
+CAMERA FLYTHROUGH TO: INT GOVERNMENT FOOTAGE - DAY
+Policy meetings, documents.
+NARRATOR (V.O.)
+“As AI adoption grows, governments and institutions are beginning to respond.”
+ON SCREEN TEXT
+Energy reporting
+Environmental oversight
+Sustainability Research
+CUT TO: POSITIVE APPLICATIONS
+Climate modeling
+Pollution tracking
+Renewable optimization
+NARRATOR (V.O.)
+“Researchers suggest that AI may play a role in addressing climate change if its growth is managed responsibly.”
+CONCLUSION
+Music fades
+EXT. DATA CENTER - SUNSET
+Quiet. Neutral. Balanced.
+NARRATOR (V.O.)
+“Generative artificial intelligence is neither a solution nor a threat on its own.”
+Beat.
+“Like past revolutions its impact depends on how society chooses to use it.”
+CUT TO: Expert 1 AND Expert 2
+Expert 1
+“AI represents innovation.”
+Expert 2
+“And a need for responsibility.”
+NARRATOR (V.O.)
+“Understanding both sides is essential– not to stop progress, but to guide it.”
+ON SCREEN TEXT
+Revolution. Reaction. Reform.
+FADE TO BLACK
+Roll credits and legal information.
