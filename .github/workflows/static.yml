@@ -34,9 +34,9 @@ jobs:
       product_pages_changed: ${{ steps.changes.outputs.product_pages_changed }}
     steps:
       - name: Checkout main repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
-          fetch-depth: 0
+          fetch-depth: 2
 
       - name: Detect changed paths
         id: changes
@@ -53,6 +53,11 @@ jobs:
             else
               BEFORE="${AFTER}"
             fi
+          fi
+
+          if ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+            echo "Previous commit is not in shallow checkout; fetching only $BEFORE"
+            git fetch --no-tags --depth=1 origin "$BEFORE"
           fi
 
           echo "Diff range: $BEFORE..$AFTER"
@@ -106,10 +111,10 @@ jobs:
       contents: write
     steps:
       - name: Checkout main repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Configure git identity
         shell: bash
@@ -257,7 +262,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Write Firebase service account
         shell: bash
@@ -291,7 +296,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Upload products to Firestore
         shell: bash
@@ -415,7 +420,7 @@ jobs:
       name: github-pages
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Prepare publish folder
         shell: bash
