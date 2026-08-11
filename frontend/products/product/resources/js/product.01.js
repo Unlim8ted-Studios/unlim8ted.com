@@ -1588,6 +1588,12 @@ async function renderCurrentProduct(force = false) {
         src: item.image
       });
     }
+    if (item.productType === "image" && item.file) {
+      sources.push({
+        type: "img",
+        src: item.file
+      });
+    }
 
     (item.images || []).forEach((src) => {
       sources.push({

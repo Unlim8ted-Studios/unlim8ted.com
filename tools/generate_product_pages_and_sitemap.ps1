@@ -97,6 +97,11 @@ function Product-Route($Product) {
   }
 }
 
+function Should-Generate-ProductPage($Product) {
+  $Type = Product-Type $Product
+  return $Type -ne "music" -and $Type -ne "podcast" -and $Type -ne "podcasts"
+}
+
 function Product-Sources($Product) {
   $Sources = @()
   if (First-Text $Product.image) {
@@ -151,7 +156,7 @@ function Product-Price($Product) {
 
 function Product-Hero($Product) {
   $Name = First-Text $Product.name $Product.title $Product.id
-  $Sources = Product-Sources $Product
+  $Sources = @(Product-Sources $Product)
   if (!$Sources.Count) {
     return '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:rgba(255,255,255,.55);">No media</div>'
   }
@@ -173,7 +178,7 @@ function Product-Hero($Product) {
 
 function Product-Thumbs($Product) {
   $Name = First-Text $Product.name $Product.title $Product.id
-  $Sources = Product-Sources $Product
+  $Sources = @(Product-Sources $Product)
   $Thumbs = @()
   foreach ($Source in $Sources) {
     if ($Source.Type -eq "img") {
@@ -265,7 +270,9 @@ New-Item -ItemType Directory -Force -Path $ProductIndexDir | Out-Null
 Set-Content -Path (Join-Path $ProductIndexDir "index.html") -Value (Render-Template $Template $null) -Encoding UTF8
 
 $SitemapParts = @()
+$GeneratedCount = 0
 foreach ($Product in $Products) {
+  if (!(Should-Generate-ProductPage $Product)) { continue }
   $RoutePath = $Product._generated_route.Trim("/")
   $OutDir = Join-Path $FrontendPath (Join-Path $RoutePath $Product._generated_slug)
   $IndexFile = Join-Path $OutDir "index.html"
@@ -274,6 +281,7 @@ foreach ($Product in $Products) {
     Set-Content -Path $IndexFile -Value (Render-Template $Template $Product) -Encoding UTF8
   }
   $SitemapParts += Sitemap-Url "$SiteOrigin$($Product._generated_route)$($Product._generated_slug)/" (Product-Date $Product $FallbackDate)
+  $GeneratedCount++
 }
 
 $CopiedTemplateFile = Join-Path $FrontendPath "products/product/template.html"
@@ -289,4 +297,4 @@ if ($Sitemap -notmatch "</urlset>\s*$") {
 
 $Sitemap = $Sitemap -replace "</urlset>\s*$", "$Append`n</urlset>`n"
 Set-Content -Path $SitemapFile -Value $Sitemap -Encoding UTF8
-Write-Output "Generated $($Products.Count) product pages in $FrontendDir and appended them to sitemap.xml"
+Write-Output "Generated $GeneratedCount product pages in $FrontendDir and appended them to sitemap.xml"

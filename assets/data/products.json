@@ -226,28 +226,16 @@
     "product-type": "card-game"
   },
   {
-    "id": "PuzzleSquare1",
+    "id": "puzzle-squares",
     "image": null,
     "additional_images": [],
     "video": null,
     "additional_videos": [],
-    "name": "Puzzle Square 1",
+    "name": "Puzzle Squares",
     "description": "Solve a tricky mystery.",
     "price": 0,
     "type": "Entertainment",
-    "product-type": "instant"
-  },
-  {
-    "id": "PuzzleSquare2",
-    "image": null,
-    "additional_images": [],
-    "video": null,
-    "additional_videos": [],
-    "name": "Puzzle Square 2",
-    "description": "Solve a tricky mystery.",
-    "price": 0,
-    "type": "Entertainment",
-    "product-type": "instant"
+    "product-type": "video-game"
   },
   {
     "id": "theglitch",

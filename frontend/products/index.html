@@ -1317,6 +1317,9 @@
         }
 
         function productUrl(product) {
+            const type = normalizeType(product?.["product-type"] || product?.productType || product?.type);
+            if (type === "music") return "/products/music/";
+            if (type === "podcast" || type === "podcasts") return "/products/podcasts/";
             const slug = slugifyProduct(product?.slug || product?.handle || product?.id || product?.name);
             return `${productRoute(product)}${slug}/`;
         }

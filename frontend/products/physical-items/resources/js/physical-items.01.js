@@ -23,6 +23,7 @@
       const type = String(product?.["product-type"] || product?.productType || product?.type || "").trim().toLowerCase();
       if (type === "image") return "/products/images/";
       if (type === "music") return "/products/music/";
+      if (type === "podcast" || type === "podcasts") return "/products/podcasts/";
       if (type === "book") return "/products/books/";
       if (type === "film") return "/products/films/";
       if (type === "software") return "/products/software/";
@@ -33,6 +34,9 @@
     }
 
     function productHref(product) {
+      const type = String(product?.["product-type"] || product?.productType || product?.type || "").trim().toLowerCase();
+      if (type === "music") return "/products/music/";
+      if (type === "podcast" || type === "podcasts") return "/products/podcasts/";
       const slug = slugify(product?.slug || product?.handle || product?.id || product?.name);
       return `${productRoute(product)}${slug}/`;
     }
@@ -169,6 +173,10 @@
           title: String(p?.name ?? p?.title ?? "Item"),
           desc: String(p?.description ?? p?.desc ?? ""),
           category: String(p?.category ?? categoryGuessFromTags(p)),
+          "product-type": p?.["product-type"] || p?.productType || "",
+          productType: p?.productType || p?.["product-type"] || "",
+          slug: p?.slug || "",
+          handle: p?.handle || "",
           image: bestImage(p),
           priceLabel: bestPriceLabel(p), // now min–max
           varients: Array.isArray(p?.varients) ? p.varients : null
