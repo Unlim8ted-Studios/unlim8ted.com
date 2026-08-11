@@ -33,74 +33,89 @@ jobs:
       products_changed: ${{ steps.changes.outputs.products_changed }}
       product_pages_changed: ${{ steps.changes.outputs.product_pages_changed }}
     steps:
-      - name: Checkout main repo
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 2
-
       - name: Detect changed paths
         id: changes
-        shell: bash
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          set -euo pipefail
+          $event = Get-Content -Raw $env:GITHUB_EVENT_PATH | ConvertFrom-Json
+          $changed = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
 
-          BEFORE="${{ github.event.before }}"
-          AFTER="${{ github.sha }}"
+          if ($env:GITHUB_EVENT_NAME -eq "workflow_dispatch") {
+            $assetsChanged = "false"
+            $apiChanged = "false"
+            $frontendChanged = "true"
+            $authChanged = "false"
+            $productsChanged = "true"
+            $productPagesChanged = "true"
+            Write-Output "Manual run: deploying frontend and product-generated pages."
+          } else {
+            $commitIds = @($event.commits | ForEach-Object { $_.id } | Where-Object { $_ })
 
-          if [ -z "${BEFORE}" ] || [ "${BEFORE}" = "0000000000000000000000000000000000000000" ]; then
-            if git rev-parse "${AFTER}~1" >/dev/null 2>&1; then
-              BEFORE="$(git rev-parse "${AFTER}~1")"
-            else
-              BEFORE="${AFTER}"
-            fi
-          fi
+            if ($commitIds.Count -ge 2048) {
+              $assetsChanged = "true"
+              $apiChanged = "true"
+              $frontendChanged = "true"
+              $authChanged = "true"
+              $productsChanged = "true"
+              $productPagesChanged = "true"
+              Write-Output "Push payload hit GitHub's 2048 commit limit; running all deploy jobs."
+            } else {
+              foreach ($commitId in $commitIds) {
+                Write-Output "Reading changed files for commit $commitId"
+                $paths = gh api --paginate "repos/$env:GITHUB_REPOSITORY/commits/$commitId`?per_page=100" --jq '.files[] | .filename, (.previous_filename // empty)'
 
-          if ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
-            echo "Previous commit is not in shallow checkout; fetching only $BEFORE"
-            git fetch --no-tags --depth=1 origin "$BEFORE"
-          fi
+                if ($LASTEXITCODE -ne 0) {
+                  throw "Failed to read changed files for commit $commitId"
+                }
 
-          echo "Diff range: $BEFORE..$AFTER"
-          CHANGED="$(git diff --name-only "$BEFORE" "$AFTER" || true)"
-          echo "$CHANGED" | sed 's/^/ - /' || true
+                foreach ($path in $paths) {
+                  if ($path) {
+                    [void]$changed.Add([string]$path)
+                  }
+                }
+              }
 
-          assets_changed=false
-          api_changed=false
-          frontend_changed=false
-          auth_changed=false
-          products_changed=false
-          product_pages_changed=false
+            Write-Output "Changed paths from GitHub commit API:"
+            foreach ($path in ($changed | Sort-Object)) {
+              Write-Output " - $path"
+            }
 
-          if echo "$CHANGED" | grep -qE '^assets/'; then
-            assets_changed=true
-          fi
+            function Bool-String([bool]$Value) {
+              if ($Value) { return "true" }
+              return "false"
+            }
 
-          if echo "$CHANGED" | grep -qE '^services/'; then
-            api_changed=true
-          fi
+            function Has-Prefix([string]$Prefix) {
+              foreach ($path in $changed) {
+                if ($path.StartsWith($Prefix, [System.StringComparison]::Ordinal)) {
+                  return $true
+                }
+              }
+              return $false
+            }
 
-          if echo "$CHANGED" | grep -qE '^frontend/'; then
-            frontend_changed=true
-          fi
+              $assetsChanged = Bool-String (Has-Prefix "assets/")
+              $apiChanged = Bool-String (Has-Prefix "services/")
+              $frontendChanged = Bool-String (Has-Prefix "frontend/")
+              $authChanged = Bool-String (Has-Prefix "auth/")
+              $productsChanged = Bool-String ($changed.Contains("assets/data/products.json"))
+              $productPagesChanged = Bool-String (
+                $changed.Contains("assets/data/products.json") -or
+                $changed.Contains("frontend/products/product/template.html") -or
+                $changed.Contains("frontend/products/product/resources/js/product.01.js") -or
+                $changed.Contains("tools/generate_product_pages_and_sitemap.ps1")
+              )
+            }
+          }
 
-          if echo "$CHANGED" | grep -qE '^auth/'; then
-            auth_changed=true
-          fi
-
-          if echo "$CHANGED" | grep -qE '^assets/data/products\.json$'; then
-            products_changed=true
-          fi
-
-          if echo "$CHANGED" | grep -qE '^(assets/data/products\.json|frontend/products/product/template\.html|tools/generate_product_pages_and_sitemap\.ps1)$'; then
-            product_pages_changed=true
-          fi
-
-          echo "assets_changed=$assets_changed" | tee -a "$GITHUB_OUTPUT"
-          echo "api_changed=$api_changed" | tee -a "$GITHUB_OUTPUT"
-          echo "frontend_changed=$frontend_changed" | tee -a "$GITHUB_OUTPUT"
-          echo "auth_changed=$auth_changed" | tee -a "$GITHUB_OUTPUT"
-          echo "products_changed=$products_changed" | tee -a "$GITHUB_OUTPUT"
-          echo "product_pages_changed=$product_pages_changed" | tee -a "$GITHUB_OUTPUT"
+          "assets_changed=$assetsChanged" | Tee-Object -FilePath $env:GITHUB_OUTPUT -Append
+          "api_changed=$apiChanged" | Tee-Object -FilePath $env:GITHUB_OUTPUT -Append
+          "frontend_changed=$frontendChanged" | Tee-Object -FilePath $env:GITHUB_OUTPUT -Append
+          "auth_changed=$authChanged" | Tee-Object -FilePath $env:GITHUB_OUTPUT -Append
+          "products_changed=$productsChanged" | Tee-Object -FilePath $env:GITHUB_OUTPUT -Append
+          "product_pages_changed=$productPagesChanged" | Tee-Object -FilePath $env:GITHUB_OUTPUT -Append
 
   sync:
     name: Sync assets + services
