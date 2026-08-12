@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#10151f">
+
+    <title>Unlim8ted Scrollys</title>
+    <meta
+        name="description"
+        content="Browse Unlim8ted scroll-controlled animated stories and comedy shorts."
+    >
+
+    <script type="module" src="https://unlim8ted.com/components/site-navbar.js"></script>
+
+    <style>
+        :root {
+            --ink: #11161b;
+            --paper: #fff8e7;
+            --yellow: #ffd84d;
+            --red: #e44e48;
+            --blue: #7fd3e8;
+            --green: #315d4a;
+            --night: #07131c;
+            --panel: #142634;
+            --muted: #b8c8ce;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            background: var(--night);
+        }
+
+        body {
+            margin: 0;
+            min-width: 320px;
+            background:
+                linear-gradient(135deg, rgba(255, 216, 77, .08), transparent 34%),
+                linear-gradient(225deg, rgba(127, 211, 232, .11), transparent 38%),
+                var(--night);
+            color: var(--paper);
+            font-family:
+                Inter,
+                ui-sans-serif,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+        }
+
+        site-navbar {
+            position: relative;
+            z-index: 20;
+        }
+
+        main {
+            width: min(1180px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 72px 0 80px;
+        }
+
+        .intro {
+            display: grid;
+            gap: 18px;
+            max-width: 840px;
+            margin-bottom: 38px;
+        }
+
+        .eyebrow {
+            color: var(--yellow);
+            font-size: .76rem;
+            font-weight: 1000;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(3rem, 9vw, 7rem);
+            font-weight: 1000;
+            line-height: .82;
+            letter-spacing: 0;
+            text-transform: uppercase;
+        }
+
+        .intro p {
+            max-width: 660px;
+            margin: 0;
+            color: var(--muted);
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            line-height: 1.55;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 18px;
+        }
+
+        .card {
+            min-height: 245px;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 16px;
+            padding: 18px;
+            border: 4px solid var(--ink);
+            border-radius: 8px;
+            background: var(--paper);
+            box-shadow: 8px 8px 0 rgba(0, 0, 0, .26);
+            color: var(--ink);
+            text-decoration: none;
+            transition:
+                transform .16s ease,
+                box-shadow .16s ease;
+        }
+
+        .card:hover {
+            transform: translate(-3px, -3px);
+            box-shadow: 12px 12px 0 rgba(0, 0, 0, .26);
+        }
+
+        .poster {
+            height: 92px;
+            width: 100%;
+            border: 3px solid var(--ink);
+            background:
+                linear-gradient(135deg, var(--accent), transparent 62%),
+                repeating-linear-gradient(
+                    -12deg,
+                    rgba(17, 22, 27, .12) 0,
+                    rgba(17, 22, 27, .12) 8px,
+                    transparent 8px,
+                    transparent 18px
+                ),
+                #e8d9b4;
+        }
+
+        .poster svg,
+        svg.poster {
+            display: block;
+        }
+
+        .poster .line {
+            stroke: var(--ink);
+            stroke-width: 6;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .poster .thin {
+            stroke-width: 4;
+        }
+
+        .card h2 {
+            margin: 0;
+            font-size: clamp(1.3rem, 2.8vw, 2rem);
+            font-weight: 1000;
+            line-height: .95;
+            letter-spacing: 0;
+            text-transform: uppercase;
+        }
+
+        .card p {
+            margin: 0;
+            color: #4a4f55;
+            font-size: .98rem;
+            font-weight: 650;
+            line-height: 1.42;
+        }
+
+        .open {
+            display: inline-flex;
+            align-items: center;
+            width: fit-content;
+            min-height: 38px;
+            padding: 0 12px;
+            border: 3px solid var(--ink);
+            background: var(--yellow);
+            font-size: .82rem;
+            font-weight: 1000;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 620px) {
+            main {
+                width: min(100% - 24px, 1180px);
+                padding-top: 48px;
+            }
+
+            .card {
+                min-height: 220px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <site-navbar></site-navbar>
+
+    <main>
+        <section class="intro" aria-labelledby="pageTitle">
+            <div class="eyebrow">Unlim8ted Scrollys</div>
+            <h1 id="pageTitle">Browse The Shorts</h1>
+            <p>
+                Scroll-controlled animated stories, comedy bits and overcomplicated situations.
+            </p>
+        </section>
+
+        <section class="grid" aria-label="Scrolly stories">
+            <a class="card" href="./failed-unlim8ted-advertisement/" style="--accent: #e44e48;">
+                <svg class="poster" viewBox="0 0 320 120" role="img" aria-label="Broken advertisement set thumbnail">
+                    <rect width="320" height="120" fill="#f3d79b"></rect>
+                    <rect x="18" y="17" width="142" height="74" rx="6" fill="#fff8e7" class="line"></rect>
+                    <path d="M34 36H140M34 53H108M34 70H128" class="line thin" fill="none"></path>
+                    <path d="M197 31L286 51L263 103L174 83Z" fill="#e44e48" class="line"></path>
+                    <path d="M200 57L257 70M192 73L238 84" class="line thin" fill="none"></path>
+                    <circle cx="230" cy="38" r="12" fill="#ffd84d" class="line"></circle>
+                </svg>
+                <h2>Failed Unlim8ted Advertisement</h2>
+                <p>An ad tries very hard to be normal and immediately loses control.</p>
+                <span class="open">Open</span>
+            </a>
+
+            <a class="card" href="./if-npcs-remembered-everything-you-did/" style="--accent: #7fd3e8;">
+                <svg class="poster" viewBox="0 0 320 120" role="img" aria-label="NPC memory town thumbnail">
+                    <rect width="320" height="120" fill="#9bd8e8"></rect>
+                    <path d="M0 91H320" class="line"></path>
+                    <rect x="22" y="38" width="58" height="53" fill="#f2b84b" class="line"></rect>
+                    <rect x="108" y="25" width="70" height="66" fill="#fff8e7" class="line"></rect>
+                    <rect x="211" y="45" width="76" height="46" fill="#8bc27a" class="line"></rect>
+                    <circle cx="249" cy="32" r="17" fill="#ffd84d" class="line"></circle>
+                    <path d="M132 58Q159 36 186 58M142 61H176" class="line thin" fill="none"></path>
+                    <circle cx="150" cy="58" r="4" fill="#11161b"></circle>
+                    <circle cx="168" cy="58" r="4" fill="#11161b"></circle>
+                </svg>
+                <h2>If NPCs Remembered Everything You Did</h2>
+                <p>A game world remembers every heroic decision and every extremely questionable one.</p>
+                <span class="open">Open</span>
+            </a>
+
+            <a class="card" href="./if-stealth-games-were-realistic/" style="--accent: #76598c;">
+                <svg class="poster" viewBox="0 0 320 120" role="img" aria-label="Stealth guard and hidden body thumbnail">
+                    <rect width="320" height="120" fill="#172a2c"></rect>
+                    <path d="M0 92H320" class="line"></path>
+                    <path d="M55 92Q83 48 111 92Z" fill="#315d4a" class="line"></path>
+                    <circle cx="88" cy="70" r="13" fill="#d7a16f" class="line thin"></circle>
+                    <rect x="81" y="84" width="18" height="22" fill="#11161b"></rect>
+                    <circle cx="221" cy="55" r="17" fill="#c98d62" class="line"></circle>
+                    <rect x="204" y="74" width="36" height="34" fill="#405761" class="line"></rect>
+                    <path d="M252 37L286 26L276 59Z" fill="#ffd84d" class="line"></path>
+                    <path d="M142 94L205 84M142 106L202 101" class="line thin" fill="none"></path>
+                </svg>
+                <h2>If Stealth Games Were Realistic</h2>
+                <p>Suspicion meters, body hiding, disguises and guards with selective reasoning.</p>
+                <span class="open">Open</span>
+            </a>
+
+            <a class="card" href="./if-video-games-had-realistic-physics/" style="--accent: #6f9a57;">
+                <svg class="poster" viewBox="0 0 320 120" role="img" aria-label="Physics cliff quest thumbnail">
+                    <rect width="320" height="120" fill="#a8d8dc"></rect>
+                    <circle cx="270" cy="24" r="18" fill="#ffe58a"></circle>
+                    <path d="M0 94H134L163 54H320V120H0Z" fill="#6f9a57" class="line"></path>
+                    <circle cx="84" cy="61" r="13" fill="#e4ae78" class="line thin"></circle>
+                    <rect x="73" y="75" width="24" height="33" fill="#b34a3f" class="line thin"></rect>
+                    <rect x="34" y="87" width="34" height="24" rx="5" fill="#9b6841" class="line thin"></rect>
+                    <path d="M104 78L145 70" class="line thin"></path>
+                    <path d="M183 49L206 30L229 49" class="line thin" fill="none"></path>
+                </svg>
+                <h2>If Video Games Had Realistic Physics</h2>
+                <p>A quest where gravity has more authority than the player character.</p>
+                <span class="open">Open</span>
+            </a>
+
+            <a class="card" href="./i-unwillfully-let-my-cat-answer-my-emails-for-one-week/" style="--accent: #aaa59d;">
+                <svg class="poster" viewBox="0 0 320 120" role="img" aria-label="Cat at email laptop thumbnail">
+                    <rect width="320" height="120" fill="#efe2bd"></rect>
+                    <rect x="44" y="38" width="102" height="55" rx="5" fill="#ffffff" class="line"></rect>
+                    <path d="M58 54H132M58 68H118M58 82H137" class="line thin" fill="none"></path>
+                    <rect x="39" y="96" width="113" height="12" fill="#b8c8ce" class="line thin"></rect>
+                    <circle cx="226" cy="68" r="29" fill="#aaa59d" class="line"></circle>
+                    <path d="M202 45L210 22L225 44M247 45L264 25L260 55" fill="#aaa59d" class="line"></path>
+                    <circle cx="216" cy="67" r="4" fill="#11161b"></circle>
+                    <circle cx="238" cy="67" r="4" fill="#11161b"></circle>
+                    <path d="M226 75Q232 83 242 77M222 75Q215 82 207 76" class="line thin" fill="none"></path>
+                </svg>
+                <h2>I Let My Cat Answer My Emails</h2>
+                <p>The cat takes over the inbox and somehow improves corporate communication.</p>
+                <span class="open">Open</span>
+            </a>
+
+            <a class="card" href="./natural-water/" style="--accent: #61b6cf;">
+                <svg class="poster" viewBox="0 0 320 120" role="img" aria-label="Natural water bottle thumbnail">
+                    <rect width="320" height="120" fill="#bfe8ee"></rect>
+                    <path d="M0 93Q58 74 122 91T245 90T320 78V120H0Z" fill="#61b6cf" class="line"></path>
+                    <path d="M131 34H185L178 103H138Z" fill="#eafcff" class="line"></path>
+                    <rect x="141" y="21" width="34" height="17" fill="#8bc27a" class="line thin"></rect>
+                    <path d="M143 63H176" class="line thin"></path>
+                    <path d="M44 75Q67 35 91 75" fill="#315d4a" class="line"></path>
+                    <circle cx="257" cy="31" r="16" fill="#ffd84d" class="line thin"></circle>
+                </svg>
+                <h2>Natural Water</h2>
+                <p>A product pitch for water that may be more natural than anyone requested.</p>
+                <span class="open">Open</span>
+            </a>
+
+            <a class="card" href="./the-chicken-crosses-the-road-why/" style="--accent: #f2b84b;">
+                <svg class="poster" viewBox="0 0 320 120" role="img" aria-label="Chicken crossing road thumbnail">
+                    <rect width="320" height="120" fill="#a8d8dc"></rect>
+                    <rect x="0" y="63" width="320" height="57" fill="#343b42"></rect>
+                    <path d="M18 91H65M102 91H149M186 91H233M270 91H316" stroke="#fff8e7" stroke-width="7" stroke-linecap="round"></path>
+                    <circle cx="154" cy="56" r="20" fill="#fff8e7" class="line"></circle>
+                    <circle cx="181" cy="50" r="12" fill="#fff8e7" class="line thin"></circle>
+                    <path d="M190 50L211 43L195 59Z" fill="#f2b84b" class="line thin"></path>
+                    <path d="M145 74L136 98M165 73L174 98" class="line thin"></path>
+                    <circle cx="185" cy="47" r="3" fill="#11161b"></circle>
+                </svg>
+                <h2>The Chicken Crosses The Road... Why?</h2>
+                <p>The classic question gets treated like a major investigative event.</p>
+                <span class="open">Open</span>
+            </a>
+
+            <a class="card" href="./the-hole/" style="--accent: #8b7250;">
+                <svg class="poster" viewBox="0 0 320 120" role="img" aria-label="Backyard hole thumbnail">
+                    <rect width="320" height="120" fill="#94c88a"></rect>
+                    <path d="M0 87Q82 70 163 86T320 76V120H0Z" fill="#6f9a57" class="line"></path>
+                    <ellipse cx="171" cy="82" rx="62" ry="21" fill="#11161b"></ellipse>
+                    <ellipse cx="171" cy="76" rx="48" ry="13" fill="#2c2520"></ellipse>
+                    <circle cx="88" cy="54" r="13" fill="#d7a16f" class="line thin"></circle>
+                    <rect x="78" y="68" width="20" height="28" fill="#4f85a8" class="line thin"></rect>
+                    <circle cx="246" cy="55" r="13" fill="#d7a16f" class="line thin"></circle>
+                    <rect x="236" y="69" width="20" height="28" fill="#e44e48" class="line thin"></rect>
+                </svg>
+                <h2>The Hole</h2>
+                <p>Two kids discover a tiny hole in the backyard. This becomes a problem.</p>
+                <span class="open">Open</span>
+            </a>
+
+            <a class="card" href="./trackmania-be-like/" style="--accent: #4f85a8;">
+                <svg class="poster" viewBox="0 0 320 120" role="img" aria-label="Trackmania car jump thumbnail">
+                    <rect width="320" height="120" fill="#9bd8e8"></rect>
+                    <path d="M0 95H112L148 66H320V120H0Z" fill="#4b535a" class="line"></path>
+                    <path d="M22 99H84M176 79H238M268 79H314" stroke="#fff8e7" stroke-width="6" stroke-linecap="round"></path>
+                    <g transform="translate(145 40) rotate(-13)">
+                        <rect x="0" y="18" width="74" height="25" rx="7" fill="#e44e48" class="line"></rect>
+                        <path d="M18 18L31 3H55L66 18Z" fill="#ffd84d" class="line thin"></path>
+                        <circle cx="17" cy="45" r="8" fill="#11161b"></circle>
+                        <circle cx="58" cy="45" r="8" fill="#11161b"></circle>
+                    </g>
+                    <path d="M86 34L58 22M96 49L53 50M101 64L68 80" class="line thin" fill="none"></path>
+                </svg>
+                <h2>Trackmania Be Like</h2>
+                <p>Absurd speedrun logic gets applied to real-world driving.</p>
+                <span class="open">Open</span>
+            </a>
+
+            <a class="card" href="./trailers-be-like/" style="--accent: #d04b6b;">
+                <svg class="poster" viewBox="0 0 320 120" role="img" aria-label="Dramatic movie trailer thumbnail">
+                    <rect width="320" height="120" fill="#2e2230"></rect>
+                    <path d="M0 96H320" class="line"></path>
+                    <path d="M44 21H276V88H44Z" fill="#11161b" class="line"></path>
+                    <path d="M71 42H165M71 61H242" stroke="#ffd84d" stroke-width="8" stroke-linecap="round"></path>
+                    <circle cx="248" cy="48" r="18" fill="#d04b6b" class="line"></circle>
+                    <path d="M26 25L44 25M276 25L294 25M26 84L44 84M276 84L294 84" class="line thin"></path>
+                    <path d="M122 103L160 78L199 103" fill="#76598c" class="line"></path>
+                </svg>
+                <h2>Trailers Be Like</h2>
+                <p>A cinematic trailer builds impossible stakes out of nearly nothing.</p>
+                <span class="open">Open</span>
+            </a>
+        </section>
+    </main>
+</body>
+</html>

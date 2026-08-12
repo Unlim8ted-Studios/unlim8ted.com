@@ -1,0 +1,6135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>If Video Games Had Realistic Physics — Unlim8ted Scrolly</title>
+
+    <meta
+        name="description"
+        content="An animated Unlim8ted Scrolly about what video games would be like with realistic physics."
+    >
+
+    <meta name="theme-color" content="#10151f">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="If Video Games Had Realistic Physics">
+    <meta
+        property="og:description"
+        content="An animated scroll-comic by Unlim8ted Studio Productions."
+    >
+
+    <script
+        type="module"
+        src="https://unlim8ted.com/components/site-navbar.js">
+    </script>
+
+    <script type="module">
+        import { getFirebase } from "/components/firebase-init.js";
+
+        const { auth, db } = getFirebase();
+
+        window.unlim8tedFirebase = {
+            auth,
+            db
+        };
+    </script>
+
+    <style>
+        :root {
+            --ink: #17171a;
+            --paper: #f7edcf;
+            --paper-dark: #ead7a8;
+            --red: #d84b3e;
+            --blue: #4f85a8;
+            --sky: #a8d8dc;
+            --grass: #6f9a57;
+            --grass-dark: #3f693f;
+            --mountain: #688678;
+            --mountain-dark: #3f6259;
+            --water: #4d94ad;
+            --water-light: #81c8d0;
+            --wood: #85542e;
+            --wood-light: #b47a43;
+            --hero-shirt: #b34a3f;
+            --hero-pants: #3e5062;
+            --hero-skin: #e4ae78;
+            --hero-hair: #5a3927;
+            --merchant: #6c496f;
+            --white: #fffdf4;
+            --shadow: rgba(27, 25, 20, 0.18);
+            --max-width: 1400px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+            background: #10151f;
+        }
+
+        body {
+            margin: 0;
+            min-width: 320px;
+            overflow-x: hidden;
+            background: #10151f;
+            color: var(--ink);
+            font-family:
+                "Trebuchet MS",
+                "Arial Rounded MT Bold",
+                Arial,
+                sans-serif;
+        }
+
+        svg {
+            display: block;
+        }
+
+        button,
+        a {
+            font: inherit;
+        }
+
+        ::selection {
+            background: #ffe66b;
+            color: #151515;
+        }
+
+        .page {
+            position: relative;
+            width: 100%;
+            overflow: clip;
+        }
+
+        .scene {
+            position: relative;
+            width: 100%;
+        }
+
+        .sticky {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            height: 100svh;
+            overflow: hidden;
+        }
+
+        .scene-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .grain {
+            position: fixed;
+            z-index: 1000;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.07;
+            mix-blend-mode: multiply;
+            background-image:
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.5'/%3E%3C/svg%3E");
+        }
+
+        .scroll-progress {
+            position: fixed;
+            z-index: 999;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 4px;
+            background: #ffe45c;
+            box-shadow: 0 1px 8px rgba(255, 228, 92, 0.55);
+        }
+
+        .scrolly-label {
+            position: fixed;
+            z-index: 900;
+            left: 18px;
+            bottom: 16px;
+            color: rgba(255,255,255,.75);
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            pointer-events: none;
+            mix-blend-mode: difference;
+        }
+
+        .scroll-hint {
+            position: absolute;
+            z-index: 30;
+            left: 50%;
+            bottom: 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 9px;
+            transform: translateX(-50%);
+            color: var(--white);
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            transition: opacity .3s ease;
+        }
+
+        .scroll-hint-arrow {
+            width: 18px;
+            height: 28px;
+            border: 2px solid currentColor;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .scroll-hint-arrow::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 5px;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: currentColor;
+            transform: translateX(-50%);
+            animation: wheel 1.5s ease-in-out infinite;
+        }
+
+        @keyframes wheel {
+            0% {
+                transform: translate(-50%, 0);
+                opacity: 0;
+            }
+            20% {
+                opacity: 1;
+            }
+            70% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, 10px);
+                opacity: 0;
+            }
+        }
+
+        .speech {
+            position: absolute;
+            z-index: 50;
+            max-width: min(390px, 72vw);
+            padding: 18px 22px;
+            border: 4px solid var(--ink);
+            border-radius: 28px;
+            background: var(--white);
+            box-shadow: 6px 7px 0 rgba(23,23,26,.18);
+            font-size: clamp(17px, 2vw, 25px);
+            font-weight: 900;
+            line-height: 1.16;
+            text-align: center;
+            transform-origin: bottom center;
+        }
+
+        .speech::after {
+            content: "";
+            position: absolute;
+            bottom: -22px;
+            left: 60%;
+            width: 27px;
+            height: 27px;
+            border-right: 4px solid var(--ink);
+            border-bottom: 4px solid var(--ink);
+            background: var(--white);
+            transform: rotate(45deg);
+        }
+
+        .caption {
+            position: absolute;
+            z-index: 40;
+            padding: 11px 15px;
+            border: 3px solid var(--ink);
+            background: #ffe66b;
+            box-shadow: 5px 5px 0 rgba(23,23,26,.2);
+            font-size: clamp(14px, 1.4vw, 20px);
+            font-weight: 1000;
+            line-height: 1.1;
+            transform: rotate(-1deg);
+        }
+
+        .sfx {
+            position: absolute;
+            z-index: 60;
+            font-weight: 1000;
+            line-height: .8;
+            letter-spacing: -.08em;
+            color: #fff4b7;
+            -webkit-text-stroke: 5px var(--ink);
+            paint-order: stroke fill;
+            filter: drop-shadow(8px 8px 0 rgba(0,0,0,.18));
+            pointer-events: none;
+        }
+
+        .hidden-at-start {
+            opacity: 0;
+        }
+
+        /* =========================================================
+           INTRO
+           ========================================================= */
+
+        #intro {
+            height: 180svh;
+            background: #111722;
+        }
+
+        .intro-sky {
+            fill: #172436;
+        }
+
+        .intro-stars circle {
+            fill: #fff8c8;
+        }
+
+        .intro-mountain-back {
+            fill: #24394a;
+        }
+
+        .intro-mountain-front {
+            fill: #182c38;
+        }
+
+        .intro-title-wrap {
+            position: absolute;
+            z-index: 20;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            padding: 30px;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .intro-title {
+            position: relative;
+            max-width: 1100px;
+            color: var(--white);
+            transform: rotate(-2deg);
+        }
+
+        .intro-kicker {
+            margin-bottom: 12px;
+            font-size: clamp(12px, 1.3vw, 18px);
+            font-weight: 1000;
+            letter-spacing: .24em;
+            text-transform: uppercase;
+            color: #ffe45c;
+        }
+
+        .intro-title h1 {
+            margin: 0;
+            font-size: clamp(3.5rem, 10vw, 9.5rem);
+            line-height: .78;
+            letter-spacing: -.075em;
+            text-transform: uppercase;
+            text-shadow:
+                6px 7px 0 #c53d38,
+                11px 12px 0 rgba(0,0,0,.3);
+        }
+
+        .intro-title h1 span {
+            display: block;
+            color: #ffe45c;
+            font-size: .72em;
+        }
+
+        .intro-byline {
+            margin-top: 30px;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            opacity: .72;
+        }
+
+        /* =========================================================
+           SHOP
+           ========================================================= */
+
+        #shop {
+            height: 430svh;
+            background: #d5b778;
+        }
+
+        .shop-wall {
+            fill: #d6b77a;
+        }
+
+        .shop-floor {
+            fill: #7d5432;
+        }
+
+        .shop-beam {
+            fill: #5e3d28;
+        }
+
+        .shop-window {
+            fill: #89c8d4;
+            stroke: var(--ink);
+            stroke-width: 5;
+        }
+
+        .shop-window-cross {
+            stroke: var(--ink);
+            stroke-width: 5;
+        }
+
+        .shop-shelf {
+            fill: #805333;
+            stroke: var(--ink);
+            stroke-width: 5;
+        }
+
+        .shop-item {
+            stroke: var(--ink);
+            stroke-width: 4;
+            stroke-linejoin: round;
+        }
+
+        .merchant-group,
+        .hero-group,
+        .bag-group,
+        #journeyHero,
+        #ledgeHero,
+        #ledgeBag,
+        #riverBag,
+        #dragonHero,
+        #dragonBag {
+            transform-box: fill-box;
+            transform-origin: center bottom;
+        }
+
+        #merchantSpeech {
+            top: 13%;
+            left: 50%;
+        }
+
+        #merchantSpeech2 {
+            top: 13%;
+            left: 48%;
+        }
+
+        #shopWham {
+            left: 13%;
+            top: 42%;
+            font-size: clamp(5rem, 16vw, 13rem);
+            transform: rotate(-13deg) scale(.5);
+        }
+
+        .title-crash {
+            position: absolute;
+            z-index: 70;
+            left: 50%;
+            top: 50%;
+            width: min(1100px, 92vw);
+            padding: 25px 25px 30px;
+            border: 7px solid var(--ink);
+            background: #ffe45c;
+            box-shadow: 12px 14px 0 rgba(0,0,0,.28);
+            text-align: center;
+            transform: translate(-50%, -200vh) rotate(-4deg);
+        }
+
+        .title-crash small {
+            display: block;
+            margin-bottom: 5px;
+            font-size: clamp(11px, 1.2vw, 16px);
+            font-weight: 1000;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+        }
+
+        .title-crash strong {
+            display: block;
+            font-size: clamp(2.6rem, 7vw, 7rem);
+            line-height: .84;
+            letter-spacing: -.07em;
+            text-transform: uppercase;
+        }
+
+        /* =========================================================
+           JOURNEY
+           ========================================================= */
+
+        #journey {
+            height: 350svh;
+            background: var(--sky);
+        }
+
+        .journey-caption {
+            left: 5%;
+            top: 10%;
+        }
+
+        #dragSfx {
+            left: 44%;
+            bottom: 19%;
+            font-size: clamp(3rem, 7vw, 7rem);
+            color: #ffe45c;
+            transform: rotate(-5deg);
+        }
+
+        /* =========================================================
+           LEDGE
+           ========================================================= */
+
+        #ledge {
+            height: 700svh;
+            background: #9ed3d3;
+        }
+
+        #guardSpeech {
+            top: 11%;
+            left: 8%;
+        }
+
+        #ledgeReveal {
+            position: absolute;
+            z-index: 45;
+            top: 10%;
+            right: 7%;
+            max-width: 330px;
+            padding: 15px 18px;
+            border: 4px solid var(--ink);
+            background: var(--white);
+            box-shadow: 6px 6px 0 rgba(0,0,0,.16);
+            font-weight: 1000;
+            font-size: clamp(17px, 2vw, 26px);
+            text-align: center;
+            transform: rotate(2deg);
+        }
+
+        .sweat-drop {
+            position: absolute;
+            z-index: 55;
+            left: 43%;
+            top: 35%;
+            width: 22px;
+            height: 31px;
+            border: 3px solid var(--ink);
+            border-radius: 70% 30% 65% 35%;
+            background: #8be5ff;
+            transform: rotate(35deg);
+            opacity: 0;
+        }
+
+        .attempt-counter {
+            position: absolute;
+            z-index: 50;
+            right: 22px;
+            bottom: 22px;
+            padding: 9px 12px;
+            border: 3px solid var(--ink);
+            background: rgba(255,253,244,.9);
+            font-size: 12px;
+            font-weight: 1000;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            opacity: 0;
+        }
+
+        #ledgeThump {
+            right: 13%;
+            top: 27%;
+            font-size: clamp(4rem, 11vw, 10rem);
+            color: #ffe45c;
+            transform: rotate(8deg);
+        }
+
+        .ellipsis {
+            position: absolute;
+            z-index: 55;
+            top: 20%;
+            right: 20%;
+            padding: 9px 17px 13px;
+            border: 4px solid var(--ink);
+            border-radius: 30px;
+            background: var(--white);
+            box-shadow: 5px 5px 0 rgba(0,0,0,.16);
+            font-size: clamp(2rem, 5vw, 5rem);
+            font-weight: 1000;
+            line-height: .5;
+            opacity: 0;
+        }
+
+        /* =========================================================
+           RIVER
+           ========================================================= */
+
+        #river {
+            height: 470svh;
+            background: #8cc8d5;
+        }
+
+        .river-caption {
+            left: 5%;
+            top: 10%;
+        }
+
+        #boatTipSfx {
+            left: 12%;
+            top: 30%;
+            font-size: clamp(4rem, 12vw, 11rem);
+            color: #81e5ff;
+            transform: rotate(-8deg);
+        }
+
+        #groan {
+            top: 17%;
+            left: 50%;
+        }
+
+        #groan::after {
+            left: 30%;
+        }
+
+        /* =========================================================
+           OUTRO
+           ========================================================= */
+
+        #outro {
+            min-height: 100svh;
+            display: grid;
+            place-items: center;
+            padding: 120px 24px 60px;
+            background:
+                radial-gradient(circle at 50% 20%, #243a4d, #101722 55%, #090d13);
+            color: var(--white);
+            text-align: center;
+        }
+
+        .outro-inner {
+            width: min(900px, 100%);
+        }
+
+        .outro-label {
+            color: #ffe45c;
+            font-size: 11px;
+            font-weight: 1000;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+        }
+
+        .outro h2 {
+            margin: 18px 0;
+            font-size: clamp(3rem, 9vw, 8rem);
+            line-height: .82;
+            letter-spacing: -.07em;
+            text-transform: uppercase;
+        }
+
+        .outro p {
+            max-width: 600px;
+            margin: 0 auto;
+            color: #b5c0ca;
+            font-size: clamp(16px, 2vw, 21px);
+            line-height: 1.6;
+        }
+
+        .outro-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 35px;
+        }
+
+        .comic-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 52px;
+            padding: 0 20px;
+            border: 3px solid var(--white);
+            color: var(--white);
+            background: transparent;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 1000;
+            letter-spacing: .09em;
+            text-transform: uppercase;
+            transition:
+                transform .15s ease,
+                background .15s ease,
+                color .15s ease;
+        }
+
+        .comic-button:hover {
+            transform: translateY(-3px) rotate(-1deg);
+            background: var(--white);
+            color: #101722;
+        }
+
+        .comic-button.primary {
+            border-color: #ffe45c;
+            background: #ffe45c;
+            color: #161616;
+        }
+
+        .outro-footer {
+            margin-top: 100px;
+            color: #64717c;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+        }
+
+        /* =========================================================
+           MOBILE
+           ========================================================= */
+
+        @media (max-width: 700px) {
+            .speech {
+                padding: 13px 16px;
+                border-width: 3px;
+                border-radius: 20px;
+                box-shadow: 4px 5px 0 rgba(23,23,26,.18);
+            }
+
+            .speech::after {
+                width: 20px;
+                height: 20px;
+                bottom: -16px;
+                border-width: 0 3px 3px 0;
+            }
+
+            #merchantSpeech,
+            #merchantSpeech2 {
+                left: auto;
+                right: 4%;
+                top: 10%;
+            }
+
+            #guardSpeech {
+                top: 9%;
+                left: 4%;
+            }
+
+            #ledgeReveal {
+                top: 9%;
+                right: 4%;
+                max-width: 230px;
+            }
+
+            #groan {
+                left: auto;
+                right: 8%;
+                top: 13%;
+            }
+
+            .scrolly-label {
+                display: none;
+            }
+
+            .scroll-hint {
+                bottom: 18px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            .scroll-hint-arrow::after {
+                animation: none;
+            }
+        }
+        /* =========================================================
+   PART TWO — FOREST
+   ========================================================= */
+
+#forest {
+    height: 650svh;
+    background: #789a8d;
+}
+
+.forest-caption {
+    left: 5%;
+    top: 10%;
+}
+
+.battle-banner {
+    position: absolute;
+    z-index: 60;
+    left: 50%;
+    top: 12%;
+    width: min(700px, 90vw);
+    padding: 18px 24px;
+    border: 6px solid #17171a;
+    background: #c7483e;
+    color: #fffdf4;
+    box-shadow: 9px 10px 0 rgba(0,0,0,.22);
+    font-size: clamp(2rem, 5vw, 5rem);
+    font-weight: 1000;
+    line-height: .85;
+    letter-spacing: -.05em;
+    text-align: center;
+    transform:
+        translate(-50%, -200px)
+        rotate(-3deg);
+    opacity: 0;
+}
+
+.item-label {
+    position: absolute;
+    z-index: 65;
+    left: 50%;
+    top: 17%;
+    padding: 10px 18px;
+    border: 4px solid #17171a;
+    background: #ffe45c;
+    box-shadow: 5px 6px 0 rgba(0,0,0,.18);
+    font-size: clamp(1.4rem, 3vw, 3rem);
+    font-weight: 1000;
+    letter-spacing: -.04em;
+    transform:
+        translateX(-50%)
+        rotate(-2deg)
+        scale(.5);
+    opacity: 0;
+}
+
+#forestSigh {
+    top: 16%;
+    left: 43%;
+}
+
+
+/* =========================================================
+   DRAGON
+   ========================================================= */
+
+#dragonScene {
+    height: 600svh;
+    background: #583f73;
+}
+
+.dragon-caption {
+    left: 5%;
+    top: 10%;
+}
+
+.dragon-intro {
+    position: absolute;
+    z-index: 50;
+    left: 50%;
+    top: 11%;
+    width: min(900px, 92vw);
+    color: #fff4bd;
+    font-size: clamp(4rem, 12vw, 11rem);
+    font-weight: 1000;
+    line-height: .75;
+    letter-spacing: -.07em;
+    text-align: center;
+    -webkit-text-stroke: 6px #17171a;
+    paint-order: stroke fill;
+    filter: drop-shadow(9px 10px 0 rgba(0,0,0,.2));
+    transform:
+        translateX(-50%)
+        scale(1.7);
+    opacity: 0;
+}
+
+#hamstringSfx {
+    left: 13%;
+    top: 32%;
+    color: #ffe45c;
+    font-size: clamp(5rem, 14vw, 12rem);
+    transform: rotate(-11deg);
+}
+
+#dragonSpeech {
+    top: 14%;
+    right: 10%;
+}
+
+#dragonSpeech::after {
+    left: 75%;
+}
+
+
+/* =========================================================
+   WALK HOME
+   ========================================================= */
+
+#walkHome {
+    height: 300svh;
+    background: #26374e;
+}
+
+.walk-caption {
+    left: 5%;
+    top: 10%;
+}
+
+.walk-status {
+    position: absolute;
+    z-index: 50;
+    left: 50%;
+    top: 12%;
+    padding: 15px 20px;
+    border: 4px solid #17171a;
+    background: #f7edcf;
+    box-shadow: 6px 7px 0 rgba(0,0,0,.2);
+    font-size: clamp(1rem, 2vw, 1.6rem);
+    font-weight: 1000;
+    text-align: center;
+    text-transform: uppercase;
+    transform: translateX(-50%) rotate(-1deg);
+}
+
+.walk-status strong {
+    display: block;
+    margin-top: 4px;
+    color: #c7483e;
+    font-size: 1.25em;
+}
+
+
+/* =========================================================
+   ENDING SHOP
+   ========================================================= */
+
+#endingShop {
+    height: 550svh;
+    background: #d6b77a;
+}
+
+#merchantBackSpeech {
+    top: 13%;
+    right: 18%;
+}
+
+#merchantArrowSpeech {
+    top: 12%;
+    right: 17%;
+}
+
+.hero-stare {
+    position: absolute;
+    z-index: 55;
+    left: 21%;
+    top: 17%;
+    padding: 10px 18px 15px;
+    border: 4px solid #17171a;
+    border-radius: 30px;
+    background: #fffdf4;
+    box-shadow: 5px 5px 0 rgba(0,0,0,.17);
+    font-size: clamp(2rem, 5vw, 5rem);
+    font-weight: 1000;
+    line-height: .5;
+    opacity: 0;
+}
+
+.cut-black {
+    position: absolute;
+    z-index: 200;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: #08090b;
+    color: #fffdf4;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.cut-black-inner {
+    width: min(1100px, 92vw);
+    text-align: center;
+}
+
+.cut-kicker {
+    margin-bottom: 20px;
+    color: #ffe45c;
+    font-size: clamp(10px, 1.3vw, 16px);
+    font-weight: 1000;
+    letter-spacing: .24em;
+}
+
+.cut-title {
+    font-size: clamp(3rem, 9vw, 9rem);
+    font-weight: 1000;
+    line-height: .82;
+    letter-spacing: -.07em;
+}
+
+
+/* =========================================================
+   MOBILE PART TWO
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    #forestSigh {
+        left: auto;
+        right: 10%;
+    }
+
+    #dragonSpeech {
+        top: 10%;
+        right: 5%;
+    }
+
+    #merchantBackSpeech,
+    #merchantArrowSpeech {
+        top: 10%;
+        right: 4%;
+    }
+
+    .hero-stare {
+        left: 15%;
+        top: 18%;
+    }
+
+    .walk-status {
+        top: 9%;
+        width: 80vw;
+    }
+}
+    </style>
+</head>
+
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="scroll-progress" id="scrollProgress"></div>
+<div class="scrolly-label">UNLIM8TED / SCROLLY 001</div>
+
+<site-navbar
+    cart-href="https://unlim8ted.com/sign-in/cart"
+    signin-href="https://unlim8ted.com/sign-in"
+    profile-href="https://unlim8ted.com/profile">
+</site-navbar>
+
+<main class="page">
+
+    <!-- =========================================================
+         INTRO
+         ========================================================= -->
+
+    <section class="scene" id="intro">
+
+        <div class="sticky">
+
+            <svg
+                class="scene-svg"
+                viewBox="0 0 1600 900"
+                preserveAspectRatio="xMidYMid slice"
+                aria-hidden="true">
+
+                <rect
+                    class="intro-sky"
+                    width="1600"
+                    height="900">
+                </rect>
+
+                <g class="intro-stars" opacity=".75">
+                    <circle cx="160" cy="120" r="3"></circle>
+                    <circle cx="340" cy="220" r="2"></circle>
+                    <circle cx="520" cy="110" r="3"></circle>
+                    <circle cx="760" cy="170" r="2"></circle>
+                    <circle cx="980" cy="90" r="3"></circle>
+                    <circle cx="1200" cy="190" r="2"></circle>
+                    <circle cx="1390" cy="100" r="3"></circle>
+                    <circle cx="1500" cy="260" r="2"></circle>
+                </g>
+
+                <circle
+                    cx="1300"
+                    cy="180"
+                    r="90"
+                    fill="#ffe8a6"
+                    opacity=".9">
+                </circle>
+
+                <path
+                    class="intro-mountain-back"
+                    d="M0 620
+                       L180 390
+                       L340 560
+                       L530 300
+                       L710 560
+                       L900 370
+                       L1100 570
+                       L1280 330
+                       L1600 610
+                       L1600 900
+                       L0 900Z">
+                </path>
+
+                <path
+                    class="intro-mountain-front"
+                    d="M0 720
+                       L240 520
+                       L420 690
+                       L670 470
+                       L870 700
+                       L1100 500
+                       L1320 700
+                       L1600 530
+                       L1600 900
+                       L0 900Z">
+                </path>
+
+                <path
+                    d="M0 760
+                       Q250 700 430 760
+                       T800 750
+                       T1200 760
+                       T1600 740
+                       L1600 900
+                       L0 900Z"
+                    fill="#111b23">
+                </path>
+
+            </svg>
+
+            <div class="intro-title-wrap" id="introTitle">
+
+                <div class="intro-title">
+
+                    <div class="intro-kicker">
+                        Unlim8ted Scrolly No. 001
+                    </div>
+
+                    <h1>
+                        If Video Games Had
+                        <span>Realistic Physics</span>
+                    </h1>
+
+                    <div class="intro-byline">
+                        Scroll to begin (for the best mobile experience go into landscape mode)
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="scroll-hint" id="scrollHint">
+                Scroll
+                <span class="scroll-hint-arrow"></span>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================================
+         SCENE 1 — MERCHANT
+         ========================================================= -->
+
+    <section class="scene" id="shop">
+
+        <div class="sticky">
+
+            <svg
+                class="scene-svg"
+                viewBox="0 0 1600 900"
+                preserveAspectRatio="xMidYMid slice"
+                aria-hidden="true">
+
+                <rect
+                    class="shop-wall"
+                    width="1600"
+                    height="900">
+                </rect>
+
+                <rect
+                    class="shop-beam"
+                    x="0"
+                    y="0"
+                    width="1600"
+                    height="65">
+                </rect>
+
+                <rect
+                    class="shop-beam"
+                    x="100"
+                    y="0"
+                    width="55"
+                    height="900">
+                </rect>
+
+                <rect
+                    class="shop-beam"
+                    x="1445"
+                    y="0"
+                    width="55"
+                    height="900">
+                </rect>
+
+                <rect
+                    class="shop-window"
+                    x="190"
+                    y="145"
+                    width="330"
+                    height="280"
+                    rx="5">
+                </rect>
+
+                <line
+                    class="shop-window-cross"
+                    x1="355"
+                    y1="145"
+                    x2="355"
+                    y2="425">
+                </line>
+
+                <line
+                    class="shop-window-cross"
+                    x1="190"
+                    y1="285"
+                    x2="520"
+                    y2="285">
+                </line>
+
+                <circle
+                    cx="250"
+                    cy="205"
+                    r="42"
+                    fill="#ffe17a">
+                </circle>
+
+                <path
+                    d="M190 390
+                       L280 310
+                       L350 365
+                       L420 290
+                       L520 385
+                       L520 425
+                       L190 425Z"
+                    fill="#63876d">
+                </path>
+
+                <rect
+                    class="shop-shelf"
+                    x="1020"
+                    y="175"
+                    width="400"
+                    height="35">
+                </rect>
+
+                <rect
+                    class="shop-shelf"
+                    x="1020"
+                    y="350"
+                    width="400"
+                    height="35">
+                </rect>
+
+                <path
+                    class="shop-item"
+                    d="M1080 170
+                       L1110 110
+                       L1140 170Z"
+                    fill="#8b5a38">
+                </path>
+
+                <path
+                    class="shop-item"
+                    d="M1200 170
+                       L1230 95
+                       L1260 170Z"
+                    fill="#54829a">
+                </path>
+
+                <circle
+                    class="shop-item"
+                    cx="1350"
+                    cy="140"
+                    r="35"
+                    fill="#b64f47">
+                </circle>
+
+                <path
+                    class="shop-item"
+                    d="M1070 345
+                       L1120 265
+                       L1170 345Z"
+                    fill="#cfb45c">
+                </path>
+
+                <rect
+                    class="shop-item"
+                    x="1240"
+                    y="275"
+                    width="70"
+                    height="70"
+                    rx="8"
+                    fill="#7c5e8f">
+                </rect>
+
+                <path
+                    class="shop-item"
+                    d="M1360 340
+                       L1385 260
+                       L1410 340Z"
+                    fill="#5c9b62">
+                </path>
+
+                <rect
+                    class="shop-floor"
+                    y="670"
+                    width="1600"
+                    height="230">
+                </rect>
+
+                <g opacity=".15" stroke="#22180f" stroke-width="4">
+                    <line x1="0" y1="740" x2="1600" y2="740"></line>
+                    <line x1="0" y1="820" x2="1600" y2="820"></line>
+                    <line x1="300" y1="670" x2="300" y2="900"></line>
+                    <line x1="700" y1="670" x2="700" y2="900"></line>
+                    <line x1="1100" y1="670" x2="1100" y2="900"></line>
+                </g>
+
+                <!-- MERCHANT -->
+
+                <g id="merchant" class="merchant-group">
+
+                    <ellipse
+                        cx="980"
+                        cy="710"
+                        rx="110"
+                        ry="25"
+                        fill="rgba(0,0,0,.16)">
+                    </ellipse>
+
+                    <path
+                        d="M925 690
+                           Q930 535 980 500
+                           Q1030 535 1035 690Z"
+                        fill="#6c496f"
+                        stroke="#17171a"
+                        stroke-width="7">
+                    </path>
+
+                    <circle
+                        cx="980"
+                        cy="450"
+                        r="65"
+                        fill="#e1aa77"
+                        stroke="#17171a"
+                        stroke-width="7">
+                    </circle>
+
+                    <path
+                        d="M920 445
+                           Q935 365 995 380
+                           Q1040 385 1045 445
+                           Q1010 415 970 420
+                           Q945 425 920 445Z"
+                        fill="#e9dfc1"
+                        stroke="#17171a"
+                        stroke-width="7">
+                    </path>
+
+                    <path
+                        d="M945 480
+                           Q980 525 1015 480"
+                        fill="none"
+                        stroke="#e9dfc1"
+                        stroke-width="22"
+                        stroke-linecap="round">
+                    </path>
+
+                    <circle cx="957" cy="452" r="5" fill="#17171a"></circle>
+                    <circle cx="1005" cy="452" r="5" fill="#17171a"></circle>
+
+                    <path
+                        d="M958 475 Q980 487 1002 475"
+                        fill="none"
+                        stroke="#17171a"
+                        stroke-width="5"
+                        stroke-linecap="round">
+                    </path>
+
+                    <path
+                        id="merchantArm"
+                        d="M935 545
+                           Q850 525 790 575"
+                        fill="none"
+                        stroke="#6c496f"
+                        stroke-width="35"
+                        stroke-linecap="round">
+                    </path>
+
+                    <circle
+                        cx="790"
+                        cy="575"
+                        r="20"
+                        fill="#e1aa77"
+                        stroke="#17171a"
+                        stroke-width="6">
+                    </circle>
+
+                </g>
+
+                <!-- HERO -->
+
+                <g id="shopHero" class="hero-group">
+
+                    <ellipse
+                        cx="580"
+                        cy="720"
+                        rx="85"
+                        ry="22"
+                        fill="rgba(0,0,0,.15)">
+                    </ellipse>
+
+                    <path
+                        d="M545 680
+                           L545 585
+                           Q580 565 615 585
+                           L615 680Z"
+                        fill="#b34a3f"
+                        stroke="#17171a"
+                        stroke-width="7">
+                    </path>
+
+                    <path
+                        d="M555 680 L540 735"
+                        stroke="#3e5062"
+                        stroke-width="28"
+                        stroke-linecap="round">
+                    </path>
+
+                    <path
+                        d="M605 680 L620 735"
+                        stroke="#3e5062"
+                        stroke-width="28"
+                        stroke-linecap="round">
+                    </path>
+
+                    <circle
+                        cx="580"
+                        cy="520"
+                        r="55"
+                        fill="#e4ae78"
+                        stroke="#17171a"
+                        stroke-width="7">
+                    </circle>
+
+                    <path
+                        d="M530 510
+                           Q545 445 610 470
+                           Q635 480 635 520
+                           Q610 492 575 495
+                           Q550 498 530 510Z"
+                        fill="#5a3927"
+                        stroke="#17171a"
+                        stroke-width="7">
+                    </path>
+
+                    <circle cx="562" cy="525" r="5" fill="#17171a"></circle>
+                    <circle cx="604" cy="525" r="5" fill="#17171a"></circle>
+
+                    <path
+                        d="M568 550 Q580 556 592 550"
+                        fill="none"
+                        stroke="#17171a"
+                        stroke-width="4"
+                        stroke-linecap="round">
+                    </path>
+
+                    <path
+                        id="heroArm"
+                        d="M550 605 Q500 585 465 610"
+                        fill="none"
+                        stroke="#b34a3f"
+                        stroke-width="27"
+                        stroke-linecap="round">
+                    </path>
+
+                    <circle
+                        cx="465"
+                        cy="610"
+                        r="17"
+                        fill="#e4ae78"
+                        stroke="#17171a"
+                        stroke-width="5">
+                    </circle>
+
+                </g>
+
+                <!-- BACKPACK -->
+
+                <g id="shopBag" class="bag-group">
+
+                    <ellipse
+                        cx="760"
+                        cy="705"
+                        rx="82"
+                        ry="22"
+                        fill="rgba(0,0,0,.15)">
+                    </ellipse>
+
+                    <path
+                        d="M695 590
+                           Q695 535 760 530
+                           Q825 535 825 590
+                           L840 685
+                           Q760 715 680 685Z"
+                        fill="#70492f"
+                        stroke="#17171a"
+                        stroke-width="8">
+                    </path>
+
+                    <path
+                        d="M715 550
+                           Q760 500 805 550"
+                        fill="none"
+                        stroke="#17171a"
+                        stroke-width="10">
+                    </path>
+
+                    <rect
+                        x="705"
+                        y="610"
+                        width="110"
+                        height="55"
+                        rx="10"
+                        fill="#9b6841"
+                        stroke="#17171a"
+                        stroke-width="6">
+                    </rect>
+
+                    <path
+                        d="M730 615V660M790 615V660"
+                        stroke="#17171a"
+                        stroke-width="5">
+                    </path>
+
+                </g>
+
+            </svg>
+
+            <div class="speech hidden-at-start" id="merchantSpeech">
+                You'll need these to defeat the dragon.
+            </div>
+
+            <div class="sfx hidden-at-start" id="shopWham">
+                WHAM
+            </div>
+
+            <div class="speech hidden-at-start" id="merchantSpeech2">
+                ...You're going to want to make two trips.
+            </div>
+
+            <div class="title-crash" id="titleCrash">
+                <small>Unlim8ted presents</small>
+                <strong>If Video Games Had Realistic Physics</strong>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================================
+         SCENE 2 — JOURNEY
+         ========================================================= -->
+
+    <section class="scene" id="journey">
+
+        <div class="sticky">
+
+            <svg
+                class="scene-svg"
+                viewBox="0 0 1600 900"
+                preserveAspectRatio="xMidYMid slice"
+                aria-hidden="true">
+
+                <rect
+                    width="1600"
+                    height="900"
+                    fill="#a8d8dc">
+                </rect>
+
+                <circle
+                    cx="1310"
+                    cy="145"
+                    r="78"
+                    fill="#ffe78b">
+                </circle>
+
+                <g id="journeyClouds" fill="#f8f2dc">
+                    <ellipse cx="220" cy="160" rx="100" ry="42"></ellipse>
+                    <ellipse cx="300" cy="145" rx="80" ry="55"></ellipse>
+                    <ellipse cx="380" cy="165" rx="110" ry="40"></ellipse>
+
+                    <ellipse cx="980" cy="220" rx="90" ry="36"></ellipse>
+                    <ellipse cx="1050" cy="205" rx="70" ry="48"></ellipse>
+                    <ellipse cx="1120" cy="220" rx="90" ry="34"></ellipse>
+                </g>
+
+                <g id="journeyMountainsBack">
+                    <path
+                        d="M0 560
+                           L210 300
+                           L400 530
+                           L620 260
+                           L830 540
+                           L1060 330
+                           L1280 540
+                           L1470 290
+                           L1600 440
+                           L1600 900
+                           L0 900Z"
+                        fill="#78978a">
+                    </path>
+                </g>
+
+                <g id="journeyMountainsFront">
+                    <path
+                        d="M0 650
+                           L230 430
+                           L430 650
+                           L700 390
+                           L940 650
+                           L1210 420
+                           L1420 640
+                           L1600 500
+                           L1600 900
+                           L0 900Z"
+                        fill="#537568">
+                    </path>
+                </g>
+
+                <path
+                    d="M0 650
+                       Q300 600 600 660
+                       Q900 720 1200 650
+                       Q1400 610 1600 650
+                       L1600 900
+                       L0 900Z"
+                    fill="#6f9a57">
+                </path>
+
+                <path
+                    d="M0 755
+                       Q350 700 720 760
+                       Q1100 820 1600 730
+                       L1600 900
+                       L0 900Z"
+                    fill="#c9aa70">
+                </path>
+
+                <g id="journeyTrees">
+
+                    <g transform="translate(120 470)">
+                        <rect x="-13" y="120" width="26" height="110" fill="#6e462d"></rect>
+                        <circle cx="0" cy="90" r="75" fill="#426e45"></circle>
+                    </g>
+
+                    <g transform="translate(1380 450)">
+                        <rect x="-13" y="120" width="26" height="110" fill="#6e462d"></rect>
+                        <circle cx="0" cy="90" r="85" fill="#426e45"></circle>
+                    </g>
+
+                    <g transform="translate(1180 510) scale(.7)">
+                        <rect x="-13" y="120" width="26" height="110" fill="#6e462d"></rect>
+                        <circle cx="0" cy="90" r="75" fill="#426e45"></circle>
+                    </g>
+
+                </g>
+
+                <!-- DRAGGING HERO -->
+
+                <g id="journeyHero">
+
+                    <ellipse
+                        cx="770"
+                        cy="780"
+                        rx="170"
+                        ry="25"
+                        fill="rgba(0,0,0,.14)">
+                    </ellipse>
+
+                    <g transform="translate(790 0) rotate(8 0 700)">
+
+                        <circle
+                            cx="0"
+                            cy="580"
+                            r="50"
+                            fill="#e4ae78"
+                            stroke="#17171a"
+                            stroke-width="7">
+                        </circle>
+
+                        <path
+                            d="M-45 570
+                               Q-35 510 20 530
+                               Q45 540 50 580
+                               Q25 555 -10 555
+                               Q-30 557 -45 570Z"
+                            fill="#5a3927"
+                            stroke="#17171a"
+                            stroke-width="7">
+                        </path>
+
+                        <path
+                            d="M-25 630
+                               Q10 610 40 635
+                               L55 720
+                               L-40 720Z"
+                            fill="#b34a3f"
+                            stroke="#17171a"
+                            stroke-width="7">
+                        </path>
+
+                        <path
+                            d="M-15 720 L-35 785"
+                            stroke="#3e5062"
+                            stroke-width="26"
+                            stroke-linecap="round">
+                        </path>
+
+                        <path
+                            d="M35 720 L60 780"
+                            stroke="#3e5062"
+                            stroke-width="26"
+                            stroke-linecap="round">
+                        </path>
+
+                        <path
+                            d="M-20 650 Q-100 665 -150 710"
+                            fill="none"
+                            stroke="#b34a3f"
+                            stroke-width="26"
+                            stroke-linecap="round">
+                        </path>
+
+                        <circle
+                            cx="-150"
+                            cy="710"
+                            r="16"
+                            fill="#e4ae78"
+                            stroke="#17171a"
+                            stroke-width="5">
+                        </circle>
+
+                        <path
+                            d="M-20 590 Q-8 600 5 592"
+                            fill="none"
+                            stroke="#17171a"
+                            stroke-width="4"
+                            stroke-linecap="round">
+                        </path>
+
+                        <circle cx="-17" cy="575" r="4" fill="#17171a"></circle>
+                        <circle cx="17" cy="578" r="4" fill="#17171a"></circle>
+
+                    </g>
+
+                    <path
+                        d="M640 710
+                           Q565 730 500 740"
+                        fill="none"
+                        stroke="#17171a"
+                        stroke-width="7"
+                        stroke-linecap="round">
+                    </path>
+
+                    <g transform="translate(430 0) rotate(-8 0 735)">
+
+                        <path
+                            d="M-75 650
+                               Q-70 600 0 595
+                               Q70 600 75 650
+                               L90 750
+                               Q0 785 -90 750Z"
+                            fill="#70492f"
+                            stroke="#17171a"
+                            stroke-width="8">
+                        </path>
+
+                        <rect
+                            x="-58"
+                            y="680"
+                            width="116"
+                            height="55"
+                            rx="9"
+                            fill="#9b6841"
+                            stroke="#17171a"
+                            stroke-width="6">
+                        </rect>
+
+                    </g>
+
+                </g>
+
+            </svg>
+
+            <div class="caption journey-caption">
+                The quest begins.
+            </div>
+
+            <div class="sfx" id="dragSfx">
+                skrrrrrrt...
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================================
+         SCENE 3 — THE HILL
+         ========================================================= -->
+
+    <section class="scene" id="ledge">
+
+        <div class="sticky">
+
+            <svg
+                class="scene-svg"
+                viewBox="0 0 1600 900"
+                preserveAspectRatio="xMidYMid slice"
+                aria-hidden="true">
+
+                <rect
+                    width="1600"
+                    height="900"
+                    fill="#9ed3d3">
+                </rect>
+
+                <circle
+                    cx="1370"
+                    cy="150"
+                    r="75"
+                    fill="#ffe58a">
+                </circle>
+
+                <path
+                    d="M0 520
+                       L250 330
+                       L450 510
+                       L690 300
+                       L910 520
+                       L1170 350
+                       L1380 530
+                       L1600 340
+                       L1600 900
+                       L0 900Z"
+                    fill="#789789">
+                </path>
+
+                <path
+                    d="M0 650
+                       Q300 600 650 660
+                       Q900 700 1150 640
+                       Q1400 590 1600 650
+                       L1600 900
+                       L0 900Z"
+                    fill="#6f9a57">
+                </path>
+
+                <!-- PATH -->
+
+                <path
+                    d="M0 780
+                       Q300 710 560 750
+                       Q800 790 1000 745
+                       Q1260 690 1600 730
+                       L1600 900
+                       L0 900Z"
+                    fill="#c7a76c">
+                </path>
+
+                <!-- THE ABSURDLY SMALL LEDGE -->
+
+                <g id="tinyLedge">
+
+                    <path
+                        d="M1030 735
+                           L1030 560
+                           L1600 560
+                           L1600 900
+                           L1030 900Z"
+                        fill="#695946"
+                        stroke="#17171a"
+                        stroke-width="8">
+                    </path>
+
+                    <path
+                        d="M1015 560
+                           Q1120 520 1240 545
+                           Q1380 565 1600 520
+                           L1600 580
+                           L1020 590Z"
+                        fill="#638f4f"
+                        stroke="#17171a"
+                        stroke-width="7">
+                    </path>
+
+                    <path
+                        d="M1080 615
+                           l60 25
+                           l-50 35
+                           M1260 590
+                           l55 30
+                           l-40 40
+                           M1440 610
+                           l65 20
+                           l-45 45"
+                        fill="none"
+                        stroke="#4e4135"
+                        stroke-width="8"
+                        stroke-linecap="round">
+                    </path>
+
+                </g>
+
+                <!-- GUARD -->
+
+                <g id="guard" transform="translate(250 0)">
+
+                    <ellipse
+                        cx="0"
+                        cy="765"
+                        rx="70"
+                        ry="18"
+                        fill="rgba(0,0,0,.14)">
+                    </ellipse>
+
+                    <path
+                        d="M-40 720
+                           L-35 600
+                           Q0 580 35 600
+                           L40 720Z"
+                        fill="#58718a"
+                        stroke="#17171a"
+                        stroke-width="7">
+                    </path>
+
+                    <circle
+                        cx="0"
+                        cy="545"
+                        r="48"
+                        fill="#dca36f"
+                        stroke="#17171a"
+                        stroke-width="7">
+                    </circle>
+
+                    <path
+                        d="M-50 535
+                           Q0 470 50 535
+                           L45 555
+                           L-45 555Z"
+                        fill="#858c91"
+                        stroke="#17171a"
+                        stroke-width="7">
+                    </path>
+
+                    <path
+                        d="M-20 720 L-25 780"
+                        stroke="#394758"
+                        stroke-width="24"
+                        stroke-linecap="round">
+                    </path>
+
+                    <path
+                        d="M20 720 L25 780"
+                        stroke="#394758"
+                        stroke-width="24"
+                        stroke-linecap="round">
+                    </path>
+
+                    <circle cx="-15" cy="545" r="4" fill="#17171a"></circle>
+                    <circle cx="17" cy="545" r="4" fill="#17171a"></circle>
+
+                </g>
+
+                <!-- HERO -->
+
+                <g id="ledgeHero">
+
+                    <ellipse
+                        cx="760"
+                        cy="775"
+                        rx="90"
+                        ry="22"
+                        fill="rgba(0,0,0,.14)">
+                    </ellipse>
+
+                    <circle
+                        cx="760"
+                        cy="590"
+                        r="50"
+                        fill="#e4ae78"
+                        stroke="#17171a"
+                        stroke-width="7">
+                    </circle>
+
+                    <path
+                        d="M715 580
+                           Q730 520 785 540
+                           Q810 550 810 590
+                           Q785 562 750 565
+                           Q730 566 715 580Z"
+                        fill="#5a3927"
+                        stroke="#17171a"
+                        stroke-width="7">
+                    </path>
+
+                    <path
+                        d="M725 645
+                           Q760 625 795 645
+                           L810 725
+                           L710 725Z"
+                        fill="#b34a3f"
+                        stroke="#17171a"
+                        stroke-width="7">
+                    </path>
+
+                    <path
+                        id="ledgeHeroLeftLeg"
+                        d="M735 720 L720 785"
+                        stroke="#3e5062"
+                        stroke-width="26"
+                        stroke-linecap="round">
+                    </path>
+
+                    <path
+                        id="ledgeHeroRightLeg"
+                        d="M785 720 L800 785"
+                        stroke="#3e5062"
+                        stroke-width="26"
+                        stroke-linecap="round">
+                    </path>
+
+                    <path
+                        id="ledgeHeroLeftArm"
+                        d="M730 665 L675 690"
+                        stroke="#b34a3f"
+                        stroke-width="25"
+                        stroke-linecap="round">
+                    </path>
+
+                    <path
+                        id="ledgeHeroRightArm"
+                        d="M790 665 L845 690"
+                        stroke="#b34a3f"
+                        stroke-width="25"
+                        stroke-linecap="round">
+                    </path>
+
+                    <circle cx="743" cy="590" r="4" fill="#17171a"></circle>
+                    <circle cx="780" cy="590" r="4" fill="#17171a"></circle>
+
+                    <path
+                        id="ledgeHeroMouth"
+                        d="M748 615 Q760 620 772 615"
+                        fill="none"
+                        stroke="#17171a"
+                        stroke-width="4"
+                        stroke-linecap="round">
+                    </path>
+
+                </g>
+
+                <!-- BAG -->
+
+                <g id="ledgeBag">
+
+                    <ellipse
+                        cx="590"
+                        cy="780"
+                        rx="90"
+                        ry="22"
+                        fill="rgba(0,0,0,.14)">
+                    </ellipse>
+
+                    <path
+                        d="M525 660
+                           Q530 610 590 605
+                           Q650 610 655 660
+                           L670 755
+                           Q590 785 510 755Z"
+                        fill="#70492f"
+                        stroke="#17171a"
+                        stroke-width="8">
+                    </path>
+
+                    <rect
+                        x="535"
+                        y="690"
+                        width="110"
+                        height="50"
+                        rx="9"
+                        fill="#9b6841"
+                        stroke="#17171a"
+                        stroke-width="6">
+                    </rect>
+
+                </g>
+
+            </svg>
+
+            <div class="speech hidden-at-start" id="guardSpeech">
+                The dragon's just over that hill.
+            </div>
+
+            <div class="hidden-at-start" id="ledgeReveal">
+                The “hill.”
+            </div>
+
+            <div class="sweat-drop" id="sweatDrop"></div>
+
+            <div class="attempt-counter" id="attemptCounter">
+                Climbing attempt 1
+            </div>
+
+            <div class="sfx hidden-at-start" id="ledgeThump">
+                THUNK
+            </div>
+
+            <div class="ellipsis" id="ellipsis">
+                ...
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================================
+         SCENE 4 — RIVER
+         ========================================================= -->
+
+    <section class="scene" id="river">
+
+        <div class="sticky">
+
+            <svg
+                class="scene-svg"
+                viewBox="0 0 1600 900"
+                preserveAspectRatio="xMidYMid slice"
+                aria-hidden="true">
+
+                <rect
+                    width="1600"
+                    height="900"
+                    fill="#8cc8d5">
+                </rect>
+
+                <circle
+                    cx="1280"
+                    cy="145"
+                    r="80"
+                    fill="#ffe88b">
+                </circle>
+
+                <g fill="#f8f0d9">
+                    <ellipse cx="250" cy="170" rx="110" ry="40"></ellipse>
+                    <ellipse cx="330" cy="150" rx="75" ry="55"></ellipse>
+                    <ellipse cx="410" cy="170" rx="105" ry="38"></ellipse>
+                </g>
+
+                <path
+                    d="M0 510
+                       L220 290
+                       L430 500
+                       L650 260
+                       L870 500
+                       L1100 320
+                       L1310 510
+                       L1500 280
+                       L1600 380
+                       L1600 900
+                       L0 900Z"
+                    fill="#648779">
+                </path>
+
+                <path
+                    d="M0 590
+                       Q250 550 450 590
+                       Q650 630 800 590
+                       Q1000 530 1200 590
+                       Q1400 630 1600 570
+                       L1600 900
+                       L0 900Z"
+                    fill="#638f4f">
+                </path>
+
+                <path
+                    d="M0 650
+                       Q350 610 650 650
+                       Q1000 700 1600 630
+                       L1600 900
+                       L0 900Z"
+                    fill="#4d94ad">
+                </path>
+
+                <g
+                    id="waterLines"
+                    fill="none"
+                    stroke="#81c8d0"
+                    stroke-width="8"
+                    stroke-linecap="round"
+                    opacity=".85">
+
+                    <path d="M-100 710 Q100 680 300 710 T700 710 T1100 710 T1700 710"></path>
+                    <path d="M-50 780 Q180 750 380 780 T800 780 T1200 780 T1700 780"></path>
+                    <path d="M-100 850 Q120 820 340 850 T780 850 T1200 850 T1700 850"></path>
+
+                </g>
+
+                <!-- BOAT + HERO + BAG -->
+
+                <g id="boatAssembly">
+
+                    <g id="boat">
+
+                        <path
+                            d="M565 690
+                               Q800 760 1035 690
+                               L970 790
+                               Q800 835 630 790Z"
+                            fill="#85542e"
+                            stroke="#17171a"
+                            stroke-width="9">
+                        </path>
+
+                        <path
+                            d="M610 710
+                               Q800 765 990 710"
+                            fill="none"
+                            stroke="#b47a43"
+                            stroke-width="15"
+                            stroke-linecap="round">
+                        </path>
+
+                    </g>
+
+                    <g id="riverHero">
+
+                        <circle
+                            cx="835"
+                            cy="500"
+                            r="48"
+                            fill="#e4ae78"
+                            stroke="#17171a"
+                            stroke-width="7">
+                        </circle>
+
+                        <path
+                            d="M792 490
+                               Q805 435 860 450
+                               Q885 460 885 500
+                               Q855 477 825 478
+                               Q808 480 792 490Z"
+                            fill="#5a3927"
+                            stroke="#17171a"
+                            stroke-width="7">
+                        </path>
+
+                        <path
+                            d="M800 555
+                               Q835 535 870 555
+                               L880 675
+                               L790 675Z"
+                            fill="#b34a3f"
+                            stroke="#17171a"
+                            stroke-width="7">
+                        </path>
+
+                        <circle cx="820" cy="500" r="4" fill="#17171a"></circle>
+                        <circle cx="853" cy="500" r="4" fill="#17171a"></circle>
+
+                        <path
+                            d="M825 525 Q835 520 845 525"
+                            fill="none"
+                            stroke="#17171a"
+                            stroke-width="4"
+                            stroke-linecap="round">
+                        </path>
+
+                    </g>
+
+                    <g id="riverBag">
+
+                        <path
+                            d="M625 555
+                               Q630 505 690 500
+                               Q750 505 755 555
+                               L770 665
+                               Q690 695 610 665Z"
+                            fill="#70492f"
+                            stroke="#17171a"
+                            stroke-width="8">
+                        </path>
+
+                        <rect
+                            x="635"
+                            y="590"
+                            width="110"
+                            height="50"
+                            rx="9"
+                            fill="#9b6841"
+                            stroke="#17171a"
+                            stroke-width="6">
+                        </rect>
+
+                    </g>
+
+                </g>
+
+                <!-- SPLASH -->
+
+                <g
+                    id="splash"
+                    opacity="0"
+                    fill="#9ce6ed"
+                    stroke="#17171a"
+                    stroke-width="5">
+
+                    <path
+                        d="M710 730
+                           Q670 630 735 680
+                           Q730 590 780 675
+                           Q815 580 825 680
+                           Q890 600 875 695
+                           Q950 640 905 730Z">
+                    </path>
+
+                    <circle cx="675" cy="650" r="14"></circle>
+                    <circle cx="925" cy="620" r="11"></circle>
+                    <circle cx="860" cy="590" r="9"></circle>
+
+                </g>
+
+                <!-- HERO HEAD AFTER CAPSIZE -->
+
+                <g id="riverHead" opacity="0">
+
+                    <circle
+                        cx="830"
+                        cy="745"
+                        r="50"
+                        fill="#e4ae78"
+                        stroke="#17171a"
+                        stroke-width="7">
+                    </circle>
+
+                    <path
+                        d="M786 738
+                           Q800 680 855 695
+                           Q880 705 880 745
+                           Q850 720 820 723
+                           Q800 725 786 738Z"
+                        fill="#5a3927"
+                        stroke="#17171a"
+                        stroke-width="7">
+                    </path>
+
+                    <circle cx="815" cy="747" r="4" fill="#17171a"></circle>
+                    <circle cx="850" cy="747" r="4" fill="#17171a"></circle>
+
+                    <path
+                        d="M815 775 Q832 765 850 775"
+                        fill="none"
+                        stroke="#17171a"
+                        stroke-width="5"
+                        stroke-linecap="round">
+                    </path>
+
+                </g>
+
+            </svg>
+
+            <div class="caption river-caption">
+                Several terrible decisions later...
+            </div>
+
+            <div class="sfx hidden-at-start" id="boatTipSfx">
+                SPLASH
+            </div>
+
+            <div class="speech hidden-at-start" id="groan">
+                UGGGHHHH.
+            </div>
+
+        </div>
+
+    </section>
+<!-- =========================================================
+     SCENE 5 — RANDOM ENCOUNTER
+     ========================================================= -->
+
+<section class="scene" id="forest">
+
+    <div class="sticky">
+
+        <svg
+            class="scene-svg"
+            viewBox="0 0 1600 900"
+            preserveAspectRatio="xMidYMid slice"
+            aria-hidden="true">
+
+            <defs>
+                <linearGradient id="forestSky" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#789a8d"></stop>
+                    <stop offset="100%" stop-color="#b4c79b"></stop>
+                </linearGradient>
+            </defs>
+
+            <rect width="1600" height="900" fill="url(#forestSky)"></rect>
+
+            <!-- distant forest -->
+
+            <g fill="#426449" opacity=".65">
+                <path d="M50 620 L150 270 L250 620Z"></path>
+                <path d="M180 620 L300 220 L420 620Z"></path>
+                <path d="M330 620 L450 300 L570 620Z"></path>
+                <path d="M1050 620 L1170 260 L1290 620Z"></path>
+                <path d="M1190 620 L1320 210 L1450 620Z"></path>
+                <path d="M1350 620 L1490 280 L1630 620Z"></path>
+            </g>
+
+            <!-- foreground trees -->
+
+            <g id="forestTrees">
+
+                <g transform="translate(120 0)">
+                    <rect
+                        x="-45"
+                        y="150"
+                        width="90"
+                        height="750"
+                        fill="#55412e"
+                        stroke="#17171a"
+                        stroke-width="7">
+                    </rect>
+
+                    <circle cx="0" cy="170" r="170" fill="#35593c"></circle>
+                </g>
+
+                <g transform="translate(1470 0)">
+                    <rect
+                        x="-55"
+                        y="100"
+                        width="110"
+                        height="800"
+                        fill="#55412e"
+                        stroke="#17171a"
+                        stroke-width="7">
+                    </rect>
+
+                    <circle cx="0" cy="120" r="190" fill="#35593c"></circle>
+                </g>
+
+            </g>
+
+            <!-- ground -->
+
+            <path
+                d="M0 630
+                   Q300 590 600 640
+                   Q900 690 1200 630
+                   Q1400 590 1600 630
+                   L1600 900
+                   L0 900Z"
+                fill="#496b3e">
+            </path>
+
+            <!-- path -->
+
+            <path
+                d="M400 900
+                   Q620 720 800 650
+                   Q1000 590 1250 900Z"
+                fill="#96744c">
+            </path>
+
+            <!-- HERO -->
+
+            <g id="forestHero">
+
+                <ellipse
+                    cx="660"
+                    cy="785"
+                    rx="100"
+                    ry="24"
+                    fill="rgba(0,0,0,.18)">
+                </ellipse>
+
+                <!-- wet backpack -->
+
+                <g id="forestBag">
+
+                    <path
+                        d="M565 615
+                           Q570 555 625 550
+                           Q680 555 690 615
+                           L700 730
+                           Q625 760 550 730Z"
+                        fill="#574433"
+                        stroke="#17171a"
+                        stroke-width="8">
+                    </path>
+
+                    <rect
+                        x="570"
+                        y="655"
+                        width="105"
+                        height="50"
+                        rx="8"
+                        fill="#71553b"
+                        stroke="#17171a"
+                        stroke-width="6">
+                    </rect>
+
+                    <!-- water drops -->
+
+                    <path
+                        d="M575 745
+                           Q565 770 575 782
+                           Q585 770 575 745Z"
+                        fill="#6fc6df"
+                        stroke="#17171a"
+                        stroke-width="3">
+                    </path>
+
+                    <path
+                        d="M640 750
+                           Q630 778 640 790
+                           Q650 778 640 750Z"
+                        fill="#6fc6df"
+                        stroke="#17171a"
+                        stroke-width="3">
+                    </path>
+
+                </g>
+
+                <!-- body -->
+
+                <path
+                    d="M650 640
+                       Q690 620 730 645
+                       L740 735
+                       L640 735Z"
+                    fill="#a9453d"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </path>
+
+                <circle
+                    cx="690"
+                    cy="580"
+                    r="52"
+                    fill="#e4ae78"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </circle>
+
+                <path
+                    d="M645 570
+                       Q660 510 715 525
+                       Q745 535 745 580
+                       Q715 550 680 555
+                       Q660 555 645 570Z"
+                    fill="#5a3927"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </path>
+
+                <path
+                    d="M660 735 L650 800"
+                    stroke="#3e5062"
+                    stroke-width="27"
+                    stroke-linecap="round">
+                </path>
+
+                <path
+                    d="M720 735 L735 800"
+                    stroke="#3e5062"
+                    stroke-width="27"
+                    stroke-linecap="round">
+                </path>
+
+                <circle cx="674" cy="580" r="4" fill="#17171a"></circle>
+                <circle cx="710" cy="580" r="4" fill="#17171a"></circle>
+
+                <path
+                    d="M675 605 Q690 598 705 605"
+                    fill="none"
+                    stroke="#17171a"
+                    stroke-width="4"
+                    stroke-linecap="round">
+                </path>
+
+                <!-- digging arm -->
+
+                <path
+                    id="forestHeroArm"
+                    d="M650 665 Q590 640 585 610"
+                    fill="none"
+                    stroke="#a9453d"
+                    stroke-width="27"
+                    stroke-linecap="round">
+                </path>
+
+            </g>
+
+
+            <!-- WOLF -->
+
+            <g id="wolf">
+
+                <ellipse
+                    cx="1100"
+                    cy="760"
+                    rx="115"
+                    ry="24"
+                    fill="rgba(0,0,0,.17)">
+                </ellipse>
+
+                <path
+                    d="M1030 680
+                       Q1070 620 1150 650
+                       Q1200 670 1190 730
+                       Q1130 760 1050 735Z"
+                    fill="#687178"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </path>
+
+                <circle
+                    cx="1190"
+                    cy="645"
+                    r="58"
+                    fill="#687178"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </circle>
+
+                <path
+                    d="M1150 605 L1160 540 L1200 595Z"
+                    fill="#687178"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </path>
+
+                <path
+                    d="M1205 595 L1240 540 L1245 615Z"
+                    fill="#687178"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </path>
+
+                <circle cx="1178" cy="645" r="6" fill="#17171a"></circle>
+                <circle cx="1212" cy="645" r="6" fill="#17171a"></circle>
+
+                <path
+                    d="M1195 668 L1210 675 L1195 680Z"
+                    fill="#17171a">
+                </path>
+
+                <path
+                    d="M1045 700
+                       Q965 650 950 705"
+                    fill="none"
+                    stroke="#687178"
+                    stroke-width="35"
+                    stroke-linecap="round">
+                </path>
+
+                <path
+                    d="M1070 725 L1050 790"
+                    stroke="#687178"
+                    stroke-width="30"
+                    stroke-linecap="round">
+                </path>
+
+                <path
+                    d="M1150 725 L1170 790"
+                    stroke="#687178"
+                    stroke-width="30"
+                    stroke-linecap="round">
+                </path>
+
+            </g>
+
+
+            <!-- ITEMS -->
+
+            <g id="forestApple" opacity="0">
+                <circle
+                    cx="710"
+                    cy="510"
+                    r="36"
+                    fill="#c94c3e"
+                    stroke="#17171a"
+                    stroke-width="6">
+                </circle>
+
+                <path
+                    d="M710 475 Q715 455 735 448"
+                    fill="none"
+                    stroke="#43683b"
+                    stroke-width="8"
+                    stroke-linecap="round">
+                </path>
+            </g>
+
+            <g id="forestPan" opacity="0">
+                <ellipse
+                    cx="710"
+                    cy="500"
+                    rx="55"
+                    ry="45"
+                    fill="#555b5d"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </ellipse>
+
+                <path
+                    d="M750 520 L835 565"
+                    stroke="#555b5d"
+                    stroke-width="22"
+                    stroke-linecap="round">
+                </path>
+            </g>
+
+            <g id="forestApple2" opacity="0">
+                <circle
+                    cx="710"
+                    cy="510"
+                    r="36"
+                    fill="#c94c3e"
+                    stroke="#17171a"
+                    stroke-width="6">
+                </circle>
+            </g>
+
+            <g id="forestRope" opacity="0">
+                <circle
+                    cx="710"
+                    cy="510"
+                    r="50"
+                    fill="none"
+                    stroke="#a77c4c"
+                    stroke-width="15">
+                </circle>
+
+                <circle
+                    cx="710"
+                    cy="510"
+                    r="27"
+                    fill="none"
+                    stroke="#a77c4c"
+                    stroke-width="10">
+                </circle>
+            </g>
+
+            <g id="forestCabbage" opacity="0">
+                <circle
+                    cx="710"
+                    cy="510"
+                    r="45"
+                    fill="#6f9c55"
+                    stroke="#17171a"
+                    stroke-width="6">
+                </circle>
+
+                <path
+                    d="M680 510 Q710 475 740 510
+                       M690 535 Q710 500 735 535"
+                    fill="none"
+                    stroke="#476f3d"
+                    stroke-width="7">
+                </path>
+            </g>
+
+            <g id="forestSword" opacity="0">
+
+                <path
+                    d="M670 550 L770 420"
+                    stroke="#d1d7d9"
+                    stroke-width="20"
+                    stroke-linecap="round">
+                </path>
+
+                <path
+                    d="M650 540 L695 575"
+                    stroke="#b98a45"
+                    stroke-width="18"
+                    stroke-linecap="round">
+                </path>
+
+                <path
+                    d="M650 560 L620 600"
+                    stroke="#6d492d"
+                    stroke-width="20"
+                    stroke-linecap="round">
+                </path>
+
+            </g>
+
+
+            <!-- WOLF TAIL ONLY -->
+
+            <g id="wolfTail" opacity="0">
+
+                <path
+                    d="M1450 690
+                       Q1530 620 1580 680"
+                    fill="none"
+                    stroke="#687178"
+                    stroke-width="42"
+                    stroke-linecap="round">
+                </path>
+
+            </g>
+
+        </svg>
+
+        <div class="caption forest-caption">
+            RANDOM ENCOUNTER
+        </div>
+
+        <div class="battle-banner" id="battleBanner">
+            ENEMY ENCOUNTERED
+        </div>
+
+        <div class="item-label" id="itemLabel">
+            APPLE
+        </div>
+
+        <div class="speech hidden-at-start" id="forestSigh">
+            ...
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     SCENE 6 — THE DRAGON
+     ========================================================= -->
+
+<section class="scene" id="dragonScene">
+
+    <div class="sticky">
+
+        <svg
+            class="scene-svg"
+            viewBox="0 0 1600 900"
+            preserveAspectRatio="xMidYMid slice"
+            aria-hidden="true">
+
+            <defs>
+
+                <linearGradient id="sunsetSky" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#583f73"></stop>
+                    <stop offset="45%" stop-color="#d46b5b"></stop>
+                    <stop offset="100%" stop-color="#f2b56b"></stop>
+                </linearGradient>
+
+            </defs>
+
+            <rect
+                width="1600"
+                height="900"
+                fill="url(#sunsetSky)">
+            </rect>
+
+            <circle
+                cx="1250"
+                cy="330"
+                r="125"
+                fill="#ffd176"
+                opacity=".9">
+            </circle>
+
+            <path
+                d="M0 580
+                   L230 410
+                   L430 570
+                   L670 380
+                   L900 590
+                   L1110 430
+                   L1320 590
+                   L1500 400
+                   L1600 480
+                   L1600 900
+                   L0 900Z"
+                fill="#4b4653"
+                opacity=".65">
+            </path>
+
+            <!-- dragon cliff -->
+
+            <path
+                d="M930 900
+                   L1010 520
+                   L1120 470
+                   L1210 490
+                   L1290 440
+                   L1400 470
+                   L1600 420
+                   L1600 900Z"
+                fill="#4d423e"
+                stroke="#17171a"
+                stroke-width="8">
+            </path>
+
+            <!-- DRAGON -->
+
+            <g id="dragon">
+
+                <ellipse
+                    cx="1260"
+                    cy="515"
+                    rx="165"
+                    ry="30"
+                    fill="rgba(0,0,0,.22)">
+                </ellipse>
+
+                <!-- tail -->
+
+                <path
+                    d="M1220 430
+                       Q1080 350 1020 450
+                       Q1080 420 1140 470"
+                    fill="#54754d"
+                    stroke="#17171a"
+                    stroke-width="9">
+                </path>
+
+                <!-- body -->
+
+                <ellipse
+                    cx="1260"
+                    cy="350"
+                    rx="125"
+                    ry="150"
+                    fill="#54754d"
+                    stroke="#17171a"
+                    stroke-width="9">
+                </ellipse>
+
+                <!-- wing -->
+
+                <path
+                    d="M1210 300
+                       Q1080 170 1030 235
+                       L1100 360Z"
+                    fill="#486541"
+                    stroke="#17171a"
+                    stroke-width="9">
+                </path>
+
+                <path
+                    d="M1310 300
+                       Q1440 160 1500 240
+                       L1400 365Z"
+                    fill="#486541"
+                    stroke="#17171a"
+                    stroke-width="9">
+                </path>
+
+                <!-- neck -->
+
+                <path
+                    d="M1240 260
+                       Q1230 170 1280 120
+                       Q1340 160 1325 285Z"
+                    fill="#54754d"
+                    stroke="#17171a"
+                    stroke-width="9">
+                </path>
+
+                <!-- head -->
+
+                <path
+                    d="M1240 130
+                       Q1280 70 1360 110
+                       L1420 155
+                       L1360 210
+                       Q1280 220 1240 180Z"
+                    fill="#54754d"
+                    stroke="#17171a"
+                    stroke-width="9">
+                </path>
+
+                <!-- horns -->
+
+                <path
+                    d="M1270 110 L1240 40 L1310 95Z"
+                    fill="#e0c692"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </path>
+
+                <path
+                    d="M1330 100 L1350 30 L1370 115Z"
+                    fill="#e0c692"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </path>
+
+                <circle
+                    cx="1350"
+                    cy="145"
+                    r="9"
+                    fill="#ffe05d"
+                    stroke="#17171a"
+                    stroke-width="4">
+                </circle>
+
+                <path
+                    id="dragonMouth"
+                    d="M1360 175 Q1385 185 1405 170"
+                    fill="none"
+                    stroke="#17171a"
+                    stroke-width="6"
+                    stroke-linecap="round">
+                </path>
+
+                <!-- arms -->
+
+                <path
+                    id="dragonLeftArm"
+                    d="M1190 330 Q1120 390 1150 445"
+                    fill="none"
+                    stroke="#54754d"
+                    stroke-width="35"
+                    stroke-linecap="round">
+                </path>
+
+                <path
+                    id="dragonRightArm"
+                    d="M1325 330 Q1390 390 1360 445"
+                    fill="none"
+                    stroke="#54754d"
+                    stroke-width="35"
+                    stroke-linecap="round">
+                </path>
+
+            </g>
+
+
+            <!-- HERO -->
+
+            <g id="dragonHero">
+
+                <ellipse
+                    cx="520"
+                    cy="790"
+                    rx="95"
+                    ry="23"
+                    fill="rgba(0,0,0,.17)">
+                </ellipse>
+
+                <circle
+                    cx="520"
+                    cy="585"
+                    r="50"
+                    fill="#e4ae78"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </circle>
+
+                <path
+                    d="M475 575
+                       Q490 515 545 535
+                       Q570 545 570 585
+                       Q545 558 510 560
+                       Q490 562 475 575Z"
+                    fill="#5a3927"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </path>
+
+                <path
+                    d="M485 645
+                       Q520 625 555 645
+                       L565 730
+                       L475 730Z"
+                    fill="#b34a3f"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </path>
+
+                <path
+                    d="M495 725 L480 795"
+                    stroke="#3e5062"
+                    stroke-width="27"
+                    stroke-linecap="round">
+                </path>
+
+                <path
+                    d="M545 725 L560 795"
+                    stroke="#3e5062"
+                    stroke-width="27"
+                    stroke-linecap="round">
+                </path>
+
+                <path
+                    id="dragonHeroArm1"
+                    d="M490 660 L435 690"
+                    stroke="#b34a3f"
+                    stroke-width="25"
+                    stroke-linecap="round">
+                </path>
+
+                <path
+                    id="dragonHeroArm2"
+                    d="M550 660 L605 690"
+                    stroke="#b34a3f"
+                    stroke-width="25"
+                    stroke-linecap="round">
+                </path>
+
+                <circle cx="505" cy="585" r="4" fill="#17171a"></circle>
+                <circle cx="540" cy="585" r="4" fill="#17171a"></circle>
+
+            </g>
+
+            <!-- BACKPACK -->
+
+            <g id="dragonBag">
+
+                <path
+                    d="M330 670
+                       Q335 615 395 610
+                       Q455 615 460 670
+                       L475 760
+                       Q395 790 315 760Z"
+                    fill="#574433"
+                    stroke="#17171a"
+                    stroke-width="8">
+                </path>
+
+                <rect
+                    x="340"
+                    y="700"
+                    width="110"
+                    height="50"
+                    rx="9"
+                    fill="#71553b"
+                    stroke="#17171a"
+                    stroke-width="6">
+                </rect>
+
+            </g>
+
+        </svg>
+
+        <div class="caption dragon-caption">
+            FINALLY.
+        </div>
+
+        <div class="dragon-intro" id="dragonIntro">
+            THE DRAGON
+        </div>
+
+        <div class="sfx hidden-at-start" id="hamstringSfx">
+            AAAGH!
+        </div>
+
+        <div class="speech hidden-at-start" id="dragonSpeech">
+            ...Do you need a minute?
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     SCENE 7 — WALK OF SHAME
+     ========================================================= -->
+
+<section class="scene" id="walkHome">
+
+    <div class="sticky">
+
+        <svg
+            class="scene-svg"
+            viewBox="0 0 1600 900"
+            preserveAspectRatio="xMidYMid slice"
+            aria-hidden="true">
+
+            <defs>
+                <linearGradient id="nightWalkSky" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#26374e"></stop>
+                    <stop offset="100%" stop-color="#725765"></stop>
+                </linearGradient>
+            </defs>
+
+            <rect width="1600" height="900" fill="url(#nightWalkSky)"></rect>
+
+            <circle
+                cx="1320"
+                cy="150"
+                r="65"
+                fill="#f5e8bb">
+            </circle>
+
+            <path
+                d="M0 620
+                   L230 430
+                   L430 620
+                   L650 400
+                   L870 620
+                   L1090 450
+                   L1300 620
+                   L1500 420
+                   L1600 500
+                   L1600 900
+                   L0 900Z"
+                fill="#263c40">
+            </path>
+
+            <path
+                d="M0 690
+                   Q400 640 800 700
+                   Q1200 750 1600 680
+                   L1600 900
+                   L0 900Z"
+                fill="#40523b">
+            </path>
+
+            <path
+                d="M0 800
+                   Q350 710 700 760
+                   Q1100 820 1600 740
+                   L1600 900
+                   L0 900Z"
+                fill="#98754e">
+            </path>
+
+
+            <!-- HERO -->
+
+            <g id="walkHero">
+
+                <circle
+                    cx="650"
+                    cy="590"
+                    r="48"
+                    fill="#e4ae78"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </circle>
+
+                <path
+                    d="M607 580
+                       Q620 525 675 540
+                       Q700 550 700 590
+                       Q675 565 640 565
+                       Q620 566 607 580Z"
+                    fill="#5a3927"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </path>
+
+                <path
+                    d="M615 645
+                       Q650 625 685 645
+                       L695 730
+                       L605 730Z"
+                    fill="#b34a3f"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </path>
+
+                <path
+                    d="M625 725 L610 795"
+                    stroke="#3e5062"
+                    stroke-width="27"
+                    stroke-linecap="round">
+                </path>
+
+                <path
+                    d="M675 725 L690 795"
+                    stroke="#3e5062"
+                    stroke-width="27"
+                    stroke-linecap="round">
+                </path>
+
+                <path
+                    d="M620 660 Q575 680 555 715"
+                    fill="none"
+                    stroke="#b34a3f"
+                    stroke-width="25"
+                    stroke-linecap="round">
+                </path>
+
+                <circle cx="635" cy="590" r="4" fill="#17171a"></circle>
+                <circle cx="668" cy="590" r="4" fill="#17171a"></circle>
+
+                <path
+                    d="M635 616 Q650 608 665 616"
+                    fill="none"
+                    stroke="#17171a"
+                    stroke-width="4">
+                </path>
+
+            </g>
+
+
+            <!-- DRAGON -->
+
+            <g id="walkDragon">
+
+                <ellipse
+                    cx="960"
+                    cy="770"
+                    rx="125"
+                    ry="26"
+                    fill="rgba(0,0,0,.17)">
+                </ellipse>
+
+                <ellipse
+                    cx="960"
+                    cy="610"
+                    rx="90"
+                    ry="120"
+                    fill="#54754d"
+                    stroke="#17171a"
+                    stroke-width="8">
+                </ellipse>
+
+                <path
+                    d="M935 520
+                       Q930 445 970 405
+                       Q1015 450 1000 545Z"
+                    fill="#54754d"
+                    stroke="#17171a"
+                    stroke-width="8">
+                </path>
+
+                <path
+                    d="M940 420
+                       Q975 375 1035 410
+                       L1080 445
+                       L1035 490
+                       Q975 500 940 465Z"
+                    fill="#54754d"
+                    stroke="#17171a"
+                    stroke-width="8">
+                </path>
+
+                <circle cx="1025" cy="445" r="7" fill="#ffe05d"></circle>
+
+                <path
+                    d="M920 695 L900 790"
+                    stroke="#54754d"
+                    stroke-width="35"
+                    stroke-linecap="round">
+                </path>
+
+                <path
+                    d="M995 695 L1015 790"
+                    stroke="#54754d"
+                    stroke-width="35"
+                    stroke-linecap="round">
+                </path>
+
+                <!-- backpack held effortlessly -->
+
+                <g id="walkBag">
+
+                    <path
+                        d="M1060 580
+                           Q1065 530 1120 525
+                           Q1175 530 1180 580
+                           L1195 680
+                           Q1120 710 1045 680Z"
+                        fill="#574433"
+                        stroke="#17171a"
+                        stroke-width="8">
+                    </path>
+
+                    <rect
+                        x="1070"
+                        y="615"
+                        width="100"
+                        height="45"
+                        rx="8"
+                        fill="#71553b"
+                        stroke="#17171a"
+                        stroke-width="6">
+                    </rect>
+
+                </g>
+
+                <path
+                    d="M1010 590 Q1050 590 1080 610"
+                    fill="none"
+                    stroke="#54754d"
+                    stroke-width="30"
+                    stroke-linecap="round">
+                </path>
+
+            </g>
+
+        </svg>
+
+        <div class="caption walk-caption">
+            QUEST UPDATE
+        </div>
+
+        <div class="walk-status" id="walkStatus">
+            DRAGON DEFEATED:
+            <strong>technically no</strong>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     SCENE 8 — BACK AT THE SHOP
+     ========================================================= -->
+
+<section class="scene" id="endingShop">
+
+    <div class="sticky">
+
+        <svg
+            class="scene-svg"
+            viewBox="0 0 1600 900"
+            preserveAspectRatio="xMidYMid slice"
+            aria-hidden="true">
+
+            <rect width="1600" height="900" fill="#d6b77a"></rect>
+
+            <rect
+                x="0"
+                y="670"
+                width="1600"
+                height="230"
+                fill="#7d5432">
+            </rect>
+
+            <rect
+                x="0"
+                y="0"
+                width="1600"
+                height="65"
+                fill="#5e3d28">
+            </rect>
+
+            <!-- counter -->
+
+            <rect
+                x="800"
+                y="560"
+                width="650"
+                height="220"
+                fill="#68442c"
+                stroke="#17171a"
+                stroke-width="8">
+            </rect>
+
+            <rect
+                x="760"
+                y="530"
+                width="720"
+                height="55"
+                fill="#8d603a"
+                stroke="#17171a"
+                stroke-width="8">
+            </rect>
+
+
+            <!-- HERO -->
+
+            <g id="endingHero">
+
+                <circle
+                    cx="390"
+                    cy="540"
+                    r="52"
+                    fill="#e4ae78"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </circle>
+
+                <path
+                    d="M345 530
+                       Q360 470 415 490
+                       Q440 500 440 540
+                       Q415 515 380 515
+                       Q360 516 345 530Z"
+                    fill="#5a3927"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </path>
+
+                <path
+                    d="M350 600
+                       Q390 580 430 605
+                       L440 715
+                       L340 715Z"
+                    fill="#b34a3f"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </path>
+
+                <path
+                    d="M365 710 L350 790"
+                    stroke="#3e5062"
+                    stroke-width="27"
+                    stroke-linecap="round">
+                </path>
+
+                <path
+                    d="M415 710 L430 790"
+                    stroke="#3e5062"
+                    stroke-width="27"
+                    stroke-linecap="round">
+                </path>
+
+                <circle cx="375" cy="540" r="4" fill="#17171a"></circle>
+                <circle cx="408" cy="540" r="4" fill="#17171a"></circle>
+
+            </g>
+
+
+            <!-- DRAGON -->
+
+            <g id="endingDragon">
+
+                <ellipse
+                    cx="625"
+                    cy="650"
+                    rx="85"
+                    ry="110"
+                    fill="#54754d"
+                    stroke="#17171a"
+                    stroke-width="8">
+                </ellipse>
+
+                <path
+                    d="M600 570
+                       Q600 500 640 465
+                       Q680 510 665 590Z"
+                    fill="#54754d"
+                    stroke="#17171a"
+                    stroke-width="8">
+                </path>
+
+                <path
+                    d="M605 480
+                       Q640 440 700 475
+                       L745 510
+                       L700 550
+                       Q640 560 605 525Z"
+                    fill="#54754d"
+                    stroke="#17171a"
+                    stroke-width="8">
+                </path>
+
+                <circle cx="690" cy="510" r="7" fill="#ffe05d"></circle>
+
+            </g>
+
+
+            <!-- MERCHANT -->
+
+            <g id="endingMerchant">
+
+                <path
+                    d="M1030 690
+                       Q1035 560 1090 530
+                       Q1145 560 1150 690Z"
+                    fill="#6c496f"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </path>
+
+                <circle
+                    cx="1090"
+                    cy="480"
+                    r="62"
+                    fill="#e1aa77"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </circle>
+
+                <path
+                    d="M1035 475
+                       Q1050 400 1105 415
+                       Q1150 425 1150 480
+                       Q1115 450 1080 452
+                       Q1055 455 1035 475Z"
+                    fill="#e9dfc1"
+                    stroke="#17171a"
+                    stroke-width="7">
+                </path>
+
+                <path
+                    d="M1055 510 Q1090 550 1125 510"
+                    fill="none"
+                    stroke="#e9dfc1"
+                    stroke-width="20"
+                    stroke-linecap="round">
+                </path>
+
+                <circle cx="1070" cy="480" r="5" fill="#17171a"></circle>
+                <circle cx="1110" cy="480" r="5" fill="#17171a"></circle>
+
+            </g>
+
+
+            <!-- ARROW CART -->
+
+            <g id="arrowCart">
+
+                <rect
+                    x="1200"
+                    y="580"
+                    width="310"
+                    height="150"
+                    rx="10"
+                    fill="#805333"
+                    stroke="#17171a"
+                    stroke-width="8">
+                </rect>
+
+                <circle
+                    cx="1260"
+                    cy="760"
+                    r="45"
+                    fill="#4d4b48"
+                    stroke="#17171a"
+                    stroke-width="8">
+                </circle>
+
+                <circle
+                    cx="1450"
+                    cy="760"
+                    r="45"
+                    fill="#4d4b48"
+                    stroke="#17171a"
+                    stroke-width="8">
+                </circle>
+
+                <!-- enormous stack of arrows -->
+
+                <g
+                    stroke="#d5c093"
+                    stroke-width="7"
+                    stroke-linecap="round">
+
+                    <line x1="1220" y1="570" x2="1280" y2="280"></line>
+                    <line x1="1250" y1="570" x2="1320" y2="240"></line>
+                    <line x1="1280" y1="570" x2="1360" y2="300"></line>
+                    <line x1="1310" y1="570" x2="1390" y2="220"></line>
+                    <line x1="1340" y1="570" x2="1430" y2="270"></line>
+                    <line x1="1370" y1="570" x2="1470" y2="230"></line>
+                    <line x1="1400" y1="570" x2="1500" y2="300"></line>
+                    <line x1="1430" y1="570" x2="1540" y2="250"></line>
+
+                </g>
+
+            </g>
+
+        </svg>
+
+        <div class="speech hidden-at-start" id="merchantBackSpeech">
+            Oh, good... you're back.
+        </div>
+
+        <div class="speech hidden-at-start" id="merchantArrowSpeech">
+            You forgot these.
+        </div>
+
+        <div class="hero-stare" id="heroStare">
+            ...
+        </div>
+
+        <div class="cut-black" id="cutBlack">
+
+            <div class="cut-black-inner">
+
+                <div class="cut-kicker">
+                    UNLIM8TED SCROLLY 001
+                </div>
+
+                <div class="cut-title">
+                    IF VIDEO GAMES HAD<br>
+                    REALISTIC PHYSICS
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+    <!-- =========================================================
+         OUTRO
+         ========================================================= -->
+
+    <section id="outro">
+
+        <div class="outro-inner">
+
+            <div class="outro-label">
+                Quest progress
+            </div>
+
+            <h2>
+                Dragon<br>
+                still alive.
+            </h2>
+
+            <p>
+                The hero has traveled approximately one hill and one river
+                and has already discovered why video games usually lie about physics.
+            </p>
+
+            <div class="outro-actions">
+
+                <a
+                    class="comic-button primary"
+                    href="#intro">
+                    Read Again
+                </a>
+
+                <a
+                    class="comic-button"
+                    href="/products/scrolly/">
+                    More Scrollys
+                </a>
+
+                <a
+                    class="comic-button"
+                    href="https://unlim8ted.com">
+                    Unlim8ted
+                </a>
+
+            </div>
+
+            <div class="outro-footer" id="copyright">
+                © 2019 Unlim8ted Studio Productions. All rights reserved.
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script>
+    /* =============================================================
+       HELPERS
+       ============================================================= */
+
+    const clamp = (value, min = 0, max = 1) =>
+        Math.min(max, Math.max(min, value));
+
+    const mapRange = (
+        value,
+        inMin,
+        inMax,
+        outMin = 0,
+        outMax = 1
+    ) => {
+        const t = clamp(
+            (value - inMin) / (inMax - inMin)
+        );
+
+        return outMin + (outMax - outMin) * t;
+    };
+
+    const easeOutCubic = t =>
+        1 - Math.pow(1 - clamp(t), 3);
+
+    const easeInCubic = t =>
+        Math.pow(clamp(t), 3);
+
+    const easeInOutCubic = t => {
+        t = clamp(t);
+
+        return t < 0.5
+            ? 4 * t * t * t
+            : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    };
+
+    const lerp = (a, b, t) =>
+        a + (b - a) * clamp(t);
+
+    function sectionProgress(element) {
+        const rect = element.getBoundingClientRect();
+        const scrollable =
+            element.offsetHeight - window.innerHeight;
+
+        if (scrollable <= 0) {
+            return 0;
+        }
+
+        return clamp(
+            -rect.top / scrollable
+        );
+    }
+
+    function setOpacity(element, opacity) {
+        if (!element) {
+            return;
+        }
+
+        element.style.opacity =
+            String(clamp(opacity));
+    }
+
+    function setTransform(element, transform) {
+        if (!element) {
+            return;
+        }
+
+        element.style.transform = transform;
+    }
+
+
+    /* =============================================================
+       ELEMENTS
+       ============================================================= */
+
+    const intro =
+        document.getElementById("intro");
+
+    const shop =
+        document.getElementById("shop");
+
+    const journey =
+        document.getElementById("journey");
+
+    const ledge =
+        document.getElementById("ledge");
+
+    const river =
+        document.getElementById("river");
+
+    const introTitle =
+        document.getElementById("introTitle");
+
+    const scrollHint =
+        document.getElementById("scrollHint");
+
+    const scrollProgress =
+        document.getElementById("scrollProgress");
+
+    const merchantSpeech =
+        document.getElementById("merchantSpeech");
+
+    const merchantSpeech2 =
+        document.getElementById("merchantSpeech2");
+
+    const shopHero =
+        document.getElementById("shopHero");
+
+    const shopBag =
+        document.getElementById("shopBag");
+
+    const shopWham =
+        document.getElementById("shopWham");
+
+    const titleCrash =
+        document.getElementById("titleCrash");
+
+    const journeyClouds =
+        document.getElementById("journeyClouds");
+
+    const journeyMountainsBack =
+        document.getElementById("journeyMountainsBack");
+
+    const journeyMountainsFront =
+        document.getElementById("journeyMountainsFront");
+
+    const journeyTrees =
+        document.getElementById("journeyTrees");
+
+    const journeyHero =
+        document.getElementById("journeyHero");
+
+    const dragSfx =
+        document.getElementById("dragSfx");
+
+    const guardSpeech =
+        document.getElementById("guardSpeech");
+
+    const ledgeReveal =
+        document.getElementById("ledgeReveal");
+
+    const sweatDrop =
+        document.getElementById("sweatDrop");
+
+    const attemptCounter =
+        document.getElementById("attemptCounter");
+
+    const ledgeHero =
+        document.getElementById("ledgeHero");
+
+    const ledgeBag =
+        document.getElementById("ledgeBag");
+
+    const ledgeThump =
+        document.getElementById("ledgeThump");
+
+    const ellipsis =
+        document.getElementById("ellipsis");
+
+    const boatAssembly =
+        document.getElementById("boatAssembly");
+
+    const riverBag =
+        document.getElementById("riverBag");
+
+    const riverHero =
+        document.getElementById("riverHero");
+
+    const splash =
+        document.getElementById("splash");
+
+    const riverHead =
+        document.getElementById("riverHead");
+
+    const boatTipSfx =
+        document.getElementById("boatTipSfx");
+
+    const groan =
+        document.getElementById("groan");
+
+    const waterLines =
+        document.getElementById("waterLines");
+
+const forest =
+    document.getElementById("forest");
+
+const forestHero =
+    document.getElementById("forestHero");
+
+const forestHeroArm =
+    document.getElementById("forestHeroArm");
+
+const forestBag =
+    document.getElementById("forestBag");
+
+const wolf =
+    document.getElementById("wolf");
+
+const wolfTail =
+    document.getElementById("wolfTail");
+
+const battleBanner =
+    document.getElementById("battleBanner");
+
+const itemLabel =
+    document.getElementById("itemLabel");
+
+const forestApple =
+    document.getElementById("forestApple");
+
+const forestPan =
+    document.getElementById("forestPan");
+
+const forestApple2 =
+    document.getElementById("forestApple2");
+
+const forestRope =
+    document.getElementById("forestRope");
+
+const forestCabbage =
+    document.getElementById("forestCabbage");
+
+const forestSword =
+    document.getElementById("forestSword");
+
+const forestSigh =
+    document.getElementById("forestSigh");
+
+
+const dragonScene =
+    document.getElementById("dragonScene");
+
+const dragon =
+    document.getElementById("dragon");
+
+const dragonHero =
+    document.getElementById("dragonHero");
+
+const dragonBag =
+    document.getElementById("dragonBag");
+
+const dragonIntro =
+    document.getElementById("dragonIntro");
+
+const hamstringSfx =
+    document.getElementById("hamstringSfx");
+
+const dragonSpeech =
+    document.getElementById("dragonSpeech");
+
+
+const walkHome =
+    document.getElementById("walkHome");
+
+const walkHero =
+    document.getElementById("walkHero");
+
+const walkDragon =
+    document.getElementById("walkDragon");
+
+
+const endingShop =
+    document.getElementById("endingShop");
+
+const endingHero =
+    document.getElementById("endingHero");
+
+const endingDragon =
+    document.getElementById("endingDragon");
+
+const endingMerchant =
+    document.getElementById("endingMerchant");
+
+const arrowCart =
+    document.getElementById("arrowCart");
+
+const merchantBackSpeech =
+    document.getElementById("merchantBackSpeech");
+
+const merchantArrowSpeech =
+    document.getElementById("merchantArrowSpeech");
+
+const heroStare =
+    document.getElementById("heroStare");
+
+const cutBlack =
+    document.getElementById("cutBlack");
+    /* =============================================================
+       INTRO
+       ============================================================= */
+
+    function animateIntro() {
+        const p =
+            sectionProgress(intro);
+
+        const titleFade =
+            1 - mapRange(
+                p,
+                0.38,
+                0.92
+            );
+
+        const scale =
+            lerp(
+                1,
+                1.18,
+                easeInCubic(
+                    mapRange(
+                        p,
+                        0.2,
+                        1
+                    )
+                )
+            );
+
+        introTitle.style.opacity =
+            String(titleFade);
+
+        introTitle.style.transform =
+            `scale(${scale}) translateY(${-p * 35}px)`;
+
+        scrollHint.style.opacity =
+            String(
+                1 -
+                mapRange(
+                    p,
+                    0.02,
+                    0.25
+                )
+            );
+    }
+
+
+    /* =============================================================
+       SHOP
+       ============================================================= */
+
+    function animateShop() {
+        const p =
+            sectionProgress(shop);
+
+        /* Merchant's line */
+
+        const speechIn =
+            easeOutCubic(
+                mapRange(
+                    p,
+                    0.02,
+                    0.10
+                )
+            );
+
+        const speechOut =
+            1 -
+            mapRange(
+                p,
+                0.23,
+                0.29
+            );
+
+        setOpacity(
+            merchantSpeech,
+            Math.min(
+                speechIn,
+                speechOut
+            )
+        );
+
+        setTransform(
+            merchantSpeech,
+            `scale(${lerp(.7, 1, speechIn)}) rotate(-2deg)`
+        );
+
+
+        /* Merchant pushes backpack toward hero */
+
+        const bagOffer =
+            easeInOutCubic(
+                mapRange(
+                    p,
+                    0.16,
+                    0.32
+                )
+            );
+
+        const bagX =
+            lerp(
+                0,
+                -185,
+                bagOffer
+            );
+
+        const bagY =
+            lerp(
+                0,
+                -25,
+                Math.sin(
+                    bagOffer * Math.PI
+                )
+            );
+
+        setTransform(
+            shopBag,
+            `translate(${bagX}px, ${bagY}px)`
+        );
+
+
+        /* Hero gets annihilated by physics */
+
+        const impact =
+            easeInCubic(
+                mapRange(
+                    p,
+                    0.32,
+                    0.38
+                )
+            );
+
+        const flatten =
+            lerp(
+                1,
+                .22,
+                impact
+            );
+
+        const heroDrop =
+            lerp(
+                0,
+                118,
+                impact
+            );
+
+        setTransform(
+            shopHero,
+            `translateY(${heroDrop}px) scaleY(${flatten}) scaleX(${lerp(1, 1.28, impact)})`
+        );
+
+        const bagImpactY =
+            lerp(
+                -25,
+                130,
+                impact
+            );
+
+        const bagImpactScale =
+            lerp(
+                1,
+                1.18,
+                impact
+            );
+
+        setTransform(
+            shopBag,
+            `translate(${bagX}px, ${bagImpactY}px) rotate(${lerp(0, -8, impact)}deg) scale(${bagImpactScale})`
+        );
+
+
+        /* WHAM */
+
+        const whamIn =
+            easeOutCubic(
+                mapRange(
+                    p,
+                    0.35,
+                    0.40
+                )
+            );
+
+        const whamOut =
+            1 -
+            mapRange(
+                p,
+                0.48,
+                0.54
+            );
+
+        setOpacity(
+            shopWham,
+            Math.min(
+                whamIn,
+                whamOut
+            )
+        );
+
+        setTransform(
+            shopWham,
+            `rotate(-13deg) scale(${lerp(.35, 1, whamIn)})`
+        );
+
+
+        /* Merchant's reaction */
+
+        const secondIn =
+            easeOutCubic(
+                mapRange(
+                    p,
+                    0.48,
+                    0.56
+                )
+            );
+
+        const secondOut =
+            1 -
+            mapRange(
+                p,
+                0.70,
+                0.76
+            );
+
+        setOpacity(
+            merchantSpeech2,
+            Math.min(
+                secondIn,
+                secondOut
+            )
+        );
+
+        setTransform(
+            merchantSpeech2,
+            `scale(${lerp(.8, 1, secondIn)}) rotate(1deg)`
+        );
+
+
+        /* Title literally falls onto the scene */
+
+        const crash =
+            easeInCubic(
+                mapRange(
+                    p,
+                    0.72,
+                    0.83
+                )
+            );
+
+        let titleY =
+            lerp(
+                -200,
+                -50,
+                crash
+            );
+
+        let titleRotation =
+            lerp(
+                -12,
+                -4,
+                crash
+            );
+
+        if (p > 0.83) {
+            const bounce =
+                mapRange(
+                    p,
+                    0.83,
+                    0.92
+                );
+
+            titleY =
+                -50 -
+                Math.sin(
+                    bounce * Math.PI
+                ) * 28;
+
+            titleRotation =
+                -4 +
+                Math.sin(
+                    bounce * Math.PI
+                ) * 2;
+        }
+
+        setTransform(
+            titleCrash,
+            `translate(-50%, ${titleY}%) rotate(${titleRotation}deg)`
+        );
+    }
+
+
+    /* =============================================================
+       JOURNEY
+       ============================================================= */
+
+    function animateJourney() {
+        const p =
+            sectionProgress(journey);
+
+        /*
+         * The gag:
+         * the entire world travels substantially faster than the hero.
+         */
+
+        const cloudX =
+            -p * 850;
+
+        const mountainBackX =
+            -p * 260;
+
+        const mountainFrontX =
+            -p * 430;
+
+        const treeX =
+            -p * 1100;
+
+        setTransform(
+            journeyClouds,
+            `translateX(${cloudX}px)`
+        );
+
+        setTransform(
+            journeyMountainsBack,
+            `translateX(${mountainBackX}px)`
+        );
+
+        setTransform(
+            journeyMountainsFront,
+            `translateX(${mountainFrontX}px)`
+        );
+
+        setTransform(
+            journeyTrees,
+            `translateX(${treeX}px)`
+        );
+
+
+        /* Hero barely progresses, because dragging is terrible. */
+
+        const heroX =
+            lerp(
+                -90,
+                100,
+                p
+            );
+
+        const pullCycle =
+            Math.sin(
+                p * Math.PI * 18
+            );
+
+        const dragStutter =
+            Math.pow(
+                Math.max(
+                    0,
+                    pullCycle
+                ),
+                2
+            ) * 14;
+
+        const bob =
+            Math.sin(
+                p * Math.PI * 22
+            ) * 4;
+
+        const strain =
+            Math.sin(
+                p * Math.PI * 36
+            ) * 2.5;
+
+        setTransform(
+            journeyHero,
+            `translate(${heroX + dragStutter}px, ${bob}px) rotate(${strain}deg)`
+        );
+
+
+        /* Drag text jitters */
+
+        const dragRotate =
+            -5 +
+            Math.sin(
+                p * 35
+            ) * 2;
+
+        const scrapeShake =
+            Math.sin(
+                p * 140
+            ) * 8;
+
+        setTransform(
+            dragSfx,
+            `rotate(${dragRotate}deg) translate(${scrapeShake}px, ${Math.abs(scrapeShake) * .25}px) scale(${1 + Math.abs(scrapeShake) * .01})`
+        );
+    }
+
+
+    /* =============================================================
+       LEDGE
+       ============================================================= */
+
+    function animateLedge() {
+        const p =
+            sectionProgress(ledge);
+
+        /* Guard line */
+
+        const guardIn =
+            easeOutCubic(
+                mapRange(
+                    p,
+                    0.01,
+                    0.06
+                )
+            );
+
+        const guardOut =
+            1 -
+            mapRange(
+                p,
+                0.13,
+                0.18
+            );
+
+        setOpacity(
+            guardSpeech,
+            Math.min(
+                guardIn,
+                guardOut
+            )
+        );
+
+        setTransform(
+            guardSpeech,
+            `scale(${lerp(.8, 1, guardIn)}) rotate(-2deg)`
+        );
+
+
+        /* Reveal that the "hill" is hilariously tiny */
+
+        const revealIn =
+            easeOutCubic(
+                mapRange(
+                    p,
+                    0.14,
+                    0.20
+                )
+            );
+
+        const revealOut =
+            1 -
+            mapRange(
+                p,
+                0.27,
+                0.31
+            );
+
+        setOpacity(
+            ledgeReveal,
+            Math.min(
+                revealIn,
+                revealOut
+            )
+        );
+
+        setTransform(
+            ledgeReveal,
+            `scale(${lerp(.7, 1, revealIn)}) rotate(2deg)`
+        );
+
+
+        /* Sweat */
+
+        const sweatIn =
+            mapRange(
+                p,
+                0.22,
+                0.27
+            );
+
+        const sweatOut =
+            1 -
+            mapRange(
+                p,
+                0.33,
+                0.38
+            );
+
+        setOpacity(
+            sweatDrop,
+            Math.min(
+                sweatIn,
+                sweatOut
+            )
+        );
+
+        setTransform(
+            sweatDrop,
+            `translateY(${mapRange(p, .22, .38, 0, 25)}px) rotate(35deg)`
+        );
+
+
+        /*
+         * Hero puts bag down.
+         * Bag remains physically where it is for the rest of the scene.
+         */
+
+        const bagSetDown =
+            easeInOutCubic(
+                mapRange(
+                    p,
+                    0.27,
+                    0.34
+                )
+            );
+
+        setTransform(
+            ledgeBag,
+            `translateX(${lerp(0, -105, bagSetDown)}px) translateY(${lerp(0, 10, bagSetDown)}px)`
+        );
+
+
+        /*
+         * Extremely overlong climb.
+         *
+         * Scroll progress from .34 to .74 is intentionally consumed
+         * almost entirely by repeated failed attempts.
+         */
+
+        const climbP =
+            mapRange(
+                p,
+                0.34,
+                0.74
+            );
+
+        const attempts = 5;
+
+        const rawAttempt =
+            climbP * attempts;
+
+        const attemptIndex =
+            Math.min(
+                attempts - 1,
+                Math.floor(rawAttempt)
+            );
+
+        const attemptLocal =
+            rawAttempt - attemptIndex;
+
+        const attempt =
+            clamp(attemptLocal);
+
+        const jumpUp =
+            easeOutCubic(
+                mapRange(
+                    attempt,
+                    0,
+                    .42
+                )
+            );
+
+        const fallDown =
+            easeInCubic(
+                mapRange(
+                    attempt,
+                    .42,
+                    1
+                )
+            );
+
+        const attemptRise =
+            Math.max(
+                0,
+                jumpUp - fallDown
+            );
+
+        const toeSlip =
+            easeInCubic(
+                mapRange(
+                    attempt,
+                    .68,
+                    1
+                )
+            );
+
+        const attemptSuccess =
+            attemptIndex === attempts - 1
+                ? easeInOutCubic(
+                    mapRange(
+                        attemptLocal,
+                        .35,
+                        1
+                    )
+                )
+                : 0;
+
+        let heroX = 0;
+        let heroY = 0;
+        let heroRotate = 0;
+
+        if (
+            p >= 0.34 &&
+            p < 0.74
+        ) {
+            heroX =
+                attemptIndex * 27 +
+                attemptRise * 62 -
+                toeSlip * 32;
+
+            heroY =
+                -attemptRise *
+                (
+                    80 +
+                    attemptIndex * 12
+                ) +
+                toeSlip * 34;
+
+            heroRotate =
+                Math.sin(
+                    attemptLocal * Math.PI * 2
+                ) * 9 +
+                toeSlip * 13;
+
+            if (
+                attemptIndex ===
+                attempts - 1
+            ) {
+                heroX +=
+                    attemptSuccess * 185;
+
+                heroY -=
+                    attemptSuccess * 105;
+            }
+
+            attemptCounter.textContent =
+                `Climbing attempt ${attemptIndex + 1}`;
+
+            setOpacity(
+                attemptCounter,
+                1
+            );
+        } else {
+            setOpacity(
+                attemptCounter,
+                0
+            );
+        }
+
+
+        /* Final success */
+
+        if (p >= 0.74) {
+            const topP =
+                easeOutCubic(
+                    mapRange(
+                        p,
+                        0.74,
+                        0.79
+                    )
+                );
+
+            heroX =
+                lerp(
+                    300,
+                    380,
+                    topP
+                );
+
+            heroY =
+                lerp(
+                    -170,
+                    -178,
+                    topP
+                );
+
+            heroRotate =
+                lerp(
+                    7,
+                    0,
+                    topP
+                );
+
+            const landing =
+                1 -
+                Math.abs(
+                    topP * 2 -
+                    1
+                );
+
+            heroY +=
+                Math.sin(
+                    topP * Math.PI * 3
+                ) *
+                landing *
+                10;
+        }
+
+        setTransform(
+            ledgeHero,
+            `translate(${heroX}px, ${heroY}px) rotate(${heroRotate}deg)`
+        );
+
+
+        /* THUNK */
+
+        const thunkIn =
+            easeOutCubic(
+                mapRange(
+                    p,
+                    0.755,
+                    0.79
+                )
+            );
+
+        const thunkOut =
+            1 -
+            mapRange(
+                p,
+                0.83,
+                0.87
+            );
+
+        setOpacity(
+            ledgeThump,
+            Math.min(
+                thunkIn,
+                thunkOut
+            )
+        );
+
+        setTransform(
+            ledgeThump,
+            `rotate(8deg) scale(${lerp(.3, 1, thunkIn)})`
+        );
+
+
+        /*
+         * Pause.
+         * Then hero slowly realizes the bag is still down there.
+         */
+
+        const realization =
+            easeOutCubic(
+                mapRange(
+                    p,
+                    0.85,
+                    0.91
+                )
+            );
+
+        setOpacity(
+            ellipsis,
+            realization
+        );
+
+        setTransform(
+            ellipsis,
+            `scale(${lerp(.5, 1, realization)})`
+        );
+
+
+        /*
+         * Near the end, emphasize the ridiculous distance
+         * by shifting the "camera" right while the bag stays behind.
+         */
+
+        if (p > 0.91) {
+            const ending =
+                mapRange(
+                    p,
+                    0.91,
+                    1
+                );
+
+            const heroExtra =
+                ending * 80;
+
+            setTransform(
+                ledgeHero,
+                `translate(${380 + heroExtra}px, -178px)`
+            );
+
+            setTransform(
+                ledgeBag,
+                `translateX(${-105 - ending * 75}px) translateY(10px)`
+            );
+        }
+    }
+
+
+    /* =============================================================
+       RIVER
+       ============================================================= */
+
+    function animateRiver() {
+        const p =
+            sectionProgress(river);
+
+        /*
+         * Hero drags bag into boat.
+         */
+
+        const bagLoad =
+            easeInOutCubic(
+                mapRange(
+                    p,
+                    0.10,
+                    0.28
+                )
+            );
+
+        const bagX =
+            lerp(
+                -280,
+                0,
+                bagLoad
+            );
+
+        const bagY =
+            lerp(
+                75,
+                0,
+                bagLoad
+            );
+
+        const bagSnag =
+            Math.sin(
+                bagLoad * Math.PI * 9
+            ) *
+            (1 - bagLoad) *
+            22;
+
+        const bagBounce =
+            Math.abs(
+                Math.sin(
+                    bagLoad * Math.PI * 7
+                )
+            ) *
+            (1 - bagLoad) *
+            18;
+
+        setTransform(
+            riverBag,
+            `translate(${bagX + bagSnag}px, ${bagY + bagBounce}px) rotate(${bagSnag * -.16}deg)`
+        );
+
+
+        /*
+         * The MOMENT the backpack reaches the boat's centerline:
+         * physics has opinions.
+         */
+
+        const tip =
+            easeInCubic(
+                mapRange(
+                    p,
+                    0.285,
+                    0.34
+                )
+            );
+
+        const rotation =
+            lerp(
+                0,
+                92,
+                tip
+            );
+
+        const assemblyY =
+            lerp(
+                0,
+                105,
+                tip
+            );
+
+        setTransform(
+            boatAssembly,
+            `rotate(${rotation}deg) translateY(${assemblyY}px)`
+        );
+
+
+        /* Splash */
+
+        const splashIn =
+            easeOutCubic(
+                mapRange(
+                    p,
+                    0.315,
+                    0.37
+                )
+            );
+
+        const splashOut =
+            1 -
+            mapRange(
+                p,
+                0.47,
+                0.54
+            );
+
+        setOpacity(
+            splash,
+            Math.min(
+                splashIn,
+                splashOut
+            )
+        );
+
+        setTransform(
+            splash,
+            `scale(${lerp(.4, 1.25, splashIn)})`
+        );
+
+        setOpacity(
+            boatTipSfx,
+            Math.min(
+                splashIn,
+                splashOut
+            )
+        );
+
+        setTransform(
+            boatTipSfx,
+            `rotate(-8deg) scale(${lerp(.3, 1, splashIn)})`
+        );
+
+
+        /*
+         * Boat disappears under the water.
+         */
+
+        const sink =
+            easeInCubic(
+                mapRange(
+                    p,
+                    0.37,
+                    0.49
+                )
+            );
+
+        setOpacity(
+            boatAssembly,
+            1 - sink
+        );
+
+
+        /*
+         * Hero resurfaces.
+         */
+
+        const headRise =
+            easeOutCubic(
+                mapRange(
+                    p,
+                    0.48,
+                    0.58
+                )
+            );
+
+        setOpacity(
+            riverHead,
+            headRise
+        );
+
+        setTransform(
+            riverHead,
+            `translateY(${lerp(80, 0, headRise)}px)`
+        );
+
+
+        /*
+         * UGGGHHHH.
+         */
+
+        const groanIn =
+            easeOutCubic(
+                mapRange(
+                    p,
+                    0.59,
+                    0.66
+                )
+            );
+
+        const groanOut =
+            1 -
+            mapRange(
+                p,
+                0.78,
+                0.85
+            );
+
+        setOpacity(
+            groan,
+            Math.min(
+                groanIn,
+                groanOut
+            )
+        );
+
+        setTransform(
+            groan,
+            `scale(${lerp(.65, 1, groanIn)}) rotate(2deg)`
+        );
+
+
+        /*
+         * Entire hero gets carried downstream.
+         * Water moves too, which sells the effect.
+         */
+
+        const downstream =
+            easeInOutCubic(
+                mapRange(
+                    p,
+                    0.68,
+                    1
+                )
+            );
+
+        setTransform(
+            riverHead,
+            `translate(${downstream * 560}px, ${lerp(0, 70, downstream)}px) rotate(${downstream * 12}deg)`
+        );
+
+        const waterOffset =
+            (p * 600) % 400;
+
+        setTransform(
+            waterLines,
+            `translateX(${waterOffset}px)`
+        );
+    }
+/* =============================================================
+   FOREST — RANDOM ENCOUNTER
+   ============================================================= */
+
+function animateForest() {
+    const p =
+        sectionProgress(forest);
+
+
+    /*
+     * Hero enters with the now-soaked backpack.
+     */
+
+    const entrance =
+        easeOutCubic(
+            mapRange(
+                p,
+                0.00,
+                0.08
+            )
+        );
+
+    const heroX =
+        lerp(
+            -300,
+            0,
+            entrance
+        );
+
+    const tiredBob =
+        Math.sin(
+            p * Math.PI * 18
+        ) * 3;
+
+    setTransform(
+        forestHero,
+        `translate(${heroX}px, ${tiredBob}px)`
+    );
+
+
+    /*
+     * Wolf walks onto the path.
+     */
+
+    const wolfEnter =
+        easeOutCubic(
+            mapRange(
+                p,
+                0.08,
+                0.16
+            )
+        );
+
+    const wolfX =
+        lerp(
+            420,
+            0,
+            wolfEnter
+        );
+
+    setTransform(
+        wolf,
+        `translateX(${wolfX}px)`
+    );
+
+
+    /*
+     * Ridiculously dramatic encounter banner.
+     */
+
+    const bannerIn =
+        easeOutCubic(
+            mapRange(
+                p,
+                0.14,
+                0.19
+            )
+        );
+
+    const bannerOut =
+        1 -
+        mapRange(
+            p,
+            0.24,
+            0.28
+        );
+
+    setOpacity(
+        battleBanner,
+        Math.min(
+            bannerIn,
+            bannerOut
+        )
+    );
+
+    setTransform(
+        battleBanner,
+        `translate(-50%, ${lerp(-200, 0, bannerIn)}px) rotate(-3deg)`
+    );
+
+
+    /*
+     * Digging animation.
+     */
+
+    const digging =
+        mapRange(
+            p,
+            0.24,
+            0.76
+        );
+
+    if (
+        p >= 0.24 &&
+        p <= 0.76
+    ) {
+        const digMotion =
+            Math.sin(
+                digging *
+                Math.PI *
+                20
+            );
+
+        forestHeroArm.setAttribute(
+            "d",
+            `M650 665
+             Q${590 + digMotion * 20}
+              ${640 - digMotion * 12}
+              ${585 + digMotion * 10}
+              ${610 + digMotion * 18}`
+        );
+    }
+
+
+    /*
+     * Each object gets its own chunk of scroll.
+     */
+
+    const items = [
+        {
+            element: forestApple,
+            name: "APPLE",
+            start: 0.28,
+            end: 0.35,
+            throwX: -310,
+            throwY: 150,
+            rotate: -210
+        },
+        {
+            element: forestPan,
+            name: "FRYING PAN",
+            start: 0.37,
+            end: 0.44,
+            throwX: -360,
+            throwY: 130,
+            rotate: -320
+        },
+        {
+            element: forestApple2,
+            name: "ANOTHER APPLE",
+            start: 0.46,
+            end: 0.53,
+            throwX: -290,
+            throwY: 180,
+            rotate: 180
+        },
+        {
+            element: forestRope,
+            name: "ROPE",
+            start: 0.55,
+            end: 0.62,
+            throwX: -350,
+            throwY: 145,
+            rotate: -260
+        },
+        {
+            element: forestCabbage,
+            name: "CABBAGE",
+            start: 0.64,
+            end: 0.71,
+            throwX: -300,
+            throwY: 170,
+            rotate: 240
+        }
+    ];
+
+    let currentItemName = "";
+
+    items.forEach(
+        item => {
+            const appear =
+                easeOutCubic(
+                    mapRange(
+                        p,
+                        item.start,
+                        item.start + 0.025
+                    )
+                );
+
+            const throwProgress =
+                easeInCubic(
+                    mapRange(
+                        p,
+                        item.start + 0.025,
+                        item.end
+                    )
+                );
+
+            const visible =
+                p >= item.start &&
+                p <= item.end + 0.015;
+
+            setOpacity(
+                item.element,
+                visible
+                    ? Math.min(
+                        appear,
+                        1 -
+                        mapRange(
+                            p,
+                            item.end,
+                            item.end + 0.015
+                        )
+                    )
+                    : 0
+            );
+
+            const x =
+                item.throwX *
+                throwProgress;
+
+            const arc =
+                -Math.sin(
+                    throwProgress *
+                    Math.PI
+                ) * 120;
+
+            const y =
+                item.throwY *
+                throwProgress +
+                arc;
+
+            const rotation =
+                item.rotate *
+                throwProgress;
+
+            setTransform(
+                item.element,
+                `translate(${x}px, ${y}px) rotate(${rotation}deg)`
+            );
+
+            if (
+                p >= item.start &&
+                p <= item.end
+            ) {
+                currentItemName =
+                    item.name;
+            }
+        }
+    );
+
+
+    /*
+     * Item name card.
+     */
+
+    if (currentItemName) {
+        itemLabel.textContent =
+            currentItemName;
+
+        setOpacity(
+            itemLabel,
+            1
+        );
+
+        setTransform(
+            itemLabel,
+            `translateX(-50%) rotate(-2deg) scale(1)`
+        );
+    } else {
+        setOpacity(
+            itemLabel,
+            0
+        );
+    }
+
+
+    /*
+     * Finally: sword.
+     */
+
+    const swordIn =
+        easeOutCubic(
+            mapRange(
+                p,
+                0.73,
+                0.79
+            )
+        );
+
+    const swordOut =
+        1 -
+        mapRange(
+            p,
+            0.88,
+            0.91
+        );
+
+    setOpacity(
+        forestSword,
+        Math.min(
+            swordIn,
+            swordOut
+        )
+    );
+
+    setTransform(
+        forestSword,
+        `translateY(${lerp(90, 0, swordIn)}px) rotate(${lerp(-25, 0, swordIn)}deg)`
+    );
+
+    if (
+        p >= 0.73 &&
+        p <= 0.88
+    ) {
+        itemLabel.textContent =
+            "SWORD";
+
+        setOpacity(
+            itemLabel,
+            swordIn
+        );
+
+        setTransform(
+            itemLabel,
+            `translateX(-50%) rotate(-2deg) scale(${lerp(.5, 1.15, swordIn)})`
+        );
+    }
+
+
+    /*
+     * The hero gets his dramatic moment...
+     *
+     * ...and the wolf simply leaves.
+     */
+
+    const wolfLeave =
+        easeInOutCubic(
+            mapRange(
+                p,
+                0.78,
+                0.86
+            )
+        );
+
+    setTransform(
+        wolf,
+        `translateX(${lerp(wolfX, 600, wolfLeave)}px)`
+    );
+
+    setOpacity(
+        wolf,
+        1 -
+        mapRange(
+            p,
+            0.83,
+            0.87
+        )
+    );
+
+
+    /*
+     * Tail disappears a fraction later.
+     */
+
+    const tailIn =
+        mapRange(
+            p,
+            0.82,
+            0.85
+        );
+
+    const tailOut =
+        1 -
+        mapRange(
+            p,
+            0.90,
+            0.94
+        );
+
+    setOpacity(
+        wolfTail,
+        Math.min(
+            tailIn,
+            tailOut
+        )
+    );
+
+    setTransform(
+        wolfTail,
+        `translateX(${mapRange(p, .84, .94, 0, 240)}px)`
+    );
+
+
+    /*
+     * Hero's wordless response.
+     */
+
+    const sighIn =
+        easeOutCubic(
+            mapRange(
+                p,
+                0.91,
+                0.95
+            )
+        );
+
+    setOpacity(
+        forestSigh,
+        sighIn
+    );
+
+    setTransform(
+        forestSigh,
+        `scale(${lerp(.5, 1, sighIn)})`
+    );
+}
+
+
+/* =============================================================
+   DRAGON
+   ============================================================= */
+
+function animateDragon() {
+    const p =
+        sectionProgress(dragonScene);
+
+
+    /*
+     * Giant dramatic dragon reveal.
+     */
+
+    const introIn =
+        easeOutCubic(
+            mapRange(
+                p,
+                0.02,
+                0.10
+            )
+        );
+
+    const introOut =
+        1 -
+        mapRange(
+            p,
+            0.18,
+            0.24
+        );
+
+    setOpacity(
+        dragonIntro,
+        Math.min(
+            introIn,
+            introOut
+        )
+    );
+
+    setTransform(
+        dragonIntro,
+        `translateX(-50%) scale(${lerp(1.7, 1, introIn)})`
+    );
+
+
+    /*
+     * Hero drops the backpack.
+     */
+
+    const bagDrop =
+        easeInCubic(
+            mapRange(
+                p,
+                0.17,
+                0.24
+            )
+        );
+
+    setTransform(
+        dragonBag,
+        `translateY(${bagDrop * 55}px) rotate(${-bagDrop * 8}deg)`
+    );
+
+
+    /*
+     * Neck crack / shoulder preparation.
+     */
+
+    const prep =
+        mapRange(
+            p,
+            0.24,
+            0.34
+        );
+
+    const prepRock =
+        Math.sin(
+            prep *
+            Math.PI *
+            4
+        ) * 5;
+
+    if (
+        p >= 0.24 &&
+        p < 0.34
+    ) {
+        setTransform(
+            dragonHero,
+            `rotate(${prepRock}deg)`
+        );
+    }
+
+
+    /*
+     * Hero charges.
+     */
+
+    const charge =
+        easeInCubic(
+            mapRange(
+                p,
+                0.34,
+                0.48
+            )
+        );
+
+    let heroX =
+        charge * 380;
+
+    let heroY = 0;
+
+    let heroRotation =
+        -charge * 8;
+
+
+    /*
+     * HEROIC COMBAT ROLL.
+     *
+     * Starts impressively.
+     */
+
+    const rollP =
+        mapRange(
+            p,
+            0.48,
+            0.59
+        );
+
+    const roll =
+        easeInOutCubic(
+            rollP
+        );
+
+    if (p >= 0.48) {
+        heroX =
+            380 +
+            roll * 140;
+
+        heroY =
+            -Math.sin(
+                roll *
+                Math.PI
+            ) * 58 +
+            easeInCubic(rollP) * 96;
+
+        heroRotation =
+            roll * 260;
+    }
+
+
+    /*
+     * Hamstring says no.
+     */
+
+    const injury =
+        easeInCubic(
+            mapRange(
+                p,
+                0.575,
+                0.63
+            )
+        );
+
+    if (p >= 0.575) {
+        heroRotation =
+            lerp(
+                heroRotation,
+                82,
+                injury
+            );
+
+        heroY +=
+            injury * 115;
+
+        heroX -=
+            Math.sin(
+                injury * Math.PI
+            ) * 20;
+    }
+
+    setTransform(
+        dragonHero,
+        `translate(${heroX}px, ${heroY}px) rotate(${heroRotation}deg)`
+    );
+
+
+    /*
+     * AAAGH!
+     */
+
+    const screamIn =
+        easeOutCubic(
+            mapRange(
+                p,
+                0.59,
+                0.63
+            )
+        );
+
+    const screamOut =
+        1 -
+        mapRange(
+            p,
+            0.70,
+            0.75
+        );
+
+    setOpacity(
+        hamstringSfx,
+        Math.min(
+            screamIn,
+            screamOut
+        )
+    );
+
+    setTransform(
+        hamstringSfx,
+        `rotate(-11deg) scale(${lerp(.25, 1, screamIn)})`
+    );
+
+
+    /*
+     * Dragon does absolutely nothing.
+     *
+     * Tiny head tilt is funnier than a big reaction.
+     */
+
+    const dragonReaction =
+        easeOutCubic(
+            mapRange(
+                p,
+                0.70,
+                0.78
+            )
+        );
+
+    setTransform(
+        dragon,
+        `rotate(${dragonReaction * 3}deg)`
+    );
+
+
+    /*
+     * Long silence before the line.
+     */
+
+    const speechIn =
+        easeOutCubic(
+            mapRange(
+                p,
+                0.82,
+                0.89
+            )
+        );
+
+    setOpacity(
+        dragonSpeech,
+        speechIn
+    );
+
+    setTransform(
+        dragonSpeech,
+        `scale(${lerp(.65, 1, speechIn)}) rotate(1deg)`
+    );
+}
+
+
+/* =============================================================
+   WALK HOME
+   ============================================================= */
+
+function animateWalkHome() {
+    const p =
+        sectionProgress(walkHome);
+
+    /*
+     * Both characters walk.
+     *
+     * Dragon carries backpack like it weighs approximately nothing.
+     */
+
+    const travel =
+        easeInOutCubic(
+            p
+        );
+
+    const walkCycle =
+        Math.sin(
+            p *
+            Math.PI *
+            18
+        );
+
+    setTransform(
+        walkHero,
+        `translate(${travel * 260}px, ${walkCycle * 5}px) rotate(${walkCycle * 1.5}deg)`
+    );
+
+    setTransform(
+        walkDragon,
+        `translate(${travel * 260}px, ${-walkCycle * 4}px) rotate(${-walkCycle}deg)`
+    );
+}
+
+
+/* =============================================================
+   ENDING SHOP
+   ============================================================= */
+
+function animateEndingShop() {
+    const p =
+        sectionProgress(endingShop);
+
+
+    /*
+     * "Oh, good... you're back."
+     */
+
+    const backSpeechIn =
+        easeOutCubic(
+            mapRange(
+                p,
+                0.03,
+                0.10
+            )
+        );
+
+    const backSpeechOut =
+        1 -
+        mapRange(
+            p,
+            0.20,
+            0.25
+        );
+
+    setOpacity(
+        merchantBackSpeech,
+        Math.min(
+            backSpeechIn,
+            backSpeechOut
+        )
+    );
+
+    setTransform(
+        merchantBackSpeech,
+        `scale(${lerp(.7, 1, backSpeechIn)}) rotate(-1deg)`
+    );
+
+
+    /*
+     * Merchant disappears behind counter.
+     */
+
+    const merchantDuck =
+        easeInOutCubic(
+            mapRange(
+                p,
+                0.22,
+                0.32
+            )
+        );
+
+    let merchantY =
+        merchantDuck * 300;
+
+    if (
+        p >= 0.32
+    ) {
+        merchantY = 300;
+    }
+
+    setTransform(
+        endingMerchant,
+        `translateY(${merchantY}px)`
+    );
+
+
+    /*
+     * Hold empty counter for comedic timing.
+     *
+     * Then the merchant comes back...
+     */
+
+    const merchantReturn =
+        easeOutCubic(
+            mapRange(
+                p,
+                0.43,
+                0.52
+            )
+        );
+
+    if (
+        p >= 0.43
+    ) {
+        merchantY =
+            lerp(
+                300,
+                0,
+                merchantReturn
+            );
+
+        setTransform(
+            endingMerchant,
+            `translateY(${merchantY}px)`
+        );
+    }
+
+
+    /*
+     * ...pushing the absurd arrow cart.
+     */
+
+    const cartEnter =
+        easeOutCubic(
+            mapRange(
+                p,
+                0.43,
+                0.57
+            )
+        );
+
+    const cartX =
+        lerp(
+            600,
+            0,
+            cartEnter
+        );
+
+    setTransform(
+        arrowCart,
+        `translateX(${cartX}px)`
+    );
+
+
+    /*
+     * "You forgot these."
+     */
+
+    const arrowSpeechIn =
+        easeOutCubic(
+            mapRange(
+                p,
+                0.58,
+                0.65
+            )
+        );
+
+    const arrowSpeechOut =
+        1 -
+        mapRange(
+            p,
+            0.75,
+            0.80
+        );
+
+    setOpacity(
+        merchantArrowSpeech,
+        Math.min(
+            arrowSpeechIn,
+            arrowSpeechOut
+        )
+    );
+
+    setTransform(
+        merchantArrowSpeech,
+        `scale(${lerp(.7, 1, arrowSpeechIn)}) rotate(1deg)`
+    );
+
+
+    /*
+     * Hero slowly turns toward the audience.
+     */
+
+    const stare =
+        easeInOutCubic(
+            mapRange(
+                p,
+                0.72,
+                0.82
+            )
+        );
+
+    setOpacity(
+        heroStare,
+        stare
+    );
+
+    setTransform(
+        endingHero,
+        `rotate(${stare * -2}deg) scale(${1 + stare * .04})`
+    );
+
+    setTransform(
+        heroStare,
+        `scale(${lerp(.4, 1, stare)})`
+    );
+
+
+    /*
+     * CUT TO BLACK.
+     *
+     * Intentionally abrupt once the scroll crosses the threshold.
+     */
+
+    const black =
+        easeInCubic(
+            mapRange(
+                p,
+                0.88,
+                0.905
+            )
+        );
+
+    setOpacity(
+        cutBlack,
+        black
+    );
+
+    cutBlack.style.pointerEvents =
+        black > 0.95
+            ? "auto"
+            : "none";
+
+
+    /*
+     * End title waits a moment inside the black.
+     */
+
+    const endTitle =
+        easeOutCubic(
+            mapRange(
+                p,
+                0.93,
+                0.985
+            )
+        );
+
+    const inner =
+        cutBlack.querySelector(
+            ".cut-black-inner"
+        );
+
+    if (inner) {
+        inner.style.opacity =
+            String(endTitle);
+
+        inner.style.transform =
+            `translateY(${lerp(30, 0, endTitle)}px) scale(${lerp(.96, 1, endTitle)})`;
+    }
+}
+
+    /* =============================================================
+       GLOBAL PROGRESS
+       ============================================================= */
+
+    function animateGlobalProgress() {
+        const maxScroll =
+            document.documentElement.scrollHeight -
+            window.innerHeight;
+
+        const progress =
+            maxScroll > 0
+                ? window.scrollY / maxScroll
+                : 0;
+
+        scrollProgress.style.width =
+            `${clamp(progress) * 100}%`;
+    }
+
+
+    /* =============================================================
+       ANIMATION LOOP
+       ============================================================= */
+
+    let ticking = false;
+
+    function render() {
+    ticking = false;
+
+    animateGlobalProgress();
+
+    animateIntro();
+    animateShop();
+    animateJourney();
+    animateLedge();
+    animateRiver();
+
+    animateForest();
+    animateDragon();
+    animateWalkHome();
+    animateEndingShop();
+}
+
+    function requestRender() {
+        if (ticking) {
+            return;
+        }
+
+        ticking = true;
+
+        requestAnimationFrame(render);
+    }
+
+    window.addEventListener(
+        "scroll",
+        requestRender,
+        {
+            passive: true
+        }
+    );
+
+    window.addEventListener(
+        "resize",
+        requestRender,
+        {
+            passive: true
+        }
+    );
+
+    render();
+
+
+    /* =============================================================
+       COPYRIGHT
+       ============================================================= */
+
+    (() => {
+        const startYear = 2019;
+        const currentYear =
+            new Date().getFullYear();
+
+        const yearText =
+            currentYear > startYear
+                ? `${startYear}–${currentYear}`
+                : `${startYear}`;
+
+        const copyright =
+            document.getElementById("copyright");
+
+        if (copyright) {
+            copyright.textContent =
+                `© ${yearText} Unlim8ted Studio Productions. All rights reserved.`;
+        }
+    })();
+</script>
+
+</body>
+</html>

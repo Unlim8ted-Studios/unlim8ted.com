@@ -1,0 +1,3441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#89c95b">
+
+<title>The Hole — Unlim8ted</title>
+<meta name="description" content="Two kids discover a tiny hole in the backyard. This becomes a problem.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The Hole — Unlim8ted">
+<meta property="og:description" content="Two kids discover a tiny hole in the backyard. This becomes a problem.">
+
+<script type="module" src="https://unlim8ted.com/components/site-navbar.js"></script>
+
+<script type="module">
+import { getFirebase } from "/components/firebase-init.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+const { auth } = getFirebase();
+
+onAuthStateChanged(auth, user => {
+    document.documentElement.dataset.signedIn = user ? "true" : "false";
+});
+</script>
+
+<style>
+:root {
+    --ink:#181a18;
+    --paper:#f8f2df;
+    --cream:#fff9e9;
+    --grass:#89c95b;
+    --grass-dark:#4d8e43;
+    --grass-light:#b9df7d;
+    --sky:#9bd9e9;
+    --sky-light:#dff5f7;
+    --dirt:#9b6a42;
+    --dirt-dark:#68462e;
+    --red:#df5545;
+    --yellow:#f4c84c;
+    --blue:#477ba5;
+    --night:#172536;
+    --night2:#263c50;
+    --white:#fffdf4;
+}
+
+* {
+    box-sizing:border-box;
+}
+
+html {
+    scroll-behavior:smooth;
+}
+
+body {
+    margin:0;
+    color:var(--ink);
+    background:
+        radial-gradient(circle at 12px 12px,rgba(20,20,20,.025) 1px,transparent 1.2px) 0 0/24px 24px,
+        var(--paper);
+    font-family:"Trebuchet MS",Arial,sans-serif;
+    overflow-x:hidden;
+}
+
+svg {
+    display:block;
+}
+
+site-navbar {
+    position:relative;
+    z-index:9999;
+}
+
+.nav-space {
+    height:64px;
+}
+
+.progress {
+    position:fixed;
+    z-index:10000;
+    left:0;
+    top:0;
+    width:0;
+    height:4px;
+    background:var(--red);
+}
+
+/* ============================================================
+   LANDSCAPE NOTICE
+   ============================================================ */
+
+.landscape-notice {
+    position:fixed;
+    z-index:9990;
+    left:50%;
+    bottom:14px;
+    display:none;
+    align-items:center;
+    gap:9px;
+    padding:9px 13px;
+    border:3px solid var(--ink);
+    border-radius:999px;
+    background:#fff;
+    box-shadow:4px 4px 0 var(--ink);
+    transform:translateX(-50%);
+    font-size:.72rem;
+    font-weight:900;
+    white-space:nowrap;
+}
+
+.landscape-notice svg {
+    width:22px;
+    height:22px;
+}
+
+@media (max-width:720px) and (orientation:portrait) {
+    .landscape-notice {
+        display:flex;
+    }
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+
+.hero {
+    position:relative;
+    height:calc(100vh - 64px);
+    min-height:620px;
+    overflow:hidden;
+    border-bottom:4px solid var(--ink);
+    background:var(--sky);
+}
+
+.hero-world {
+    position:absolute;
+    inset:-8%;
+    transform-origin:50% 65%;
+    will-change:transform;
+}
+
+.sky {
+    position:absolute;
+    inset:0 0 35%;
+    background:
+        radial-gradient(circle at 75% 18%,#fff 0 28px,transparent 29px),
+        radial-gradient(circle at 79% 18%,#fff 0 39px,transparent 40px),
+        radial-gradient(circle at 83% 20%,#fff 0 28px,transparent 29px),
+        linear-gradient(var(--sky-light),var(--sky));
+}
+
+.grass {
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    height:39%;
+    border-top:4px solid var(--ink);
+    background:
+        repeating-linear-gradient(
+            100deg,
+            transparent 0 28px,
+            rgba(35,90,38,.1) 29px 31px,
+            transparent 32px 57px
+        ),
+        var(--grass);
+}
+
+.fence {
+    position:absolute;
+    left:-10px;
+    right:-10px;
+    bottom:32%;
+    height:125px;
+    display:flex;
+    gap:2px;
+    align-items:end;
+    opacity:.95;
+}
+
+.fence span {
+    flex:1;
+    height:100%;
+    border:3px solid var(--ink);
+    background:#e5c68f;
+    clip-path:polygon(50% 0,100% 18%,100% 100%,0 100%,0 18%);
+}
+
+.hero-sun {
+    position:absolute;
+    top:10%;
+    right:8%;
+    width:105px;
+    height:105px;
+    border:4px solid var(--ink);
+    border-radius:50%;
+    background:var(--yellow);
+    box-shadow:8px 8px 0 rgba(24,26,24,.12);
+}
+
+.hero-title {
+    position:absolute;
+    z-index:30;
+    top:11%;
+    left:50%;
+    width:min(800px,90%);
+    transform:translateX(-50%) rotate(-2deg);
+    text-align:center;
+    will-change:transform,opacity;
+}
+
+.hero-kicker {
+    display:inline-block;
+    padding:7px 13px;
+    border:3px solid var(--ink);
+    background:white;
+    box-shadow:4px 4px 0 var(--ink);
+    font-size:.8rem;
+    font-weight:900;
+    letter-spacing:.16em;
+}
+
+.hero h1 {
+    margin:22px 0 0;
+    font-family:Impact,"Arial Black",sans-serif;
+    font-size:clamp(5.2rem,16vw,11rem);
+    line-height:.78;
+    letter-spacing:-.035em;
+    color:#fff6d8;
+    -webkit-text-stroke:5px var(--ink);
+    paint-order:stroke fill;
+    text-shadow:10px 10px 0 var(--red);
+}
+
+.hero-sub {
+    display:inline-block;
+    margin-top:25px;
+    padding:11px 18px;
+    border:3px solid var(--ink);
+    background:white;
+    box-shadow:5px 5px 0 var(--ink);
+    font-weight:900;
+    transform:rotate(1deg);
+}
+
+.scroll-cue {
+    position:absolute;
+    z-index:40;
+    right:24px;
+    bottom:20px;
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:8px 12px;
+    border:3px solid var(--ink);
+    border-radius:999px;
+    background:white;
+    font-size:.75rem;
+    font-weight:900;
+}
+
+.scroll-cue svg {
+    width:18px;
+    animation:scrollBob .7s infinite alternate ease-in-out;
+}
+
+@keyframes scrollBob {
+    to { transform:translateY(5px); }
+}
+
+/* ============================================================
+   CHARACTER
+   ============================================================ */
+
+.kid {
+    --shirt:#e65343;
+    --shorts:#354d72;
+
+    position:absolute;
+    z-index:10;
+    width:180px;
+    height:290px;
+    transform-origin:50% 100%;
+    will-change:transform;
+}
+
+.kid.miles {
+    --shirt:#4f82ae;
+    --shorts:#735139;
+}
+
+.kid-body {
+    position:absolute;
+    inset:0;
+    transform-origin:50% 90%;
+    will-change:transform;
+}
+
+.kid .head-group {
+    position:absolute;
+    z-index:8;
+    left:0;
+    top:0;
+    width:180px;
+    height:115px;
+    transform-origin:50% 90%;
+    will-change:transform;
+}
+
+.kid .head {
+    position:absolute;
+    left:47px;
+    top:15px;
+    width:91px;
+    height:91px;
+    border:4px solid var(--ink);
+    border-radius:49% 51% 45% 55%;
+    background:#f0b87f;
+}
+
+.kid .ear {
+    position:absolute;
+    top:50px;
+    width:19px;
+    height:27px;
+    border:4px solid var(--ink);
+    border-radius:50%;
+    background:#f0b87f;
+}
+
+.kid .ear.left { left:38px; }
+.kid .ear.right { left:128px; }
+
+.kid .hair {
+    position:absolute;
+    z-index:6;
+    left:43px;
+    top:3px;
+    width:101px;
+    height:51px;
+}
+
+.kid .hair::before,
+.kid .hair::after {
+    content:"";
+    position:absolute;
+    background:var(--ink);
+}
+
+.kid .hair::before {
+    left:8px;
+    top:15px;
+    width:79px;
+    height:32px;
+    border-radius:55% 50% 30% 25%;
+    transform:rotate(-6deg);
+}
+
+.kid .hair::after {
+    left:59px;
+    top:2px;
+    width:23px;
+    height:42px;
+    clip-path:polygon(50% 0,100% 100%,0 78%);
+    transform:rotate(22deg);
+}
+
+.kid.miles .hair::before {
+    border-radius:50%;
+    transform:rotate(5deg);
+    width:85px;
+    left:3px;
+}
+
+.kid.miles .hair::after {
+    left:13px;
+    top:0;
+    transform:rotate(-20deg);
+}
+
+.kid .eye {
+    position:absolute;
+    z-index:7;
+    top:55px;
+    width:8px;
+    height:11px;
+    border-radius:50%;
+    background:var(--ink);
+    transform-origin:center;
+}
+
+.kid .eye.left { left:72px; }
+.kid .eye.right { left:109px; }
+
+.kid .brow {
+    position:absolute;
+    z-index:7;
+    top:44px;
+    width:20px;
+    height:4px;
+    border-radius:50%;
+    background:var(--ink);
+}
+
+.kid .brow.left {
+    left:64px;
+    transform:rotate(-7deg);
+}
+
+.kid .brow.right {
+    left:105px;
+    transform:rotate(8deg);
+}
+
+.kid .mouth {
+    position:absolute;
+    z-index:7;
+    left:85px;
+    top:80px;
+    width:20px;
+    height:9px;
+    border-bottom:4px solid var(--ink);
+    border-radius:50%;
+}
+
+.kid .neck {
+    position:absolute;
+    z-index:2;
+    left:78px;
+    top:96px;
+    width:30px;
+    height:28px;
+    border:4px solid var(--ink);
+    background:#f0b87f;
+}
+
+.kid .torso {
+    position:absolute;
+    z-index:3;
+    left:47px;
+    top:112px;
+    width:92px;
+    height:101px;
+    border:4px solid var(--ink);
+    border-radius:25px 25px 18px 18px;
+    background:var(--shirt);
+}
+
+.kid .arm {
+    position:absolute;
+    z-index:2;
+    top:124px;
+    width:27px;
+    height:96px;
+    border:4px solid var(--ink);
+    border-radius:18px;
+    background:#f0b87f;
+    transform-origin:50% 10%;
+    will-change:transform;
+}
+
+.kid .arm.left {
+    left:30px;
+    transform:rotate(11deg);
+}
+
+.kid .arm.right {
+    left:129px;
+    transform:rotate(-11deg);
+}
+
+.kid .shorts {
+    position:absolute;
+    z-index:4;
+    left:48px;
+    top:195px;
+    width:90px;
+    height:42px;
+    border:4px solid var(--ink);
+    border-radius:7px 7px 13px 13px;
+    background:var(--shorts);
+}
+
+.kid .leg {
+    position:absolute;
+    z-index:2;
+    top:226px;
+    width:31px;
+    height:59px;
+    border:4px solid var(--ink);
+    border-radius:0 0 15px 15px;
+    background:#f0b87f;
+    transform-origin:50% 0;
+}
+
+.kid .leg.left { left:55px; }
+.kid .leg.right { left:102px; }
+
+.kid .shoe {
+    position:absolute;
+    z-index:5;
+    top:270px;
+    width:49px;
+    height:20px;
+    border:4px solid var(--ink);
+    border-radius:50% 55% 12px 12px;
+    background:#f5f1dc;
+}
+
+.kid .shoe.left {
+    left:42px;
+    transform:rotate(-2deg);
+}
+
+.kid .shoe.right {
+    left:96px;
+    transform:rotate(3deg);
+}
+
+.kid.suspicious .brow.left { transform:rotate(17deg); }
+.kid.suspicious .brow.right { transform:rotate(-17deg); }
+
+.kid.suspicious .mouth {
+    width:16px;
+    height:3px;
+    border-radius:0;
+}
+
+.kid.shocked .mouth {
+    left:86px;
+    width:18px;
+    height:23px;
+    border:4px solid var(--ink);
+    background:#7b342f;
+    border-radius:50%;
+}
+
+.kid.talking .mouth {
+    left:84px;
+    width:23px;
+    height:15px;
+    border:4px solid var(--ink);
+    border-radius:45%;
+    background:#7b342f;
+}
+
+.kid.pointing .arm.right {
+    left:137px;
+    top:132px;
+    height:110px;
+    transform:rotate(-80deg);
+}
+
+/* idle life */
+
+.kid.alive .kid-body {
+    animation:kidBreath 2.7s ease-in-out infinite;
+}
+
+.kid.alive .head-group {
+    animation:headIdle 4.3s ease-in-out infinite;
+}
+
+.kid.alive .eye {
+    animation:blink 5.2s infinite;
+}
+
+.kid.miles.alive .kid-body {
+    animation-delay:-1.2s;
+}
+
+.kid.miles.alive .head-group {
+    animation-delay:-2.3s;
+}
+
+.kid.miles.alive .eye {
+    animation-delay:-2.1s;
+}
+
+@keyframes kidBreath {
+    0%,100% { transform:translateY(0) scaleY(1); }
+    50% { transform:translateY(-2px) scaleY(1.008); }
+}
+
+@keyframes headIdle {
+    0%,100% { transform:rotate(-1deg); }
+    45% { transform:rotate(1.2deg); }
+    65% { transform:rotate(.2deg); }
+}
+
+@keyframes blink {
+    0%,43%,46%,100% { transform:scaleY(1); }
+    44%,45% { transform:scaleY(.08); }
+}
+
+.kid.look-down .head-group {
+    animation:none;
+    transform:translateY(5px) rotate(7deg);
+}
+
+.kid.look-right .head-group {
+    animation:none;
+    transform:rotate(6deg) translateX(2px);
+}
+
+.kid.look-left .head-group {
+    animation:none;
+    transform:rotate(-6deg) translateX(-2px);
+}
+
+.kid.recoil .kid-body {
+    animation:recoil .45s cubic-bezier(.2,1.4,.3,1) both;
+}
+
+@keyframes recoil {
+    0% { transform:translateY(0) rotate(0); }
+    35% { transform:translateY(-14px) rotate(-4deg); }
+    100% { transform:translateY(0) rotate(0); }
+}
+
+/* ============================================================
+   HOLE
+   ============================================================ */
+
+.hole {
+    position:absolute;
+    z-index:8;
+    width:76px;
+    height:27px;
+    border:4px solid var(--ink);
+    border-radius:50%;
+    background:#191716;
+    box-shadow:
+        inset 0 5px 0 #563824,
+        0 6px 0 rgba(70,43,25,.25);
+}
+
+.hole::before {
+    content:"";
+    position:absolute;
+    z-index:-1;
+    left:-17px;
+    right:-17px;
+    top:-8px;
+    bottom:-9px;
+    border-radius:50%;
+    background:#9c6b44;
+    transform:rotate(-4deg);
+}
+
+/* ============================================================
+   SCROLL STORY
+   ============================================================ */
+
+.comic {
+    width:min(1120px,calc(100% - 28px));
+    margin:auto;
+}
+
+.story {
+    position:relative;
+    height:var(--story-height,300vh);
+}
+
+.stage {
+    position:sticky;
+    top:64px;
+    height:calc(100vh - 64px);
+    min-height:540px;
+    overflow:hidden;
+    border:4px solid var(--ink);
+    border-radius:18px;
+    background:var(--white);
+    box-shadow:7px 8px 0 rgba(24,26,24,.14);
+    isolation:isolate;
+}
+
+.world {
+    position:absolute;
+    inset:-4%;
+    overflow:hidden;
+    transform-origin:center;
+    will-change:transform;
+}
+
+.story-gap {
+    height:10vh;
+}
+
+/* ============================================================
+   DIALOGUE
+   ============================================================ */
+
+.beat {
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transform:translateY(18px) scale(.93);
+    transition:
+        opacity .18s ease,
+        transform .28s cubic-bezier(.2,1.4,.35,1),
+        visibility 0s linear .28s;
+}
+
+.beat.on {
+    opacity:1;
+    visibility:visible;
+    pointer-events:auto;
+    transform:translateY(0) scale(1);
+    transition:
+        opacity .18s ease,
+        transform .28s cubic-bezier(.2,1.4,.35,1),
+        visibility 0s;
+}
+
+.speech {
+    --tail-x:32px;
+    position:absolute;
+    z-index:30;
+    max-width:280px;
+    padding:13px 17px;
+    border:3px solid var(--ink);
+    border-radius:22px;
+    background:white;
+    box-shadow:3px 4px 0 rgba(24,26,24,.12);
+    font-size:1.04rem;
+    font-weight:800;
+    line-height:1.28;
+}
+
+.speech::after {
+    content:"";
+    position:absolute;
+    bottom:-17px;
+    left:var(--tail-x);
+    width:23px;
+    height:23px;
+    background:white;
+    border-right:3px solid var(--ink);
+    border-bottom:3px solid var(--ink);
+    transform:skew(15deg) rotate(40deg);
+}
+
+.speech.right::after {
+    left:auto;
+    right:var(--tail-x);
+    transform:skew(-15deg) rotate(50deg);
+}
+
+.caption {
+    position:absolute;
+    z-index:25;
+    max-width:330px;
+    padding:10px 15px;
+    border:3px solid var(--ink);
+    background:#fff8c9;
+    box-shadow:4px 4px 0 var(--ink);
+    font-family:Georgia,serif;
+    font-weight:700;
+    line-height:1.35;
+}
+
+.sound {
+    position:absolute;
+    z-index:35;
+    font-family:Impact,"Arial Black",sans-serif;
+    font-weight:900;
+    letter-spacing:.04em;
+    -webkit-text-stroke:2px var(--ink);
+    paint-order:stroke fill;
+    text-shadow:4px 4px 0 rgba(24,26,24,.2);
+}
+
+.sound.on {
+    animation:soundHit .35s cubic-bezier(.1,1.6,.3,1) both;
+}
+
+@keyframes soundHit {
+    0% { opacity:0; transform:scale(.3) rotate(-12deg); }
+    70% { opacity:1; transform:scale(1.18) rotate(3deg); }
+    100% { opacity:1; transform:scale(1) rotate(0); }
+}
+
+.note {
+    position:absolute;
+    z-index:20;
+    padding:8px 10px;
+    border:2px solid var(--ink);
+    background:#fff5ad;
+    font-family:"Courier New",monospace;
+    font-weight:900;
+    box-shadow:3px 3px 0 rgba(24,26,24,.18);
+}
+
+/* ============================================================
+   STORY 1
+   ============================================================ */
+
+.discovery .evan {
+    left:15%;
+    bottom:7%;
+}
+
+.discovery .miles {
+    right:13%;
+    bottom:7%;
+}
+
+.discovery .hole {
+    left:50%;
+    bottom:19%;
+    transform:translateX(-50%);
+}
+
+.discovery .b1 { right:9%; top:10%; }
+.discovery .b2 { left:8%; top:27%; }
+.discovery .b3 { right:8%; bottom:12%; }
+.discovery .b4 { left:9%; top:10%; }
+.discovery .b5 { right:8%; top:20%; }
+
+/* ============================================================
+   STORY 2
+   ============================================================ */
+
+.investigation .evan {
+    left:12%;
+    bottom:5%;
+}
+
+.investigation .miles {
+    right:12%;
+    bottom:5%;
+}
+
+.investigation .hole {
+    left:50%;
+    bottom:17%;
+    transform:translateX(-50%);
+}
+
+.stick {
+    position:absolute;
+    z-index:18;
+    left:55%;
+    bottom:20%;
+    width:9px;
+    height:220px;
+    border:3px solid var(--ink);
+    border-radius:10px;
+    background:#9c6a3e;
+    transform:rotate(28deg);
+    transform-origin:bottom;
+}
+
+.investigation .b1 { right:8%; top:10%; }
+.investigation .b2 { left:7%; top:11%; font-size:1.35rem; }
+.investigation .b3 { left:27%; bottom:8%; }
+.investigation .b4 { left:8%; top:10%; }
+.investigation .b5 { right:8%; top:17%; }
+
+.gear {
+    position:absolute;
+    inset:0;
+    z-index:15;
+    opacity:0;
+    pointer-events:none;
+    background:#f6e8b9;
+    transition:opacity .25s ease;
+}
+
+.gear.on {
+    opacity:1;
+}
+
+.gear-floor {
+    position:absolute;
+    inset:55% 0 0;
+    border-top:4px solid var(--ink);
+    background:#c6a86e;
+}
+
+.gear svg {
+    position:absolute;
+    filter:drop-shadow(4px 5px 0 rgba(24,26,24,.14));
+}
+
+.flashlight { left:8%; bottom:15%; width:140px; transform:rotate(-17deg); }
+.helmet { left:28%; bottom:13%; width:145px; }
+.tongs { left:48%; bottom:13%; width:120px; transform:rotate(12deg); }
+.racket { right:20%; bottom:8%; width:150px; transform:rotate(-12deg); }
+.shovel { right:4%; bottom:4%; width:110px; transform:rotate(8deg); }
+
+.gear .caption {
+    left:5%;
+    top:6%;
+}
+
+.gear .speech.one {
+    left:7%;
+    top:20%;
+}
+
+.gear .speech.two {
+    right:8%;
+    top:15%;
+}
+
+/* ============================================================
+   STORY 3
+   ============================================================ */
+
+.contact .evan {
+    left:12%;
+    bottom:5%;
+}
+
+.contact .miles {
+    right:11%;
+    bottom:5%;
+}
+
+.contact .hole {
+    left:50%;
+    bottom:16%;
+    transform:translateX(-50%);
+}
+
+.string {
+    position:absolute;
+    z-index:15;
+    left:43%;
+    bottom:20%;
+    width:160px;
+    height:190px;
+    border-right:3px solid var(--ink);
+    border-top:3px solid var(--ink);
+    border-radius:0 100% 0 0;
+    transform:rotate(8deg);
+}
+
+.cheese {
+    position:absolute;
+    z-index:17;
+    left:calc(50% + 17px);
+    bottom:20%;
+    width:47px;
+    height:39px;
+    border:3px solid var(--ink);
+    background:
+        radial-gradient(circle at 25% 30%,#d39c29 0 4px,transparent 5px),
+        radial-gradient(circle at 68% 65%,#d39c29 0 5px,transparent 6px),
+        #f6ca4d;
+    clip-path:polygon(0 22%,100% 0,85% 100%,8% 90%);
+    transform-origin:top center;
+}
+
+.cheese.dangle {
+    animation:dangle 1.4s ease-in-out infinite alternate;
+}
+
+@keyframes dangle {
+    from { transform:rotate(-8deg); }
+    to { transform:rotate(8deg); }
+}
+
+.cheese.yanked {
+    animation:cheeseYank .25s cubic-bezier(.5,0,1,.3) forwards;
+}
+
+@keyframes cheeseYank {
+    to {
+        transform:translateY(95px) scale(.25);
+        opacity:0;
+    }
+}
+
+.contact .b1 { right:8%; top:10%; }
+.contact .b2 { left:7%; top:23%; }
+.contact .fwip {
+    left:50%;
+    top:35%;
+    transform:translate(-50%,-50%);
+    color:var(--yellow);
+    font-size:clamp(3rem,8vw,6rem);
+}
+.contact .b3 { left:7%; top:9%; }
+.contact .b4 { right:6%; top:10%; }
+
+/* underground overlay */
+
+.underground {
+    position:absolute;
+    z-index:60;
+    inset:0;
+    opacity:0;
+    pointer-events:none;
+    background:
+        repeating-linear-gradient(
+            7deg,
+            transparent 0 35px,
+            rgba(75,45,27,.3) 36px 39px,
+            transparent 40px 75px
+        ),
+        #8c5e3d;
+    transition:opacity .3s ease;
+}
+
+.underground.on {
+    opacity:1;
+}
+
+.tunnel {
+    position:absolute;
+    left:50%;
+    top:55%;
+    width:72%;
+    height:190px;
+    transform:translate(-50%,-50%);
+    border:5px solid var(--ink);
+    border-radius:50%;
+    background:#4b3426;
+}
+
+.mouse {
+    position:absolute;
+    z-index:10;
+    left:50%;
+    top:56%;
+    width:220px;
+    height:130px;
+    transform:translate(-50%,-50%);
+}
+
+.mouse-body {
+    position:absolute;
+    left:38px;
+    top:33px;
+    width:140px;
+    height:82px;
+    border:4px solid var(--ink);
+    border-radius:60% 55% 50% 45%;
+    background:#9a8c7b;
+}
+
+.mouse-head {
+    position:absolute;
+    left:5px;
+    top:37px;
+    width:82px;
+    height:68px;
+    border:4px solid var(--ink);
+    border-radius:55% 45% 50% 50%;
+    background:#a99a87;
+}
+
+.mouse-ear {
+    position:absolute;
+    left:40px;
+    top:14px;
+    width:42px;
+    height:42px;
+    border:4px solid var(--ink);
+    border-radius:50%;
+    background:#c9928b;
+}
+
+.mouse-eye {
+    position:absolute;
+    z-index:5;
+    left:24px;
+    top:58px;
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--ink);
+}
+
+.mouse-tail {
+    position:absolute;
+    left:168px;
+    top:55px;
+    width:90px;
+    height:55px;
+    border-top:5px solid #c9928b;
+    border-radius:50%;
+    transform:rotate(12deg);
+}
+
+.mouse-cheese {
+    position:absolute;
+    z-index:8;
+    left:1px;
+    top:88px;
+    width:43px;
+    height:34px;
+    border:3px solid var(--ink);
+    background:var(--yellow);
+    transform:rotate(9deg);
+}
+
+.underground .caption {
+    left:50%;
+    top:7%;
+    transform:translateX(-50%) rotate(-1deg);
+}
+
+/* ============================================================
+   MAP
+   ============================================================ */
+
+.map-scene .world {
+    background:
+        linear-gradient(rgba(255,255,255,.65),rgba(255,255,255,.65)),
+        repeating-linear-gradient(0deg,transparent 0 29px,#9db6d1 30px 31px),
+        repeating-linear-gradient(90deg,transparent 0 29px,#9db6d1 30px 31px),
+        #dce8ed;
+}
+
+.map {
+    position:absolute;
+    z-index:5;
+    left:50%;
+    top:53%;
+    width:min(680px,76%);
+    height:430px;
+    transform:translate(-50%,-50%) rotate(-1deg);
+    border:4px solid var(--ink);
+    background:#f8e6aa;
+    box-shadow:8px 8px 0 rgba(24,26,24,.18);
+}
+
+.map::after {
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+        repeating-linear-gradient(7deg,transparent 0 60px,rgba(85,67,38,.08) 61px 63px);
+    pointer-events:none;
+}
+
+.map-hole {
+    position:absolute;
+    left:46%;
+    top:42%;
+    width:70px;
+    height:30px;
+    border:4px solid var(--ink);
+    border-radius:50%;
+    background:#222;
+}
+
+.map-house {
+    position:absolute;
+    right:8%;
+    top:19%;
+    width:145px;
+    height:110px;
+    border:4px solid var(--ink);
+    background:#ef725f;
+}
+
+.map-house::before {
+    content:"";
+    position:absolute;
+    left:-19px;
+    top:-69px;
+    width:175px;
+    height:85px;
+    border:4px solid var(--ink);
+    background:#704a3d;
+    clip-path:polygon(50% 0,100% 100%,0 100%);
+}
+
+.map-tunnel {
+    position:absolute;
+    left:48%;
+    top:47%;
+    width:320px;
+    height:170px;
+    border-bottom:7px dashed var(--red);
+    border-radius:50%;
+    transform:rotate(-20deg);
+}
+
+.map-label {
+    position:absolute;
+    font-family:"Comic Sans MS","Trebuchet MS",sans-serif;
+    font-weight:900;
+}
+
+.hole-label { left:34%; top:32%; }
+.known { left:9%; top:18%; transform:rotate(5deg); }
+.tunnels { left:20%; bottom:15%; transform:rotate(-5deg); }
+.ambush { right:6%; bottom:12%; color:var(--red); transform:rotate(6deg); }
+.canada { left:8%; bottom:4%; font-size:1.5rem; transform:rotate(-9deg); }
+
+.map-scene .b1 { left:3%; top:8%; }
+.map-scene .b2 { right:3%; top:9%; }
+
+/* ============================================================
+   KITCHEN
+   ============================================================ */
+
+.kitchen .world {
+    background:#f7e7c8;
+}
+
+.kitchen-wall {
+    position:absolute;
+    inset:0 0 34%;
+    background:
+        repeating-linear-gradient(0deg,transparent 0 60px,rgba(80,60,40,.07) 61px 63px),
+        #f7e7c8;
+}
+
+.kitchen-floor {
+    position:absolute;
+    inset:66% 0 0;
+    border-top:4px solid var(--ink);
+    background:
+        repeating-linear-gradient(90deg,#d49c65 0 90px,#c78e5b 91px 180px);
+}
+
+.counter {
+    position:absolute;
+    left:0;
+    right:0;
+    top:41%;
+    height:110px;
+    border-top:4px solid var(--ink);
+    border-bottom:4px solid var(--ink);
+    background:#a4b9b2;
+}
+
+.mom {
+    position:absolute;
+    z-index:12;
+    left:8%;
+    bottom:6%;
+    width:185px;
+    height:360px;
+}
+
+.mom .head {
+    position:absolute;
+    left:47px;
+    top:12px;
+    width:96px;
+    height:105px;
+    border:4px solid var(--ink);
+    border-radius:50%;
+    background:#efb67f;
+}
+
+.mom .hair {
+    position:absolute;
+    z-index:3;
+    left:36px;
+    top:0;
+    width:117px;
+    height:73px;
+    border:4px solid var(--ink);
+    border-radius:60% 60% 40% 35%;
+    background:#593d2d;
+}
+
+.mom .hair::after {
+    content:"";
+    position:absolute;
+    right:-23px;
+    top:19px;
+    width:55px;
+    height:65px;
+    border:4px solid var(--ink);
+    border-radius:50%;
+    background:#593d2d;
+}
+
+.mom .body {
+    position:absolute;
+    left:39px;
+    top:107px;
+    width:112px;
+    height:168px;
+    border:4px solid var(--ink);
+    border-radius:28px 28px 10px 10px;
+    background:#d57469;
+}
+
+.mom .leg {
+    position:absolute;
+    top:267px;
+    width:35px;
+    height:90px;
+    border:4px solid var(--ink);
+    background:#4d6176;
+}
+
+.mom .leg.l { left:54px; }
+.mom .leg.r { left:104px; }
+
+.kitchen .evan {
+    left:43%;
+    bottom:4%;
+    transform:scale(.9);
+}
+
+.kitchen .miles {
+    right:5%;
+    bottom:4%;
+    transform:scale(.9);
+}
+
+.kitchen .b1 { left:4%; top:8%; }
+.kitchen .b2 { left:36%; top:12%; }
+.kitchen .b3 { right:4%; top:29%; }
+.kitchen .b4 { left:7%; bottom:11%; }
+.kitchen .b5 { left:7%; top:9%; }
+.kitchen .b6 { right:7%; bottom:12%; }
+.kitchen .b7 { left:6%; top:10%; }
+.kitchen .b8 { right:6%; top:17%; }
+.kitchen .b9 { left:12%; top:12%; font-size:1.35rem; }
+
+.supply {
+    position:absolute;
+    z-index:9;
+    border:3px solid var(--ink);
+}
+
+.can {
+    width:42px;
+    height:55px;
+    border-radius:7px;
+    background:#df6657;
+}
+
+.tp {
+    width:58px;
+    height:45px;
+    border-radius:50%;
+    background:
+        radial-gradient(circle,#c7bfa9 0 7px,white 8px 100%);
+}
+
+/* ============================================================
+   NIGHT
+   ============================================================ */
+
+.night .world {
+    color:#f9f5dc;
+    background:var(--night);
+}
+
+.night-sky {
+    position:absolute;
+    inset:0 0 35%;
+    background:
+        radial-gradient(circle at 12% 20%,white 0 2px,transparent 3px),
+        radial-gradient(circle at 31% 12%,white 0 2px,transparent 3px),
+        radial-gradient(circle at 52% 24%,white 0 2px,transparent 3px),
+        radial-gradient(circle at 71% 11%,white 0 2px,transparent 3px),
+        radial-gradient(circle at 88% 26%,white 0 2px,transparent 3px),
+        linear-gradient(#0d1724,#263b51);
+}
+
+.night-grass {
+    position:absolute;
+    inset:65% 0 0;
+    border-top:4px solid var(--ink);
+    background:#31553a;
+}
+
+.moon {
+    position:absolute;
+    right:8%;
+    top:9%;
+    width:82px;
+    height:82px;
+    border:4px solid var(--ink);
+    border-radius:50%;
+    background:#f5e9ad;
+}
+
+.command-sign {
+    position:absolute;
+    z-index:12;
+    left:5%;
+    top:22%;
+    padding:14px;
+    border:4px solid var(--ink);
+    background:#e6c176;
+    color:var(--ink);
+    box-shadow:6px 6px 0 rgba(0,0,0,.3);
+    font-family:"Arial Black",sans-serif;
+    transform:rotate(-5deg);
+}
+
+.command-sign::before,
+.command-sign::after {
+    content:"";
+    position:absolute;
+    top:100%;
+    width:7px;
+    height:140px;
+    background:#725032;
+    border:2px solid var(--ink);
+}
+
+.command-sign::before { left:20px; }
+.command-sign::after { right:20px; }
+
+.bush {
+    position:absolute;
+    z-index:8;
+    left:50%;
+    bottom:12%;
+    width:360px;
+    height:145px;
+    transform:translateX(-50%);
+}
+
+.bush::before,
+.bush::after {
+    content:"";
+    position:absolute;
+    border:4px solid var(--ink);
+    background:#284d32;
+    border-radius:50%;
+}
+
+.bush::before { inset:30px 0 0; }
+
+.bush::after {
+    left:70px;
+    top:0;
+    width:190px;
+    height:130px;
+}
+
+.night .evan {
+    left:34%;
+    bottom:8%;
+    transform:scale(.67);
+}
+
+.night .miles {
+    right:32%;
+    bottom:8%;
+    transform:scale(.67);
+}
+
+.night .hole {
+    right:14%;
+    bottom:14%;
+    background:#080808;
+}
+
+.night .b1 { left:24%; top:9%; color:var(--ink); }
+.night .b2 { right:24%; top:24%; color:var(--ink); }
+.night .b3 { left:10%; top:12%; color:var(--ink); }
+.night .b4 { left:38%; bottom:13%; color:var(--ink); }
+.night .b5 { right:5%; top:12%; color:var(--ink); }
+
+.rustle {
+    left:50%;
+    top:20%;
+    color:#f5df8d;
+    font-size:clamp(2.8rem,7vw,4.5rem);
+    transform:translateX(-50%);
+}
+
+.chipmunk {
+    position:absolute;
+    z-index:17;
+    right:12%;
+    bottom:14%;
+    width:145px;
+    height:120px;
+    opacity:0;
+    transform:translateY(30px) scale(.7);
+    transition:opacity .2s ease,transform .35s cubic-bezier(.2,1.5,.3,1);
+}
+
+.chipmunk.on {
+    opacity:1;
+    transform:translateY(0) scale(1);
+}
+
+.chip-body {
+    position:absolute;
+    left:28px;
+    top:42px;
+    width:93px;
+    height:60px;
+    border:4px solid var(--ink);
+    border-radius:55% 50%;
+    background:
+        linear-gradient(90deg,#a36c3b 0 22%,#f0d5a3 23% 30%,#5d402a 31% 37%,#f0d5a3 38% 44%,#a36c3b 45% 100%);
+}
+
+.chip-head {
+    position:absolute;
+    left:0;
+    top:28px;
+    width:66px;
+    height:62px;
+    border:4px solid var(--ink);
+    border-radius:50%;
+    background:#ad7542;
+}
+
+.chip-eye {
+    position:absolute;
+    left:17px;
+    top:47px;
+    z-index:4;
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:#111;
+}
+
+.chip-tail {
+    position:absolute;
+    left:98px;
+    top:5px;
+    width:50px;
+    height:93px;
+    border:5px solid var(--ink);
+    border-radius:50%;
+    background:#8d5a35;
+    transform:rotate(28deg);
+}
+
+.notebook-overlay {
+    position:absolute;
+    z-index:70;
+    inset:0;
+    display:grid;
+    place-items:center;
+    opacity:0;
+    pointer-events:none;
+    background:#e9dfbd;
+    transition:opacity .25s ease;
+}
+
+.notebook-overlay.on {
+    opacity:1;
+}
+
+.notebook {
+    position:relative;
+    width:min(700px,82%);
+    height:390px;
+    border:4px solid var(--ink);
+    background:
+        linear-gradient(90deg,transparent 0 70px,rgba(214,75,75,.45) 71px 73px,transparent 74px),
+        repeating-linear-gradient(0deg,#fffbed 0 35px,#b8cee1 36px 38px);
+    box-shadow:9px 10px 0 rgba(24,26,24,.18);
+    transform:rotate(-2deg);
+}
+
+.notebook-text {
+    position:absolute;
+    left:100px;
+    top:70px;
+    right:40px;
+    font-family:"Comic Sans MS","Trebuchet MS",sans-serif;
+    font-size:clamp(1.4rem,4vw,3rem);
+    font-weight:900;
+    line-height:1.45;
+}
+
+.notebook-text strong {
+    display:block;
+    color:var(--red);
+    font-size:1.25em;
+    text-decoration:underline 5px;
+}
+
+.notebook .speech {
+    right:-5%;
+    bottom:-5%;
+}
+
+/* ============================================================
+   END
+   ============================================================ */
+
+.ending .evan {
+    left:18%;
+    bottom:5%;
+}
+
+.ending .miles {
+    right:18%;
+    bottom:5%;
+}
+
+.ending .hole {
+    left:40%;
+    bottom:15%;
+}
+
+.dad {
+    position:absolute;
+    z-index:11;
+    right:10%;
+    bottom:5%;
+    width:175px;
+    height:355px;
+}
+
+.dad-head {
+    position:absolute;
+    left:42px;
+    top:10px;
+    width:95px;
+    height:100px;
+    border:4px solid var(--ink);
+    border-radius:50%;
+    background:#eab17c;
+}
+
+.dad-hair {
+    position:absolute;
+    z-index:4;
+    left:43px;
+    top:4px;
+    width:94px;
+    height:38px;
+    border:4px solid var(--ink);
+    border-radius:50% 50% 20% 20%;
+    background:#463629;
+}
+
+.dad-body {
+    position:absolute;
+    left:34px;
+    top:105px;
+    width:112px;
+    height:150px;
+    border:4px solid var(--ink);
+    border-radius:25px 25px 8px 8px;
+    background:#668e6c;
+}
+
+.dad-leg {
+    position:absolute;
+    top:247px;
+    width:36px;
+    height:104px;
+    border:4px solid var(--ink);
+    background:#506175;
+}
+
+.dad-leg.l { left:49px; }
+.dad-leg.r { left:98px; }
+
+.dirt-pile {
+    position:absolute;
+    z-index:7;
+    left:31%;
+    bottom:11%;
+    width:180px;
+    height:60px;
+    border:4px solid var(--ink);
+    border-radius:50% 50% 25% 25%;
+    background:#a16c43;
+}
+
+.flat-dirt {
+    position:absolute;
+    z-index:7;
+    left:50%;
+    bottom:14%;
+    width:160px;
+    height:42px;
+    transform:translateX(-50%);
+    border:4px solid var(--ink);
+    border-radius:50%;
+    background:#9a6945;
+    opacity:0;
+}
+
+.ending .b1 { right:23%; top:11%; }
+.ending .b2 { left:17%; top:10%; }
+.ending .b3 { right:18%; top:24%; }
+.ending .b4 { left:37%; bottom:8%; }
+.ending .b5 { right:8%; bottom:10%; font-size:1.35rem; }
+
+.final-overlay {
+    position:absolute;
+    z-index:80;
+    inset:0;
+    opacity:0;
+    pointer-events:none;
+    color:white;
+    background:var(--ink);
+    transition:opacity .3s ease;
+}
+
+.final-overlay.on {
+    opacity:1;
+}
+
+.final-house {
+    position:absolute;
+    right:-40px;
+    bottom:-20px;
+    width:58%;
+    height:68%;
+    border:5px solid #080808;
+    background:#e3b275;
+}
+
+.final-house::before {
+    content:"";
+    position:absolute;
+    left:-60px;
+    top:-160px;
+    width:calc(100% + 100px);
+    height:190px;
+    background:#7a5140;
+    border:5px solid #080808;
+    clip-path:polygon(50% 0,100% 100%,0 100%);
+}
+
+.final-window {
+    position:absolute;
+    z-index:6;
+    right:15%;
+    bottom:24%;
+    width:130px;
+    height:150px;
+    border:6px solid #111;
+    background:#171d23;
+}
+
+.final-window::before,
+.final-window::after {
+    content:"";
+    position:absolute;
+    background:#111;
+}
+
+.final-window::before {
+    left:50%;
+    top:0;
+    bottom:0;
+    width:5px;
+}
+
+.final-window::after {
+    top:50%;
+    left:0;
+    right:0;
+    height:5px;
+}
+
+.final-overlay .evan {
+    left:10%;
+    bottom:4%;
+    transform:scale(.95);
+}
+
+.final-overlay .miles {
+    left:30%;
+    bottom:4%;
+    transform:scale(.95);
+}
+
+.final-overlay .f1 { left:7%; top:8%; color:var(--ink); }
+.final-overlay .f2 { left:34%; top:26%; color:var(--ink); }
+.final-overlay .yes {
+    right:6%;
+    top:7%;
+    color:var(--red);
+    font-size:clamp(3rem,8vw,5rem);
+}
+
+/* ============================================================
+   OUTRO
+   ============================================================ */
+
+.outro {
+    position:relative;
+    padding:120px 20px 90px;
+    text-align:center;
+}
+
+.outro::before {
+    content:"";
+    position:absolute;
+    left:50%;
+    top:25px;
+    width:90px;
+    height:33px;
+    transform:translateX(-50%);
+    border:4px solid var(--ink);
+    border-radius:50%;
+    background:#181716;
+    box-shadow:0 8px 0 #805638;
+}
+
+.outro h2 {
+    margin:0;
+    font-family:Impact,"Arial Black",sans-serif;
+    font-size:clamp(4rem,13vw,8rem);
+    line-height:.9;
+}
+
+.outro p {
+    max-width:620px;
+    margin:24px auto;
+    font-family:Georgia,serif;
+    font-size:1.15rem;
+    line-height:1.7;
+}
+
+.outro-badge {
+    display:inline-block;
+    padding:9px 14px;
+    border:3px solid var(--ink);
+    background:var(--yellow);
+    box-shadow:4px 4px 0 var(--ink);
+    font-weight:900;
+    transform:rotate(-1deg);
+}
+
+.footer {
+    padding:35px 20px 60px;
+    border-top:3px solid var(--ink);
+    text-align:center;
+    font-size:.82rem;
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width:720px) {
+    .nav-space {
+        height:58px;
+    }
+
+    .hero {
+        height:calc(100vh - 58px);
+        min-height:500px;
+    }
+
+    .comic {
+        width:calc(100% - 12px);
+    }
+
+    .stage {
+        top:58px;
+        height:calc(100vh - 58px);
+        min-height:440px;
+        border-width:3px;
+        border-radius:12px;
+    }
+
+    .speech {
+        max-width:205px;
+        padding:9px 12px;
+        border-width:2px;
+        font-size:.82rem;
+    }
+
+    .speech::after {
+        border-width:0 2px 2px 0;
+    }
+
+    .kid {
+        scale:.7;
+    }
+
+    .hero-title {
+        top:14%;
+    }
+
+    .hero h1 {
+        -webkit-text-stroke-width:3px;
+        text-shadow:6px 6px 0 var(--red);
+    }
+
+    .discovery .evan,
+    .investigation .evan,
+    .contact .evan {
+        left:0;
+    }
+
+    .discovery .miles,
+    .investigation .miles,
+    .contact .miles {
+        right:0;
+    }
+
+    .kitchen .evan {
+        left:34%;
+        transform:scale(.68);
+    }
+
+    .kitchen .miles {
+        right:-3%;
+        transform:scale(.68);
+    }
+
+    .mom {
+        left:-10px;
+        transform:scale(.75);
+        transform-origin:bottom left;
+    }
+
+    .night .evan {
+        left:24%;
+        transform:scale(.55);
+    }
+
+    .night .miles {
+        right:23%;
+        transform:scale(.55);
+    }
+
+    .map {
+        width:92%;
+        height:390px;
+    }
+
+    .map-house {
+        transform:scale(.7);
+        transform-origin:top right;
+    }
+
+    .notebook {
+        width:94%;
+    }
+
+    .notebook-text {
+        left:80px;
+    }
+
+    .ending .evan {
+        left:1%;
+    }
+
+    .ending .miles {
+        right:1%;
+    }
+
+    .final-overlay .evan {
+        left:-1%;
+        transform:scale(.7);
+    }
+
+    .final-overlay .miles {
+        left:24%;
+        transform:scale(.7);
+    }
+
+    .final-house {
+        width:64%;
+    }
+}
+
+@media (max-height:520px) and (orientation:landscape) {
+    .kid {
+        scale:.66;
+    }
+
+    .stage {
+        min-height:0;
+    }
+
+    .speech {
+        font-size:.76rem;
+        padding:8px 11px;
+    }
+
+    .map {
+        height:75%;
+        width:65%;
+    }
+
+    .hero h1 {
+        font-size:clamp(4rem,14vh,7rem);
+    }
+
+    .hero-title {
+        top:6%;
+    }
+}
+
+@media (prefers-reduced-motion:reduce) {
+    html {
+        scroll-behavior:auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration:.001ms !important;
+        animation-iteration-count:1 !important;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="progress" id="progress"></div>
+
+<div class="landscape-notice">
+    <svg viewBox="0 0 28 28" aria-hidden="true">
+        <rect x="8" y="3" width="12" height="22" rx="2"
+              fill="none" stroke="currentColor" stroke-width="2.5"/>
+        <path d="M3 9C1 13 2 18 6 21M3 9l-.3 5M3 9l5 1"
+              fill="none" stroke="currentColor" stroke-width="2.3"
+              stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Landscape is best on mobile
+</div>
+
+<site-navbar
+    cart-href="https://unlim8ted.com/sign-in/cart"
+    signin-href="https://unlim8ted.com/sign-in"
+    profile-href="https://unlim8ted.com/profile">
+</site-navbar>
+
+<div class="nav-space"></div>
+
+<header class="hero" id="hero">
+    <div class="hero-world" id="heroWorld">
+        <div class="sky"></div>
+        <div class="hero-sun"></div>
+
+        <div class="fence">
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+        </div>
+
+        <div class="grass"></div>
+
+        <div class="kid evan suspicious alive" style="left:calc(50% - 310px);bottom:8%;">
+            <div class="kid-body">
+                <div class="neck"></div>
+                <div class="torso"></div>
+                <div class="arm left"></div><div class="arm right"></div>
+                <div class="shorts"></div>
+                <div class="leg left"></div><div class="leg right"></div>
+                <div class="shoe left"></div><div class="shoe right"></div>
+                <div class="head-group">
+                    <div class="ear left"></div><div class="ear right"></div>
+                    <div class="head"></div><div class="hair"></div>
+                    <div class="eye left"></div><div class="eye right"></div>
+                    <div class="brow left"></div><div class="brow right"></div>
+                    <div class="mouth"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="kid miles alive" style="left:calc(50% + 125px);bottom:8%;">
+            <div class="kid-body">
+                <div class="neck"></div>
+                <div class="torso"></div>
+                <div class="arm left"></div><div class="arm right"></div>
+                <div class="shorts"></div>
+                <div class="leg left"></div><div class="leg right"></div>
+                <div class="shoe left"></div><div class="shoe right"></div>
+                <div class="head-group">
+                    <div class="ear left"></div><div class="ear right"></div>
+                    <div class="head"></div><div class="hair"></div>
+                    <div class="eye left"></div><div class="eye right"></div>
+                    <div class="brow left"></div><div class="brow right"></div>
+                    <div class="mouth"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hole" style="left:50%;bottom:14%;transform:translateX(-50%) scale(1.35);"></div>
+    </div>
+
+    <div class="hero-title" id="heroTitle">
+        <div class="hero-kicker">AN UNLIM8TED SCROLLY COMIC</div>
+        <h1>THE<br>HOLE</h1>
+        <div class="hero-sub">This situation is already under control.</div>
+    </div>
+
+    <div class="scroll-cue">
+        SCROLL
+        <svg viewBox="0 0 24 24">
+            <path d="M12 3v15M6 13l6 6 6-6"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"/>
+        </svg>
+    </div>
+</header>
+
+<main class="comic">
+
+<!-- DISCOVERY -->
+
+<section class="story discovery" data-duration="4.8">
+    <div class="stage">
+        <div class="world">
+            <div class="sky"></div>
+
+            <div class="fence">
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span>
+            </div>
+
+            <div class="grass"></div>
+
+            <div class="kid evan suspicious alive look-down">
+                <div class="kid-body">
+                    <div class="neck"></div><div class="torso"></div>
+                    <div class="arm left"></div><div class="arm right"></div>
+                    <div class="shorts"></div>
+                    <div class="leg left"></div><div class="leg right"></div>
+                    <div class="shoe left"></div><div class="shoe right"></div>
+                    <div class="head-group">
+                        <div class="ear left"></div><div class="ear right"></div>
+                        <div class="head"></div><div class="hair"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
+                        <div class="brow left"></div><div class="brow right"></div>
+                        <div class="mouth"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kid miles alive">
+                <div class="kid-body">
+                    <div class="neck"></div><div class="torso"></div>
+                    <div class="arm left"></div><div class="arm right"></div>
+                    <div class="shorts"></div>
+                    <div class="leg left"></div><div class="leg right"></div>
+                    <div class="shoe left"></div><div class="shoe right"></div>
+                    <div class="head-group">
+                        <div class="ear left"></div><div class="ear right"></div>
+                        <div class="head"></div><div class="hair"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
+                        <div class="brow left"></div><div class="brow right"></div>
+                        <div class="mouth"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hole"></div>
+
+            <div class="speech right beat b1" data-at=".08">What are you doing?</div>
+            <div class="speech beat b2" data-at=".20">Don't come any closer.</div>
+            <div class="speech right beat b3" data-at=".31">Why?</div>
+
+            <div class="speech beat b4" data-at=".58">What is it?</div>
+            <div class="speech right beat b5" data-at=".72">That's what I'm trying to figure out.</div>
+
+            <div class="speech beat"
+                 data-at=".87"
+                 style="left:8%;bottom:9%;">
+                Looks like a hole.
+            </div>
+
+            <div class="speech right beat"
+                 data-at=".94"
+                 style="right:7%;bottom:9%;">
+                That's exactly what it wants you to think.
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="story-gap"></div>
+
+<!-- INVESTIGATION -->
+
+<section class="story investigation" data-duration="5.8">
+    <div class="stage">
+        <div class="world">
+            <div class="sky"></div>
+            <div class="grass"></div>
+
+            <div class="kid evan suspicious alive look-down">
+                <div class="kid-body">
+                    <div class="neck"></div><div class="torso"></div>
+                    <div class="arm left"></div><div class="arm right"></div>
+                    <div class="shorts"></div>
+                    <div class="leg left"></div><div class="leg right"></div>
+                    <div class="shoe left"></div><div class="shoe right"></div>
+                    <div class="head-group">
+                        <div class="ear left"></div><div class="ear right"></div>
+                        <div class="head"></div><div class="hair"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
+                        <div class="brow left"></div><div class="brow right"></div>
+                        <div class="mouth"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kid miles pointing alive look-down">
+                <div class="kid-body">
+                    <div class="neck"></div><div class="torso"></div>
+                    <div class="arm left"></div><div class="arm right"></div>
+                    <div class="shorts"></div>
+                    <div class="leg left"></div><div class="leg right"></div>
+                    <div class="shoe left"></div><div class="shoe right"></div>
+                    <div class="head-group">
+                        <div class="ear left"></div><div class="ear right"></div>
+                        <div class="head"></div><div class="hair"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
+                        <div class="brow left"></div><div class="brow right"></div>
+                        <div class="mouth"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hole"></div>
+            <div class="stick"></div>
+
+            <div class="speech right beat b1" data-at=".06">Maybe we should poke it.</div>
+            <div class="speech beat b2" data-at=".17">ARE YOU INSANE?!</div>
+            <div class="speech beat b3" data-at=".28">You can't just stick things into unidentified holes!</div>
+            <div class="speech beat b4" data-at=".39">Why?</div>
+            <div class="speech right beat b5" data-at=".50">That's Rule One.</div>
+
+            <div class="gear" data-layer-at=".62">
+                <div class="gear-floor"></div>
+
+                <div class="caption beat" data-at=".64">Five minutes later...</div>
+
+                <svg class="flashlight" viewBox="0 0 170 100">
+                    <path d="M20 35h75l30-18v66L95 65H20z"
+                          fill="#e5d04f" stroke="#181a18" stroke-width="5"/>
+                    <path d="M126 17h25v66h-25"
+                          fill="#a7a7a7" stroke="#181a18" stroke-width="5"/>
+                </svg>
+
+                <svg class="helmet" viewBox="0 0 150 130">
+                    <path d="M20 95C18 38 42 14 75 14s59 26 58 81z"
+                          fill="#df5545" stroke="#181a18" stroke-width="5"/>
+                    <path d="M25 90h115" stroke="#181a18" stroke-width="6"/>
+                </svg>
+
+                <svg class="tongs" viewBox="0 0 120 180">
+                    <path d="M30 10C25 80 30 130 55 168"
+                          fill="none" stroke="#181a18" stroke-width="8"/>
+                    <path d="M90 10C95 80 90 130 65 168"
+                          fill="none" stroke="#181a18" stroke-width="8"/>
+                </svg>
+
+                <svg class="racket" viewBox="0 0 170 260">
+                    <ellipse cx="85" cy="75" rx="60" ry="70"
+                             fill="none" stroke="#181a18" stroke-width="7"/>
+                    <path d="M45 25l80 100M125 25L45 125M25 60h120M25 90h120"
+                          stroke="#181a18" stroke-width="3" opacity=".6"/>
+                    <path d="M85 145v100"
+                          stroke="#181a18" stroke-width="13" stroke-linecap="round"/>
+                </svg>
+
+                <svg class="shovel" viewBox="0 0 130 300">
+                    <path d="M65 20v190"
+                          stroke="#181a18" stroke-width="13" stroke-linecap="round"/>
+                    <path d="M35 205h60l-8 70H43z"
+                          fill="#9aa4a8" stroke="#181a18" stroke-width="6"/>
+                </svg>
+
+                <div class="speech one beat" data-at=".73">What's the tennis racket for?</div>
+                <div class="speech right two beat" data-at=".84">If something comes out.</div>
+
+                <div class="note beat"
+                     data-at=".92"
+                     style="right:22%;bottom:5%;transform:rotate(4deg);">
+                    RACKET LATER UPGRADED<br>TO SNOW SHOVEL
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="story-gap"></div>
+
+<!-- FIRST CONTACT -->
+
+<section class="story contact" data-duration="6.3">
+    <div class="stage">
+        <div class="world">
+            <div class="sky"></div>
+            <div class="grass"></div>
+
+            <div class="kid evan suspicious alive look-down">
+                <div class="kid-body">
+                    <div class="neck"></div><div class="torso"></div>
+                    <div class="arm left"></div><div class="arm right"></div>
+                    <div class="shorts"></div>
+                    <div class="leg left"></div><div class="leg right"></div>
+                    <div class="shoe left"></div><div class="shoe right"></div>
+                    <div class="head-group">
+                        <div class="ear left"></div><div class="ear right"></div>
+                        <div class="head"></div><div class="hair"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
+                        <div class="brow left"></div><div class="brow right"></div>
+                        <div class="mouth"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kid miles alive look-down">
+                <div class="kid-body">
+                    <div class="neck"></div><div class="torso"></div>
+                    <div class="arm left"></div><div class="arm right"></div>
+                    <div class="shorts"></div>
+                    <div class="leg left"></div><div class="leg right"></div>
+                    <div class="shoe left"></div><div class="shoe right"></div>
+                    <div class="head-group">
+                        <div class="ear left"></div><div class="ear right"></div>
+                        <div class="head"></div><div class="hair"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
+                        <div class="brow left"></div><div class="brow right"></div>
+                        <div class="mouth"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hole"></div>
+            <div class="string"></div>
+            <div class="cheese dangle"></div>
+
+            <div class="speech right beat b1" data-at=".07">Maybe it doesn't like cheese.</div>
+            <div class="speech beat b2" data-at=".18">Everything likes cheese.</div>
+
+            <div class="sound beat fwip" data-at=".42">FWIP!</div>
+
+            <div class="speech beat b3" data-at=".53">Did you do that?</div>
+            <div class="speech right beat b4" data-at=".64">
+                Why would I be holding the string if I wanted the cheese gone?
+            </div>
+
+            <div class="underground" data-layer-at=".78">
+                <div class="tunnel"></div>
+
+                <div class="caption beat" data-at=".80">
+                    Approximately eight inches below the crisis...
+                </div>
+
+                <div class="mouse">
+                    <div class="mouse-tail"></div>
+                    <div class="mouse-body"></div>
+                    <div class="mouse-head"></div>
+                    <div class="mouse-ear"></div>
+                    <div class="mouse-eye"></div>
+                    <div class="mouse-cheese"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="story-gap"></div>
+
+<!-- MAP -->
+
+<section class="story map-scene" data-duration="4.4">
+    <div class="stage">
+        <div class="world">
+            <div class="map">
+                <div class="map-hole"></div>
+                <div class="map-house"></div>
+                <div class="map-tunnel"></div>
+
+                <div class="map-label hole-label">HOLE</div>
+                <div class="map-label known">KNOWN TERRITORY</div>
+                <div class="map-label tunnels">POSSIBLE TUNNELS</div>
+                <div class="map-label ambush">AMBUSH ZONE</div>
+                <div class="map-label canada">CANADA?</div>
+            </div>
+
+            <div class="speech beat b1" data-at=".15">Why would it go to Canada?</div>
+            <div class="speech right beat b2" data-at=".34">Why wouldn't it?</div>
+
+            <div class="speech beat"
+                 data-at=".62"
+                 style="left:8%;bottom:10%;">
+                Assuming an average tunneling speed of...
+            </div>
+
+            <div class="speech right beat"
+                 data-at=".78"
+                 style="right:8%;bottom:10%;font-size:1.35rem;">
+                ...fast...
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="story-gap"></div>
+
+<!-- KITCHEN -->
+
+<section class="story kitchen" data-duration="7">
+    <div class="stage">
+        <div class="world">
+            <div class="kitchen-wall"></div>
+            <div class="counter"></div>
+            <div class="kitchen-floor"></div>
+
+            <div class="mom">
+                <div class="hair"></div>
+                <div class="head"></div>
+                <div class="body"></div>
+                <div class="leg l"></div>
+                <div class="leg r"></div>
+            </div>
+
+            <div class="kid evan suspicious alive">
+                <div class="kid-body">
+                    <div class="neck"></div><div class="torso"></div>
+                    <div class="arm left"></div><div class="arm right"></div>
+                    <div class="shorts"></div>
+                    <div class="leg left"></div><div class="leg right"></div>
+                    <div class="shoe left"></div><div class="shoe right"></div>
+                    <div class="head-group">
+                        <div class="ear left"></div><div class="ear right"></div>
+                        <div class="head"></div><div class="hair"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
+                        <div class="brow left"></div><div class="brow right"></div>
+                        <div class="mouth"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kid miles alive">
+                <div class="kid-body">
+                    <div class="neck"></div><div class="torso"></div>
+                    <div class="arm left"></div><div class="arm right"></div>
+                    <div class="shorts"></div>
+                    <div class="leg left"></div><div class="leg right"></div>
+                    <div class="shoe left"></div><div class="shoe right"></div>
+                    <div class="head-group">
+                        <div class="ear left"></div><div class="ear right"></div>
+                        <div class="head"></div><div class="hair"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
+                        <div class="brow left"></div><div class="brow right"></div>
+                        <div class="mouth"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="supply can" style="left:40%;bottom:6%;"></div>
+            <div class="supply can" style="left:44%;bottom:6%;background:#e2b54a;"></div>
+            <div class="supply tp" style="right:12%;bottom:10%;"></div>
+            <div class="supply tp" style="right:8%;bottom:7%;"></div>
+            <div class="supply tp" style="right:4%;bottom:10%;"></div>
+
+            <div class="speech beat b1" data-at=".05">What are you doing?</div>
+            <div class="speech beat b2" data-at=".14">Nothing.</div>
+            <div class="speech right beat b3" data-at=".23">We're evacuating.</div>
+            <div class="speech beat b4" data-at=".32">MILES.</div>
+
+            <div class="speech beat b5" data-at=".46">Evacuating from what?</div>
+            <div class="speech right beat b6" data-at=".56">That's a chipmunk hole.</div>
+
+            <div class="speech beat b7" data-at=".68">How do you know?</div>
+            <div class="speech right beat b8" data-at=".78">
+                Because I've seen chipmunk holes before.
+            </div>
+
+            <div class="speech beat b9" data-at=".91">Convenient.</div>
+        </div>
+    </div>
+</section>
+
+<div class="story-gap"></div>
+
+<!-- NIGHT -->
+
+<section class="story night" data-duration="7">
+    <div class="stage">
+        <div class="world">
+            <div class="night-sky"></div>
+            <div class="moon"></div>
+            <div class="night-grass"></div>
+
+            <div class="command-sign">
+                HOLE<br>
+                OBSERVATION<br>
+                COMMAND
+            </div>
+
+            <div class="bush"></div>
+
+            <div class="kid evan suspicious alive">
+                <div class="kid-body">
+                    <div class="neck"></div><div class="torso"></div>
+                    <div class="arm left"></div><div class="arm right"></div>
+                    <div class="shorts"></div>
+                    <div class="leg left"></div><div class="leg right"></div>
+                    <div class="shoe left"></div><div class="shoe right"></div>
+                    <div class="head-group">
+                        <div class="ear left"></div><div class="ear right"></div>
+                        <div class="head"></div><div class="hair"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
+                        <div class="brow left"></div><div class="brow right"></div>
+                        <div class="mouth"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kid miles alive">
+                <div class="kid-body">
+                    <div class="neck"></div><div class="torso"></div>
+                    <div class="arm left"></div><div class="arm right"></div>
+                    <div class="shorts"></div>
+                    <div class="leg left"></div><div class="leg right"></div>
+                    <div class="shoe left"></div><div class="shoe right"></div>
+                    <div class="head-group">
+                        <div class="ear left"></div><div class="ear right"></div>
+                        <div class="head"></div><div class="hair"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
+                        <div class="brow left"></div><div class="brow right"></div>
+                        <div class="mouth"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hole"></div>
+
+            <div class="speech beat b1" data-at=".06">
+                What if your mom was telling the truth?
+            </div>
+
+            <div class="speech right beat b2" data-at=".18">
+                Then we've wasted an afternoon.
+                <br><br>
+                I'm not willing to take that risk.
+            </div>
+
+            <div class="sound beat rustle" data-at=".38">RUSTLE</div>
+
+            <div class="chipmunk" data-layer-at=".46">
+                <div class="chip-tail"></div>
+                <div class="chip-body"></div>
+                <div class="chip-head"></div>
+                <div class="chip-eye"></div>
+            </div>
+
+            <div class="speech beat b3" data-at=".54">Your mom was right.</div>
+            <div class="speech beat b4" data-at=".63">Don't jump to conclusions.</div>
+            <div class="speech right beat b5" data-at=".72">...It's a chipmunk.</div>
+
+            <div class="notebook-overlay" data-layer-at=".82">
+                <div class="notebook">
+                    <div class="notebook-text">
+                        OBSERVATION #17:
+                        <strong>CAN DISGUISE AS CHIPMUNK.</strong>
+                    </div>
+
+                    <div class="speech right beat" data-at=".90">
+                        That's bad.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="story-gap"></div>
+
+<!-- ENDING -->
+
+<section class="story ending" data-duration="7">
+    <div class="stage">
+        <div class="world">
+            <div class="sky"></div>
+            <div class="grass"></div>
+
+            <div class="dirt-pile"></div>
+            <div class="hole"></div>
+
+            <div class="dad">
+                <div class="dad-head"></div>
+                <div class="dad-hair"></div>
+                <div class="dad-body"></div>
+                <div class="dad-leg l"></div>
+                <div class="dad-leg r"></div>
+            </div>
+
+            <div class="speech right beat b1" data-at=".06">Huh.</div>
+
+            <div class="caption beat"
+                 data-at=".14"
+                 style="left:6%;bottom:7%;">
+                Dad filled in the hole.
+            </div>
+
+            <div class="kid evan shocked alive" style="opacity:0;">
+                <div class="kid-body">
+                    <div class="neck"></div><div class="torso"></div>
+                    <div class="arm left"></div><div class="arm right"></div>
+                    <div class="shorts"></div>
+                    <div class="leg left"></div><div class="leg right"></div>
+                    <div class="shoe left"></div><div class="shoe right"></div>
+                    <div class="head-group">
+                        <div class="ear left"></div><div class="ear right"></div>
+                        <div class="head"></div><div class="hair"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
+                        <div class="brow left"></div><div class="brow right"></div>
+                        <div class="mouth"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kid miles alive" style="opacity:0;">
+                <div class="kid-body">
+                    <div class="neck"></div><div class="torso"></div>
+                    <div class="arm left"></div><div class="arm right"></div>
+                    <div class="shorts"></div>
+                    <div class="leg left"></div><div class="leg right"></div>
+                    <div class="shoe left"></div><div class="shoe right"></div>
+                    <div class="head-group">
+                        <div class="ear left"></div><div class="ear right"></div>
+                        <div class="head"></div><div class="hair"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
+                        <div class="brow left"></div><div class="brow right"></div>
+                        <div class="mouth"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flat-dirt"></div>
+
+            <div class="speech beat b2" data-at=".39">Miles.</div>
+            <div class="speech right beat b3" data-at=".48">What?</div>
+            <div class="speech beat b4" data-at=".56">Miles.</div>
+            <div class="speech right beat b5" data-at=".68">...It moved.</div>
+
+            <div class="final-overlay" data-layer-at=".78">
+                <div class="final-house"></div>
+                <div class="final-window"></div>
+
+                <div class="kid evan suspicious alive">
+                    <div class="kid-body">
+                        <div class="neck"></div><div class="torso"></div>
+                        <div class="arm left"></div><div class="arm right"></div>
+                        <div class="shorts"></div>
+                        <div class="leg left"></div><div class="leg right"></div>
+                        <div class="shoe left"></div><div class="shoe right"></div>
+                        <div class="head-group">
+                            <div class="ear left"></div><div class="ear right"></div>
+                            <div class="head"></div><div class="hair"></div>
+                            <div class="eye left"></div><div class="eye right"></div>
+                            <div class="brow left"></div><div class="brow right"></div>
+                            <div class="mouth"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kid miles shocked alive">
+                    <div class="kid-body">
+                        <div class="neck"></div><div class="torso"></div>
+                        <div class="arm left"></div><div class="arm right"></div>
+                        <div class="shorts"></div>
+                        <div class="leg left"></div><div class="leg right"></div>
+                        <div class="shoe left"></div><div class="shoe right"></div>
+                        <div class="head-group">
+                            <div class="ear left"></div><div class="ear right"></div>
+                            <div class="head"></div><div class="hair"></div>
+                            <div class="eye left"></div><div class="eye right"></div>
+                            <div class="brow left"></div><div class="brow right"></div>
+                            <div class="mouth"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="speech beat f1" data-at=".82">Get the shovel.</div>
+                <div class="speech beat f2" data-at=".89">The big one?</div>
+                <div class="sound beat yes" data-at=".96">YES.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="outro">
+    <h2>THE HOLE</h2>
+
+    <p>
+        Two kids discover a tiny hole in the backyard and conduct the
+        only reasonable response: surveillance, emergency planning,
+        geological analysis, international speculation, and an
+        escalating investigation into a completely ordinary chipmunk.
+    </p>
+
+    <div class="outro-badge">
+        AN UNLIM8TED SCROLLY COMIC
+    </div>
+</section>
+
+</main>
+
+<footer class="footer">
+    <span id="copyright"></span>
+</footer>
+
+<script>
+/* ============================================================
+   SET STORY LENGTHS
+   ============================================================ */
+
+const stories = [...document.querySelectorAll(".story")];
+
+for (const story of stories) {
+    const duration = Number(story.dataset.duration || 4);
+    story.style.setProperty("--story-height", `${duration * 100}vh`);
+}
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+
+const clamp = (value, min = 0, max = 1) =>
+    Math.max(min, Math.min(max, value));
+
+const lerp = (a, b, t) =>
+    a + (b - a) * t;
+
+const range = (value, start, end) => {
+    if (start === end) {
+        return value >= end ? 1 : 0;
+    }
+
+    return clamp((value - start) / (end - start));
+};
+
+const ease = t =>
+    t * t * (3 - 2 * t);
+
+function storyProgress(story) {
+    const rect = story.getBoundingClientRect();
+    const stage = story.querySelector(".stage");
+
+    const topOffset =
+        window.innerWidth <= 720
+            ? 58
+            : 64;
+
+    const travel =
+        story.offsetHeight -
+        stage.offsetHeight;
+
+    if (travel <= 0) {
+        return rect.top <= topOffset ? 1 : 0;
+    }
+
+    return clamp(
+        (topOffset - rect.top) / travel
+    );
+}
+
+function setBeatVisibility(story, progress) {
+    const beats =
+        story.querySelectorAll(".beat[data-at]");
+
+    for (const beat of beats) {
+        const at = Number(beat.dataset.at);
+
+        beat.classList.toggle(
+            "on",
+            progress >= at
+        );
+    }
+
+    const layers =
+        story.querySelectorAll("[data-layer-at]");
+
+    for (const layer of layers) {
+        const at =
+            Number(layer.dataset.layerAt);
+
+        layer.classList.toggle(
+            "on",
+            progress >= at
+        );
+    }
+}
+
+/* ============================================================
+   CAMERA
+   ============================================================ */
+
+function camera(world, x, y, scale, rotation = 0) {
+    world.style.transform =
+        `translate(${x}%, ${y}%) scale(${scale}) rotate(${rotation}deg)`;
+}
+
+function animateCamera(story, progress) {
+    const world =
+        story.querySelector(".world");
+
+    if (!world) {
+        return;
+    }
+
+    if (story.classList.contains("discovery")) {
+        /*
+            Establish wide.
+            Then slowly creep toward the hole as Evan becomes
+            increasingly convinced that a hole has motives.
+        */
+        const zoom =
+            ease(range(progress, .34, .68));
+
+        const release =
+            ease(range(progress, .78, 1));
+
+        const scale =
+            lerp(
+                lerp(1, 1.46, zoom),
+                1.18,
+                release
+            );
+
+        const y =
+            lerp(
+                lerp(0, -7, zoom),
+                -3,
+                release
+            );
+
+        camera(world, 0, y, scale);
+    }
+
+    else if (story.classList.contains("investigation")) {
+        const alarm =
+            ease(range(progress, .12, .25));
+
+        const settle =
+            ease(range(progress, .25, .48));
+
+        const gear =
+            ease(range(progress, .60, .70));
+
+        let scale =
+            lerp(1, 1.18, alarm);
+
+        scale =
+            lerp(scale, 1.04, settle);
+
+        scale =
+            lerp(scale, 1, gear);
+
+        const shake =
+            progress > .15 && progress < .22
+                ? Math.sin(progress * 430) * 1.2
+                : 0;
+
+        camera(
+            world,
+            shake,
+            lerp(0, -2, alarm),
+            scale
+        );
+    }
+
+    else if (story.classList.contains("contact")) {
+        const cheeseZoom =
+            ease(range(progress, .20, .39));
+
+        const recoil =
+            ease(range(progress, .42, .51));
+
+        const underground =
+            ease(range(progress, .73, .81));
+
+        let scale =
+            lerp(1, 1.26, cheeseZoom);
+
+        scale =
+            lerp(scale, 1.08, recoil);
+
+        scale =
+            lerp(scale, 1, underground);
+
+        camera(
+            world,
+            0,
+            lerp(0, -4, cheeseZoom),
+            scale
+        );
+    }
+
+    else if (story.classList.contains("map-scene")) {
+        const zoom =
+            ease(range(progress, .05, .50));
+
+        const canada =
+            ease(range(progress, .50, .78));
+
+        const x =
+            lerp(
+                0,
+                lerp(0, 12, canada),
+                zoom
+            );
+
+        const y =
+            lerp(0, -2, zoom);
+
+        const scale =
+            lerp(1, 1.16, zoom);
+
+        camera(world, x, y, scale, lerp(0, -1.2, canada));
+    }
+
+    else if (story.classList.contains("kitchen")) {
+        const momZoom =
+            ease(range(progress, .04, .30));
+
+        const kidShift =
+            ease(range(progress, .42, .70));
+
+        const suspicion =
+            ease(range(progress, .72, .94));
+
+        let x =
+            lerp(0, 5, momZoom);
+
+        x =
+            lerp(x, -4, kidShift);
+
+        x =
+            lerp(x, -7, suspicion);
+
+        const scale =
+            lerp(
+                lerp(1, 1.08, momZoom),
+                1.15,
+                suspicion
+            );
+
+        camera(world, x, -1, scale);
+    }
+
+    else if (story.classList.contains("night")) {
+        const waiting =
+            ease(range(progress, .05, .30));
+
+        const rustle =
+            ease(range(progress, .32, .48));
+
+        const reveal =
+            ease(range(progress, .45, .72));
+
+        let x =
+            lerp(0, 0, waiting);
+
+        x =
+            lerp(x, -11, rustle);
+
+        x =
+            lerp(x, -7, reveal);
+
+        const scale =
+            lerp(
+                lerp(1, 1.06, waiting),
+                1.28,
+                rustle
+            );
+
+        camera(world, x, -2, scale);
+    }
+
+    else if (story.classList.contains("ending")) {
+        const kids =
+            ease(range(progress, .28, .38));
+
+        const realization =
+            ease(range(progress, .48, .70));
+
+        const final =
+            ease(range(progress, .76, .86));
+
+        let scale =
+            lerp(1, 1.08, kids);
+
+        scale =
+            lerp(scale, 1.25, realization);
+
+        scale =
+            lerp(scale, 1, final);
+
+        camera(
+            world,
+            lerp(0, 2, realization),
+            lerp(0, -3, realization),
+            scale
+        );
+    }
+}
+
+/* ============================================================
+   CHARACTER / PROP ANIMATION
+   ============================================================ */
+
+function animateDiscovery(story, p) {
+    const evan =
+        story.querySelector(".evan");
+
+    const miles =
+        story.querySelector(".miles");
+
+    if (!evan || !miles) {
+        return;
+    }
+
+    const approach =
+        ease(range(p, 0, .16));
+
+    miles.style.transform =
+        `translateX(${lerp(55, 0, approach)}px)`;
+
+    const lean =
+        ease(range(p, .32, .55));
+
+    evan.style.transform =
+        `rotate(${lerp(0, 7, lean)}deg)`;
+
+    const milesHead =
+        miles.querySelector(".head-group");
+
+    if (milesHead) {
+        if (p > .53) {
+            miles.classList.add("look-down");
+        } else {
+            miles.classList.remove("look-down");
+        }
+    }
+}
+
+function animateInvestigation(story, p) {
+    const evan =
+        story.querySelector(".evan");
+
+    const miles =
+        story.querySelector(".miles");
+
+    const stick =
+        story.querySelector(".stick");
+
+    if (stick) {
+        const poke =
+            ease(range(p, .02, .12));
+
+        const retreat =
+            ease(range(p, .15, .22));
+
+        let rotation =
+            lerp(48, 25, poke);
+
+        rotation =
+            lerp(rotation, 44, retreat);
+
+        stick.style.transform =
+            `rotate(${rotation}deg)`;
+    }
+
+    if (evan) {
+        if (p >= .15 && p < .23) {
+            evan.classList.add("recoil");
+        } else {
+            evan.classList.remove("recoil");
+        }
+    }
+
+    if (miles) {
+        const arm =
+            miles.querySelector(".arm.right");
+
+        if (arm) {
+            const lower =
+                ease(range(p, .20, .35));
+
+            arm.style.transform =
+                `rotate(${lerp(-80, -20, lower)}deg)`;
+        }
+    }
+}
+
+function animateContact(story, p) {
+    const cheese =
+        story.querySelector(".cheese");
+
+    const evan =
+        story.querySelector(".evan");
+
+    const miles =
+        story.querySelector(".miles");
+
+    if (cheese) {
+        if (p >= .41) {
+            cheese.classList.remove("dangle");
+            cheese.classList.add("yanked");
+        } else {
+            cheese.classList.add("dangle");
+            cheese.classList.remove("yanked");
+        }
+    }
+
+    if (p >= .42 && p < .54) {
+        evan?.classList.add("recoil");
+        miles?.classList.add("recoil");
+    } else {
+        evan?.classList.remove("recoil");
+        miles?.classList.remove("recoil");
+    }
+
+    if (p >= .43) {
+        evan?.classList.add("shocked");
+        miles?.classList.add("shocked");
+    } else {
+        evan?.classList.remove("shocked");
+        miles?.classList.remove("shocked");
+    }
+}
+
+function animateKitchen(story, p) {
+    const evan =
+        story.querySelector(".evan");
+
+    const miles =
+        story.querySelector(".miles");
+
+    const mom =
+        story.querySelector(".mom");
+
+    if (mom) {
+        const enter =
+            ease(range(p, 0, .10));
+
+        mom.style.transform =
+            `translateX(${lerp(-90, 0, enter)}px)`;
+    }
+
+    if (miles) {
+        const nervous =
+            p > .72
+                ? Math.sin(p * 100) * .8
+                : 0;
+
+        miles.style.rotate =
+            `${nervous}deg`;
+    }
+
+    if (evan) {
+        if (p > .78) {
+            evan.classList.add("look-right");
+        } else {
+            evan.classList.remove("look-right");
+        }
+    }
+}
+
+function animateNight(story, p) {
+    const bush =
+        story.querySelector(".bush");
+
+    const chipmunk =
+        story.querySelector(".chipmunk");
+
+    if (bush) {
+        let shake = 0;
+
+        if (p > .34 && p < .47) {
+            shake =
+                Math.sin(p * 190) * 6;
+        }
+
+        bush.style.marginLeft =
+            `${shake}px`;
+    }
+
+    if (chipmunk && p >= .46) {
+        chipmunk.classList.add("on");
+    }
+
+    const evan =
+        story.querySelector(".evan");
+
+    const miles =
+        story.querySelector(".miles");
+
+    if (p > .39) {
+        evan?.classList.add("look-right");
+        miles?.classList.add("look-right");
+    } else {
+        evan?.classList.remove("look-right");
+        miles?.classList.remove("look-right");
+    }
+}
+
+function animateEnding(story, p) {
+    const dad =
+        story.querySelector(".dad");
+
+    const hole =
+        story.querySelector(".hole");
+
+    const dirt =
+        story.querySelector(".dirt-pile");
+
+    const flat =
+        story.querySelector(".flat-dirt");
+
+    const evan =
+        story.querySelector(".evan");
+
+    const miles =
+        story.querySelector(".miles");
+
+    const fill =
+        ease(range(p, .12, .27));
+
+    if (hole) {
+        hole.style.opacity =
+            String(1 - fill);
+    }
+
+    if (dirt) {
+        dirt.style.transform =
+            `scale(${lerp(1, .35, fill)})`;
+
+        dirt.style.opacity =
+            String(1 - fill);
+    }
+
+    if (dad) {
+        dad.style.transform =
+            `translateX(${lerp(0, 180, fill)}px)`;
+        dad.style.opacity =
+            String(1 - fill);
+    }
+
+    const kidsEnter =
+        ease(range(p, .28, .37));
+
+    if (evan) {
+        evan.style.opacity =
+            String(kidsEnter);
+
+        evan.style.transform =
+            `translateX(${lerp(-90, 0, kidsEnter)}px)`;
+    }
+
+    if (miles) {
+        miles.style.opacity =
+            String(kidsEnter);
+
+        miles.style.transform =
+            `translateX(${lerp(90, 0, kidsEnter)}px)`;
+    }
+
+    if (flat) {
+        flat.style.opacity =
+            String(kidsEnter);
+    }
+
+    if (p > .61) {
+        evan?.classList.add("look-right");
+        miles?.classList.add("look-left");
+    }
+}
+
+/* ============================================================
+   STORY UPDATE
+   ============================================================ */
+
+function updateStory(story) {
+    const p =
+        storyProgress(story);
+
+    setBeatVisibility(
+        story,
+        p
+    );
+
+    animateCamera(
+        story,
+        p
+    );
+
+    if (story.classList.contains("discovery")) {
+        animateDiscovery(story, p);
+    }
+
+    if (story.classList.contains("investigation")) {
+        animateInvestigation(story, p);
+    }
+
+    if (story.classList.contains("contact")) {
+        animateContact(story, p);
+    }
+
+    if (story.classList.contains("kitchen")) {
+        animateKitchen(story, p);
+    }
+
+    if (story.classList.contains("night")) {
+        animateNight(story, p);
+    }
+
+    if (story.classList.contains("ending")) {
+        animateEnding(story, p);
+    }
+}
+
+/* ============================================================
+   HERO CAMERA
+   ============================================================ */
+
+const hero =
+    document.getElementById("hero");
+
+const heroWorld =
+    document.getElementById("heroWorld");
+
+const heroTitle =
+    document.getElementById("heroTitle");
+
+function updateHero() {
+    if (!hero || !heroWorld) {
+        return;
+    }
+
+    const rect =
+        hero.getBoundingClientRect();
+
+    const progress =
+        clamp(-rect.top / hero.offsetHeight);
+
+    const zoom =
+        ease(progress);
+
+    heroWorld.style.transform =
+        `translateY(${progress * -2}%) scale(${1 + zoom * .12})`;
+
+    heroTitle.style.transform =
+        `translateX(-50%) translateY(${progress * 55}px) rotate(${-2 + progress * 1.2}deg)`;
+
+    heroTitle.style.opacity =
+        String(1 - progress * .85);
+}
+
+/* ============================================================
+   PROGRESS
+   ============================================================ */
+
+const progressBar =
+    document.getElementById("progress");
+
+function updateProgress() {
+    const max =
+        document.documentElement.scrollHeight -
+        window.innerHeight;
+
+    const p =
+        max > 0
+            ? window.scrollY / max
+            : 0;
+
+    progressBar.style.width =
+        `${clamp(p) * 100}%`;
+}
+
+/* ============================================================
+   RAF LOOP
+   ============================================================ */
+
+let requested =
+    false;
+
+function render() {
+    requested = false;
+
+    updateHero();
+    updateProgress();
+
+    for (const story of stories) {
+        const rect =
+            story.getBoundingClientRect();
+
+        if (
+            rect.bottom < -window.innerHeight ||
+            rect.top > window.innerHeight * 2
+        ) {
+            continue;
+        }
+
+        updateStory(story);
+    }
+}
+
+function requestRender() {
+    if (requested) {
+        return;
+    }
+
+    requested = true;
+    requestAnimationFrame(render);
+}
+
+window.addEventListener(
+    "scroll",
+    requestRender,
+    { passive:true }
+);
+
+window.addEventListener(
+    "resize",
+    requestRender
+);
+
+render();
+
+/* ============================================================
+   COPYRIGHT
+   ============================================================ */
+
+const currentYear =
+    new Date().getFullYear();
+
+document.getElementById("copyright").innerHTML =
+    `&copy; 2019-${currentYear} Unlim8ted Studio Productions. All rights reserved.`;
+</script>
+
+</body>
+</html>

@@ -1,0 +1,3090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#071a18">
+
+    <title>Natural™ Water — Unlim8ted</title>
+
+    <meta name="description"
+        content="Natural Water: a fake commercial about a company pursuing increasingly ridiculous methods to create the world's most natural water.">
+
+    <script type="module" src="https://unlim8ted.com/components/site-navbar.js"></script>
+
+    <script type="module">
+        import { onAuthStateChanged }
+            from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+        import { getFirebase } from "/components/firebase-init.js";
+
+        const { auth, db } = getFirebase();
+
+        onAuthStateChanged(auth, user => {
+            document.documentElement.dataset.authenticated = user ? "true" : "false";
+        });
+    </script>
+
+    <style>
+        :root {
+            --forest: #123f31;
+            --forest2: #285b3e;
+            --forestDark: #071b16;
+            --water: #70d4ce;
+            --waterLight: #d9ffff;
+            --sky: #91c8d4;
+            --cream: #f6f2e7;
+            --earth: #79593f;
+            --earthDark: #503b2d;
+            --leaf: #579750;
+            --leafDark: #346d3b;
+            --yellow: #f2cc45;
+            --orange: #eb8c34;
+            --skin: #c78d68;
+            --ink: #13201d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            background: var(--forestDark);
+        }
+
+        body {
+            margin: 0;
+            overflow-x: hidden;
+            background: var(--forestDark);
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        site-navbar {
+            position: relative;
+            z-index: 10000;
+        }
+
+        .progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: white;
+            z-index: 10001;
+        }
+
+        .scene {
+            position: relative;
+            min-height: 100vh;
+            overflow: hidden;
+            display: grid;
+            place-items: center;
+            padding: 70px 20px;
+        }
+
+        .scene-inner {
+            position: relative;
+            z-index: 30;
+            width: min(1100px, 100%);
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(35px);
+            transition:
+                opacity .85s ease,
+                transform .85s cubic-bezier(.2,.8,.2,1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: none;
+        }
+
+        .narration {
+            max-width: 850px;
+            margin: auto;
+            text-align: center;
+            font-family: Georgia, serif;
+            font-size: clamp(1.8rem, 4.5vw, 4rem);
+            line-height: 1.2;
+            text-shadow: 0 4px 24px rgba(0,0,0,.75);
+        }
+
+        .narration.small {
+            font-size: clamp(1.35rem, 3vw, 2.5rem);
+        }
+
+        .method-label {
+            position: absolute;
+            z-index: 50;
+            top: 30px;
+            left: 35px;
+            text-transform: uppercase;
+            letter-spacing: .18em;
+            font-size: .7rem;
+            opacity: .75;
+        }
+
+        .method-number {
+            display: block;
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: .85;
+            letter-spacing: -.08em;
+            opacity: .3;
+        }
+
+        .beat {
+            min-height: 65vh;
+            display: grid;
+            place-items: center;
+            padding: 70px 20px;
+            text-align: center;
+            background: #071b16;
+        }
+
+        .beat p {
+            max-width: 950px;
+            margin: 0;
+            font-family: Georgia, serif;
+            font-size: clamp(2rem, 6vw, 5rem);
+            line-height: 1.05;
+        }
+
+        .tiny {
+            display: block;
+            margin-bottom: 30px;
+            font-family: Arial, sans-serif;
+            font-size: .72rem;
+            letter-spacing: .24em;
+            text-transform: uppercase;
+            color: #849d94;
+        }
+
+        /* =========================================================
+           DISCLAIMER
+        ========================================================= */
+
+        .disclaimer {
+            min-height: 50vh;
+            background: #050706;
+            display: grid;
+            place-items: center;
+            padding: 40px 20px;
+        }
+
+        .disclaimer-box {
+            max-width: 600px;
+            padding: 22px 30px;
+            border: 1px solid #505652;
+            color: #aeb4b0;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            font-size: .82rem;
+        }
+
+        /* =========================================================
+           OPENING RIVER
+        ========================================================= */
+
+        .river-scene {
+            min-height: 130vh;
+            background:
+                linear-gradient(
+                    to bottom,
+                    var(--sky) 0 23%,
+                    #739c70 23% 41%,
+                    var(--forest2) 41%
+                );
+        }
+
+        .mountains {
+            position: absolute;
+            inset: 8% 0 auto;
+            height: 42%;
+        }
+
+        .mountain {
+            position: absolute;
+            bottom: 0;
+            width: 58%;
+            height: 100%;
+            background: #54755e;
+            clip-path: polygon(50% 0,100% 100%,0 100%);
+        }
+
+        .mountain.one {
+            left: -10%;
+        }
+
+        .mountain.two {
+            right: -10%;
+            height: 83%;
+            background: #65866d;
+        }
+
+        .mountain::after {
+            content: "";
+            position: absolute;
+            left: 32%;
+            top: 0;
+            width: 36%;
+            height: 25%;
+            background: #edf3f2;
+            clip-path: polygon(
+                50% 0,
+                100% 100%,
+                67% 72%,
+                49% 90%,
+                31% 67%,
+                0 100%
+            );
+        }
+
+        .forest-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 29%;
+            height: 33%;
+        }
+
+        .tree {
+            position: absolute;
+            bottom: 0;
+            width: 80px;
+            height: 250px;
+        }
+
+        .tree::before {
+            content: "";
+            position: absolute;
+            left: 34px;
+            bottom: 0;
+            width: 13px;
+            height: 92px;
+            background: #493d2f;
+        }
+
+        .tree::after {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto;
+            width: 80px;
+            height: 190px;
+            background: #164b32;
+            clip-path: polygon(
+                50% 0,
+                80% 28%,
+                65% 28%,
+                92% 55%,
+                70% 55%,
+                100% 88%,
+                0 88%,
+                30% 55%,
+                8% 55%,
+                35% 28%,
+                20% 28%
+            );
+        }
+
+        .river {
+            position: absolute;
+            left: 15%;
+            right: 13%;
+            top: 42%;
+            bottom: -8%;
+            overflow: hidden;
+            background: linear-gradient(
+                100deg,
+                #b6f3ef,
+                #5fc7c2 45%,
+                #a8efeb 75%,
+                #62bdb9
+            );
+            clip-path: polygon(
+                42% 0,
+                57% 0,
+                69% 18%,
+                55% 34%,
+                75% 52%,
+                66% 68%,
+                100% 100%,
+                0 100%,
+                38% 69%,
+                25% 52%,
+                47% 35%,
+                31% 18%
+            );
+        }
+
+        .river::after {
+            content: "";
+            position: absolute;
+            inset: -200px 0 0;
+            background: repeating-linear-gradient(
+                168deg,
+                transparent 0 32px,
+                rgba(255,255,255,.4) 34px 38px,
+                transparent 41px 76px
+            );
+            animation: flowingWater 3.5s linear infinite;
+        }
+
+        @keyframes flowingWater {
+            to {
+                transform: translateY(190px);
+            }
+        }
+
+        .opening-copy {
+            position: relative;
+            z-index: 40;
+            margin-top: -18vh;
+            text-align: center;
+        }
+
+        .opening-copy .first {
+            font-family: Georgia, serif;
+            font-size: clamp(2rem, 5vw, 4.7rem);
+        }
+
+        .opening-copy .second {
+            margin-top: 28px;
+            font-family: Georgia, serif;
+            font-style: italic;
+            font-size: clamp(3rem, 8vw, 7rem);
+        }
+
+        /* =========================================================
+           RIVER -> PIPE -> FACTORY CAMERA SHOT
+        ========================================================= */
+
+        .factory-pan-scene {
+            min-height: 180vh;
+            padding: 0;
+            background: #789b78;
+        }
+
+        .factory-camera {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            transform-origin: 15% 60%;
+        }
+
+        .factory-pan-scene.active .factory-camera {
+            animation: factoryCamera 8s ease-in-out forwards;
+        }
+
+        @keyframes factoryCamera {
+            0% {
+                transform: scale(2.15) translate(17%, 9%);
+            }
+
+            20% {
+                transform: scale(2.15) translate(7%, 7%);
+            }
+
+            45% {
+                transform: scale(1.7) translate(-6%, 4%);
+            }
+
+            70% {
+                transform: scale(1.25) translate(-11%, 1%);
+            }
+
+            100% {
+                transform: scale(1) translate(0,0);
+            }
+        }
+
+        .factory-pan-ground {
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(
+                    to bottom,
+                    #9bc6cf 0 20%,
+                    #718e6d 20% 100%
+                );
+        }
+
+        .pan-river {
+            position: absolute;
+            left: -5%;
+            bottom: -10%;
+            width: 38%;
+            height: 85%;
+            background: #6ed0cb;
+            transform: rotate(-8deg);
+            clip-path: polygon(0 0,60% 0,100% 100%,10% 100%);
+            overflow: hidden;
+        }
+
+        .pan-river::after {
+            content: "";
+            position: absolute;
+            inset: -100px 0;
+            background: repeating-linear-gradient(
+                175deg,
+                transparent 0 25px,
+                rgba(255,255,255,.35) 27px 31px,
+                transparent 33px 65px
+            );
+            animation: flowingWater 3s linear infinite;
+        }
+
+        .intake {
+            position: absolute;
+            left: 20%;
+            bottom: 36%;
+            width: 120px;
+            height: 95px;
+            background: #686f6c;
+            border: 7px solid #414846;
+            z-index: 5;
+        }
+
+        .intake::before {
+            content: "INTAKE";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%,-50%);
+            color: #ddd;
+            font-size: .65rem;
+            letter-spacing: .12em;
+        }
+
+        .pipe-horizontal {
+            position: absolute;
+            z-index: 4;
+            left: 26%;
+            right: 26%;
+            bottom: 42%;
+            height: 54px;
+            background: #747d7c;
+            border-top: 8px solid #949d9b;
+            border-bottom: 8px solid #505755;
+        }
+
+        .pipe-horizontal::after {
+            content: "";
+            position: absolute;
+            inset: 11px 0;
+            background:
+                repeating-linear-gradient(
+                    90deg,
+                    transparent 0 90px,
+                    rgba(255,255,255,.16) 90px 96px
+                );
+        }
+
+        .pipe-water {
+            position: absolute;
+            z-index: 6;
+            left: 26%;
+            bottom: calc(42% + 20px);
+            width: 0;
+            height: 14px;
+            border-radius: 20px;
+            background: #8ef2eb;
+            box-shadow: 0 0 12px rgba(142,242,235,.6);
+        }
+
+        .factory-pan-scene.active .pipe-water {
+            animation: pipeFill 4s 1.3s ease forwards;
+        }
+
+        @keyframes pipeFill {
+            to {
+                width: 48%;
+            }
+        }
+
+        .pipe-support {
+            position: absolute;
+            bottom: 19%;
+            width: 22px;
+            height: 25%;
+            background: #555c59;
+        }
+
+        .pipe-support.s1 { left: 36%; }
+        .pipe-support.s2 { left: 49%; }
+        .pipe-support.s3 { left: 62%; }
+
+        .factory-building {
+            position: absolute;
+            right: 3%;
+            bottom: 12%;
+            width: 33%;
+            height: 48%;
+            background: #a5a9a6;
+            border: 8px solid #777d79;
+            z-index: 3;
+        }
+
+        .factory-building::before {
+            content: "";
+            position: absolute;
+            left: 8%;
+            right: 8%;
+            top: 18%;
+            height: 36%;
+            background: repeating-linear-gradient(
+                90deg,
+                #6c7473 0 50px,
+                #b7c6c7 50px 90px
+            );
+            border: 6px solid #777;
+        }
+
+        .factory-building::after {
+            content: "NATURAL™ WATER";
+            position: absolute;
+            left: 50%;
+            bottom: 17%;
+            transform: translateX(-50%);
+            width: 90%;
+            text-align: center;
+            color: #4c5350;
+            font-weight: 900;
+            letter-spacing: .12em;
+        }
+
+        .factory-stack {
+            position: absolute;
+            z-index: 2;
+            bottom: 60%;
+            width: 60px;
+            height: 230px;
+            background: #7d827f;
+        }
+
+        .factory-stack.a { right: 9%; }
+        .factory-stack.b {
+            right: 24%;
+            height: 175px;
+        }
+
+        .factory-smoke {
+            position: absolute;
+            width: 90px;
+            height: 55px;
+            border-radius: 50%;
+            background: rgba(225,230,226,.65);
+            opacity: 0;
+        }
+
+        .factory-pan-scene.active .factory-smoke {
+            animation: smoke 4s 4s ease-in-out infinite;
+        }
+
+        .factory-smoke.sm1 {
+            right: 7%;
+            bottom: 86%;
+        }
+
+        .factory-smoke.sm2 {
+            right: 21%;
+            bottom: 79%;
+            animation-delay: 4.8s !important;
+        }
+
+        @keyframes smoke {
+            0% {
+                opacity: 0;
+                transform: translateY(0) scale(.6);
+            }
+
+            30% {
+                opacity: .7;
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(30px,-100px) scale(1.6);
+            }
+        }
+
+        .pan-label {
+            position: absolute;
+            z-index: 50;
+            left: 50%;
+            top: 12%;
+            transform: translateX(-50%);
+            width: min(800px, 90%);
+            text-align: center;
+            font-family: Georgia, serif;
+            font-size: clamp(1.7rem,4vw,3.6rem);
+            text-shadow: 0 4px 20px rgba(0,0,0,.8);
+            opacity: 0;
+        }
+
+        .factory-pan-scene.active .pan-label {
+            animation: panCopy 2s 5.6s forwards;
+        }
+
+        @keyframes panCopy {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .camera-note {
+            position: absolute;
+            z-index: 50;
+            left: 30px;
+            bottom: 30px;
+            padding: 9px 12px;
+            background: rgba(0,0,0,.45);
+            color: rgba(255,255,255,.7);
+            font-size: .67rem;
+            text-transform: uppercase;
+            letter-spacing: .15em;
+        }
+
+        /* =========================================================
+           LEAF WORKERS
+        ========================================================= */
+
+        .leaf-scene {
+            min-height: 145vh;
+            background:
+                linear-gradient(#9cc4aa 0 24%, #315c3f 24% 72%, #6dc9c4 72%);
+        }
+
+        .leaf-path {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 25%;
+            height: 80px;
+            background: #876347;
+        }
+
+        .leaf-worker {
+            position: absolute;
+            bottom: 26%;
+            width: 95px;
+            height: 225px;
+            transform-origin: bottom center;
+        }
+
+        .leaf-worker .head {
+            position: absolute;
+            left: 24px;
+            top: 0;
+            width: 47px;
+            height: 52px;
+            border-radius: 50%;
+            background: var(--skin);
+        }
+
+        .leaf-worker .body {
+            position: absolute;
+            left: 12px;
+            top: 45px;
+            width: 70px;
+            height: 115px;
+            border-radius: 25px 25px 5px 5px;
+            background: var(--yellow);
+        }
+
+        .leaf-worker .leg {
+            position: absolute;
+            top: 150px;
+            width: 17px;
+            height: 70px;
+            background: #343b40;
+            transform-origin: top;
+        }
+
+        .leaf-worker .leg.left {
+            left: 24px;
+        }
+
+        .leaf-worker .leg.right {
+            right: 24px;
+        }
+
+        .leaf-worker .arm {
+            position: absolute;
+            top: 72px;
+            width: 15px;
+            height: 75px;
+            background: var(--skin);
+            transform-origin: top;
+        }
+
+        .leaf-worker .arm.left {
+            left: 13px;
+            transform: rotate(-25deg);
+        }
+
+        .leaf-worker .arm.right {
+            right: 13px;
+            transform: rotate(25deg);
+        }
+
+        .carried-leaf {
+            position: absolute;
+            left: -16px;
+            top: 124px;
+            width: 125px;
+            height: 67px;
+            overflow: hidden;
+            border: 3px solid var(--leafDark);
+            border-radius: 100% 0 100% 0;
+            background:
+                radial-gradient(
+                    ellipse 28px 10px at 56% 54%,
+                    #ffffff 0 10%,
+                    var(--waterLight) 11% 62%,
+                    transparent 63%
+                ),
+                var(--leaf);
+            transform: rotate(-6deg);
+        }
+
+        .leaf-water {
+            display: none;
+        }
+
+        @keyframes leafSlosh {
+            from {
+                transform: rotate(-5deg) translateX(-4px);
+            }
+
+            to {
+                transform: rotate(6deg) translateX(5px);
+            }
+        }
+
+        .leaf-worker.walk1 {
+            left: -15%;
+        }
+
+        .leaf-worker.walk2 {
+            left: -30%;
+        }
+
+        .leaf-worker.walk3 {
+            left: -45%;
+        }
+
+        .leaf-scene.active .walk1 {
+            animation: workerWalk 10s linear infinite;
+        }
+
+        .leaf-scene.active .walk2 {
+            animation: workerWalk 10s 2.4s linear infinite;
+        }
+
+        .leaf-scene.active .walk3 {
+            animation: workerWalk 10s 4.8s linear infinite;
+        }
+
+        @keyframes workerWalk {
+            from {
+                left: -15%;
+            }
+
+            to {
+                left: 115%;
+            }
+        }
+
+        .leaf-worker.walk1 .leg.left,
+        .leaf-worker.walk2 .leg.left,
+        .leaf-worker.walk3 .leg.left {
+            animation: legA .55s ease-in-out infinite alternate;
+        }
+
+        .leaf-worker.walk1 .leg.right,
+        .leaf-worker.walk2 .leg.right,
+        .leaf-worker.walk3 .leg.right {
+            animation: legB .55s ease-in-out infinite alternate;
+        }
+
+        @keyframes legA {
+            from { transform: rotate(18deg); }
+            to { transform: rotate(-18deg); }
+        }
+
+        @keyframes legB {
+            from { transform: rotate(-18deg); }
+            to { transform: rotate(18deg); }
+        }
+
+        .fall-worker {
+            left: 68%;
+        }
+
+        .leaf-scene.active .fall-worker {
+            animation: actualFall 2.4s 1.5s forwards;
+        }
+
+        @keyframes actualFall {
+            0%,20% {
+                transform: rotate(0) translate(0,0);
+            }
+
+            40% {
+                transform: rotate(12deg) translate(10px,5px);
+            }
+
+            70% {
+                transform: rotate(72deg) translate(45px,20px);
+            }
+
+            100% {
+                transform: rotate(88deg) translate(55px,30px);
+            }
+        }
+
+        .spill {
+            position: absolute;
+            z-index: 10;
+            left: 70%;
+            bottom: 22%;
+            width: 200px;
+            height: 150px;
+            opacity: 0;
+        }
+
+        .leaf-scene.active .spill {
+            animation: spillAppear .3s 2.65s forwards;
+        }
+
+        @keyframes spillAppear {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .spill-drop {
+            position: absolute;
+            width: 18px;
+            height: 45px;
+            border-radius: 60% 60% 70% 70%;
+            background: var(--waterLight);
+        }
+
+        .spill-drop:nth-child(1) {
+            left: 15px;
+            animation: dropFall .8s infinite;
+        }
+
+        .spill-drop:nth-child(2) {
+            left: 65px;
+            top: -30px;
+            animation: dropFall .7s .15s infinite;
+        }
+
+        .spill-drop:nth-child(3) {
+            left: 115px;
+            top: 10px;
+            animation: dropFall .9s .25s infinite;
+        }
+
+        @keyframes dropFall {
+            to {
+                transform: translateY(100px) rotate(30deg);
+                opacity: 0;
+            }
+        }
+
+        .day-lost {
+            position: absolute;
+            right: 6%;
+            bottom: 8%;
+            z-index: 20;
+            padding: 13px 18px;
+            border: 4px solid #111;
+            background: white;
+            color: #111;
+            font-weight: 900;
+            transform: rotate(3deg) scale(0);
+        }
+
+        .leaf-scene.active .day-lost {
+            animation: dayLost .4s 3s forwards;
+        }
+
+        @keyframes dayLost {
+            to {
+                transform: rotate(3deg) scale(1);
+            }
+        }
+
+        /* =========================================================
+           SPITTING NETWORK
+        ========================================================= */
+
+        .spit-scene {
+            min-height: 160vh;
+            background:
+                linear-gradient(
+                    to bottom,
+                    #afd0ba 0 24%,
+                    #4d744f 24% 72%,
+                    #79583e 72%
+                );
+        }
+
+        .spit-river {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 18%;
+            height: 42%;
+            background: #6fd0ca;
+        }
+
+        .spit-factory {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 16%;
+            height: 50%;
+            background: #939895;
+        }
+
+        .spit-factory::after {
+            content: "FACTORY";
+            position: absolute;
+            left: 50%;
+            top: 35%;
+            transform: translateX(-50%);
+            color: #555;
+            font-weight: 900;
+            letter-spacing: .12em;
+        }
+
+        .spit-line {
+            position: absolute;
+            z-index: 10;
+            left: 10%;
+            right: 10%;
+            bottom: 24%;
+            height: 220px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .spitter {
+            position: relative;
+            width: 70px;
+            height: 190px;
+            flex: 0 0 70px;
+        }
+
+        .spitter-head {
+            position: absolute;
+            z-index: 5;
+            left: 15px;
+            top: 0;
+            width: 44px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--skin);
+            transform-origin: bottom;
+        }
+
+        .spitter-face {
+            position: absolute;
+            right: -3px;
+            top: 22px;
+            width: 9px;
+            height: 7px;
+            border-radius: 50%;
+            background: #4d2924;
+        }
+
+        .spitter-body {
+            position: absolute;
+            left: 8px;
+            top: 44px;
+            width: 58px;
+            height: 105px;
+            border-radius: 20px 20px 3px 3px;
+            background: var(--yellow);
+        }
+
+        .spitter-legs {
+            position: absolute;
+            left: 18px;
+            top: 143px;
+            width: 14px;
+            height: 48px;
+            background: #343b40;
+            box-shadow: 27px 0 #343b40;
+        }
+
+        .spit-line .spitter:nth-child(even) .spitter-body {
+            background: #e59a42;
+        }
+
+        .spit-line .spitter:nth-child(3n) .spitter-body {
+            background: #d5d56b;
+        }
+
+        .spit-scene.active .spitter-head {
+            animation: spitHead 1.8s ease-in-out infinite;
+        }
+
+        .spit-line .spitter:nth-child(2) .spitter-head {
+            animation-delay: .2s;
+        }
+
+        .spit-line .spitter:nth-child(3) .spitter-head {
+            animation-delay: .4s;
+        }
+
+        .spit-line .spitter:nth-child(4) .spitter-head {
+            animation-delay: .6s;
+        }
+
+        .spit-line .spitter:nth-child(5) .spitter-head {
+            animation-delay: .8s;
+        }
+
+        .spit-line .spitter:nth-child(6) .spitter-head {
+            animation-delay: 1s;
+        }
+
+        .spit-line .spitter:nth-child(7) .spitter-head {
+            animation-delay: 1.2s;
+        }
+
+        .spit-line .spitter:nth-child(8) .spitter-head {
+            animation-delay: 1.4s;
+        }
+
+        @keyframes spitHead {
+            0%,55%,100% {
+                transform: rotate(0);
+            }
+
+            70% {
+                transform: rotate(-8deg) translateX(2px);
+            }
+
+            82% {
+                transform: rotate(8deg) translateX(5px);
+            }
+        }
+
+        .spit-streams {
+            position: absolute;
+            z-index: 20;
+            left: 10%;
+            right: 10%;
+            bottom: calc(24% + 80px);
+            height: 80px;
+            pointer-events: none;
+        }
+
+        .spit-arc {
+            position: absolute;
+            width: 11%;
+            height: 55px;
+            border-top: 6px solid #c6ffff;
+            border-radius: 50%;
+            transform: rotate(-4deg) scaleX(0);
+            transform-origin: left center;
+            opacity: 0;
+        }
+
+        .spit-scene.active .spit-arc {
+            animation: spitArc 1.8s ease-in-out infinite;
+        }
+
+        .spit-arc.a1 { left: 4%; animation-delay: 0s !important; }
+        .spit-arc.a2 { left: 16%; animation-delay: .2s !important; }
+        .spit-arc.a3 { left: 28%; animation-delay: .4s !important; }
+        .spit-arc.a4 { left: 40%; animation-delay: .6s !important; }
+        .spit-arc.a5 { left: 52%; animation-delay: .8s !important; }
+        .spit-arc.a6 { left: 64%; animation-delay: 1s !important; }
+        .spit-arc.a7 { left: 76%; animation-delay: 1.2s !important; }
+
+        @keyframes spitArc {
+            0%,55% {
+                transform: rotate(-4deg) scaleX(0);
+                opacity: 0;
+            }
+
+            65% {
+                opacity: 1;
+            }
+
+            82% {
+                transform: rotate(-4deg) scaleX(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: rotate(-4deg) scaleX(1);
+                opacity: 0;
+            }
+        }
+
+        .mouth-fill {
+            position: absolute;
+            z-index: 30;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #b9ffff;
+            opacity: 0;
+        }
+
+        .spit-scene.active .mouth-fill {
+            animation: waterRelay 8s linear infinite;
+        }
+
+        @keyframes waterRelay {
+            0% {
+                left: 11%;
+                bottom: 41%;
+                opacity: 1;
+            }
+
+            12% {
+                left: 22%;
+                bottom: 41%;
+            }
+
+            24% {
+                left: 33%;
+                bottom: 41%;
+            }
+
+            36% {
+                left: 44%;
+                bottom: 41%;
+            }
+
+            48% {
+                left: 55%;
+                bottom: 41%;
+            }
+
+            60% {
+                left: 66%;
+                bottom: 41%;
+            }
+
+            72% {
+                left: 77%;
+                bottom: 41%;
+            }
+
+            84% {
+                left: 88%;
+                bottom: 41%;
+            }
+
+            100% {
+                left: 94%;
+                bottom: 36%;
+                opacity: 0;
+            }
+        }
+
+        .source-worker {
+            position: absolute;
+            left: 7%;
+            bottom: 22%;
+            z-index: 25;
+            width: 75px;
+            height: 190px;
+        }
+
+        .source-worker .head {
+            position: absolute;
+            left: 15px;
+            width: 44px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--skin);
+        }
+
+        .source-worker .body {
+            position: absolute;
+            top: 45px;
+            left: 8px;
+            width: 58px;
+            height: 105px;
+            border-radius: 20px;
+            background: var(--yellow);
+        }
+
+        .source-worker .legs {
+            position: absolute;
+            left: 18px;
+            top: 143px;
+            width: 14px;
+            height: 48px;
+            background: #343b40;
+            box-shadow: 27px 0 #343b40;
+        }
+
+        .spit-scene.active .source-worker {
+            animation: drinkRiver 3.6s ease-in-out infinite;
+        }
+
+        @keyframes drinkRiver {
+            0%,20%,100% {
+                transform: rotate(0) translate(0,0);
+            }
+
+            40%,58% {
+                transform: rotate(-38deg) translate(-20px,20px);
+            }
+
+            75% {
+                transform: rotate(0);
+            }
+        }
+
+        .relay-caption {
+            position: absolute;
+            z-index: 50;
+            left: 50%;
+            bottom: 7%;
+            transform: translateX(-50%);
+            width: max-content;
+            max-width: 92%;
+            padding: 13px 20px;
+            border: 4px solid #111;
+            background: white;
+            color: #111;
+            font-weight: 900;
+            text-align: center;
+        }
+
+        /* MISSED SPIT */
+
+        .miss-scene {
+            min-height: 90vh;
+            background: #4d744f;
+        }
+
+        .miss-pair {
+            position: relative;
+            width: min(650px, 95vw);
+            height: 400px;
+        }
+
+        .big-person {
+            position: absolute;
+            bottom: 20px;
+            width: 150px;
+            height: 320px;
+        }
+
+        .big-person.left { left: 10%; }
+        .big-person.right { right: 10%; }
+
+        .big-head {
+            position: absolute;
+            left: 37px;
+            width: 76px;
+            height: 84px;
+            border-radius: 50%;
+            background: var(--skin);
+        }
+
+        .big-mouth {
+            position: absolute;
+            right: -5px;
+            top: 40px;
+            width: 15px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4b2924;
+        }
+
+        .big-body {
+            position: absolute;
+            top: 75px;
+            width: 150px;
+            height: 180px;
+            border-radius: 50px 50px 8px 8px;
+            background: var(--yellow);
+        }
+
+        .miss-jet {
+            position: absolute;
+            left: 27%;
+            top: 112px;
+            width: 0;
+            height: 8px;
+            border-radius: 20px;
+            background: var(--waterLight);
+            transform-origin: left;
+            transform: rotate(19deg);
+        }
+
+        .miss-scene.active .miss-jet {
+            animation: missedSpit 2.8s .5s forwards;
+        }
+
+        @keyframes missedSpit {
+            0% {
+                width: 0;
+            }
+
+            35% {
+                width: 270px;
+            }
+
+            60%,100% {
+                width: 270px;
+                transform: rotate(31deg);
+                opacity: 0;
+            }
+        }
+
+        .ground-splat {
+            position: absolute;
+            left: 59%;
+            bottom: 15px;
+            width: 130px;
+            height: 35px;
+            border-radius: 50%;
+            background: #a9f3ee;
+            transform: scale(0);
+        }
+
+        .miss-scene.active .ground-splat {
+            animation: splatGrow .4s 1.8s forwards;
+        }
+
+        @keyframes splatGrow {
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .groan {
+            position: absolute;
+            left: 50%;
+            bottom: -30px;
+            transform: translateX(-50%) scale(0);
+            width: max-content;
+            max-width: 90vw;
+            padding: 15px 22px;
+            border: 5px solid #111;
+            background: white;
+            color: #111;
+            font-size: clamp(1.3rem,4vw,3rem);
+            font-weight: 900;
+        }
+
+        .miss-scene.active .groan {
+            animation: groanPop .4s 2.1s forwards;
+        }
+
+        @keyframes groanPop {
+            to {
+                transform: translateX(-50%) scale(1);
+            }
+        }
+
+        /* =========================================================
+           REROUTE
+        ========================================================= */
+
+        .reroute-scene {
+            min-height: 145vh;
+            background:
+                linear-gradient(#a8c7b2 0 27%, #567a51 27% 100%);
+        }
+
+        .original-river {
+            position: absolute;
+            left: -2%;
+            bottom: -10%;
+            width: 27%;
+            height: 70%;
+            background: #6cc7c3;
+            clip-path: polygon(0 0,65% 0,100% 100%,0 100%);
+        }
+
+        .trench {
+            position: absolute;
+            left: 21%;
+            bottom: 22%;
+            width: 63%;
+            height: 100px;
+            overflow: hidden;
+            background: #5d4432;
+            transform: rotate(-6deg);
+            clip-path: polygon(0 35%,100% 0,100% 68%,0 100%);
+        }
+
+        .trench-water {
+            position: absolute;
+            inset: 32% 0;
+            background: #7ad4ce;
+            transform: scaleX(0);
+            transform-origin: left;
+        }
+
+        .reroute-scene.active .trench-water {
+            animation: trenchTrickle 3s 1.5s forwards;
+        }
+
+        @keyframes trenchTrickle {
+            to {
+                transform: scaleX(.45);
+            }
+        }
+
+        .digger {
+            position: absolute;
+            bottom: 31%;
+            width: 90px;
+            height: 230px;
+        }
+
+        .digger.d1 { left: 37%; }
+        .digger.d2 { left: 59%; }
+        .digger.d3 { left: 76%; }
+
+        .hardhat {
+            position: absolute;
+            left: 17px;
+            width: 56px;
+            height: 27px;
+            border-radius: 30px 30px 4px 4px;
+            background: var(--yellow);
+        }
+
+        .digger-head {
+            position: absolute;
+            left: 22px;
+            top: 18px;
+            width: 46px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--skin);
+        }
+
+        .digger-body {
+            position: absolute;
+            left: 10px;
+            top: 62px;
+            width: 70px;
+            height: 115px;
+            border-radius: 25px;
+            background: var(--orange);
+        }
+
+        .digger-legs {
+            position: absolute;
+            left: 21px;
+            top: 169px;
+            width: 16px;
+            height: 61px;
+            background: #30373a;
+            box-shadow: 31px 0 #30373a;
+        }
+
+        .shovel {
+            position: absolute;
+            left: 74px;
+            top: 82px;
+            width: 7px;
+            height: 125px;
+            background: #705039;
+            transform-origin: top;
+        }
+
+        .shovel::after {
+            content: "";
+            position: absolute;
+            left: -11px;
+            bottom: -13px;
+            width: 29px;
+            height: 27px;
+            border-radius: 4px 4px 14px 14px;
+            background: #737b7c;
+        }
+
+        .reroute-scene.active .d1 .shovel {
+            animation: digging 1.3s ease-in-out infinite;
+        }
+
+        .reroute-scene.active .d2 .shovel {
+            animation: digging 1.3s .4s ease-in-out infinite;
+        }
+
+        .reroute-scene.active .d3 .shovel {
+            animation: digging 1.3s .8s ease-in-out infinite;
+        }
+
+        @keyframes digging {
+            0%,100% {
+                transform: rotate(-25deg);
+            }
+
+            50% {
+                transform: rotate(28deg) translateY(20px);
+            }
+        }
+
+        .dirt {
+            position: absolute;
+            width: 18px;
+            height: 14px;
+            border-radius: 50%;
+            background: #71513b;
+            opacity: 0;
+        }
+
+        .reroute-scene.active .dirt {
+            animation: dirtThrow 1.3s ease-out infinite;
+        }
+
+        .dirt.x1 {
+            left: 43%;
+            bottom: 35%;
+        }
+
+        .dirt.x2 {
+            left: 65%;
+            bottom: 35%;
+            animation-delay: .4s !important;
+        }
+
+        @keyframes dirtThrow {
+            0% {
+                opacity: 1;
+                transform: translate(0,0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50px,-80px);
+            }
+        }
+
+        .thumbs-up {
+            position: absolute;
+            right: 8%;
+            top: 30%;
+            padding: 12px 18px;
+            border: 4px solid #111;
+            background: white;
+            color: #111;
+            font-weight: 900;
+            transform: scale(0) rotate(4deg);
+        }
+
+        .reroute-scene.active .thumbs-up {
+            animation: thumbs .4s 4.3s forwards;
+        }
+
+        @keyframes thumbs {
+            to {
+                transform: scale(1) rotate(4deg);
+            }
+        }
+
+        /* REFILL */
+
+        .refill-scene {
+            min-height: 95vh;
+            background: #567a51;
+        }
+
+        .refill-trench {
+            position: absolute;
+            left: 16%;
+            right: 16%;
+            bottom: 26%;
+            height: 90px;
+            overflow: hidden;
+            background: #4d392c;
+            transform: rotate(-4deg);
+        }
+
+        .refill-dirt {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            height: 100%;
+            background: #765941;
+        }
+
+        .refill-scene.active .refill-dirt {
+            animation: refill 4s .7s forwards;
+        }
+
+        @keyframes refill {
+            to {
+                width: 100%;
+            }
+        }
+
+        .refill-copy {
+            position: relative;
+            z-index: 20;
+            margin-top: 45vh;
+            padding: 15px 22px;
+            background: rgba(0,0,0,.7);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+        }
+
+        /* =========================================================
+           BEES
+        ========================================================= */
+
+        .bee-scene {
+            min-height: 150vh;
+            background:
+                linear-gradient(#bdd6bc 0 28%, #70945e 28%);
+        }
+
+        .bee-table {
+            position: absolute;
+            left: 8%;
+            right: 8%;
+            bottom: 18%;
+            height: 18px;
+            background: #79573c;
+        }
+
+        .supervisor {
+            position: absolute;
+            left: 8%;
+            bottom: 20%;
+            width: 130px;
+            height: 320px;
+        }
+
+        .supervisor-head {
+            position: absolute;
+            left: 30px;
+            width: 68px;
+            height: 73px;
+            border-radius: 50%;
+            background: var(--skin);
+        }
+
+        .supervisor-body {
+            position: absolute;
+            left: 8px;
+            top: 65px;
+            width: 115px;
+            height: 195px;
+            border-radius: 35px 35px 4px 4px;
+            background: var(--yellow);
+        }
+
+        .clipboard {
+            position: absolute;
+            left: 90px;
+            top: 125px;
+            width: 72px;
+            height: 98px;
+            border: 5px solid #66503b;
+            background: #eee7d5;
+            transform: rotate(-8deg);
+        }
+
+        .clipboard::after {
+            content: "✓\A✓\A✓\A?";
+            white-space: pre;
+            position: absolute;
+            inset: 9px;
+            color: #222;
+            font-weight: 900;
+            line-height: 1.5;
+        }
+
+        .bee-zone {
+            position: absolute;
+            left: 28%;
+            right: 8%;
+            top: 32%;
+            bottom: 25%;
+        }
+
+        .bee {
+            position: absolute;
+            width: 45px;
+            height: 29px;
+            border: 2px solid #222;
+            border-radius: 50%;
+            background: repeating-linear-gradient(
+                90deg,
+                #f1c83d 0 10px,
+                #28251f 10px 17px
+            );
+        }
+
+        .bee::before,
+        .bee::after {
+            content: "";
+            position: absolute;
+            top: -13px;
+            width: 23px;
+            height: 15px;
+            border: 2px solid #718585;
+            border-radius: 50%;
+            background: rgba(225,245,255,.78);
+        }
+
+        .bee::before {
+            left: 1px;
+            transform: rotate(-22deg);
+        }
+
+        .bee::after {
+            right: 1px;
+            transform: rotate(22deg);
+        }
+
+        .mini-harness {
+            position: absolute;
+            left: 19px;
+            top: 23px;
+            width: 5px;
+            height: 17px;
+            background: #555;
+        }
+
+        .mini-bucket {
+            position: absolute;
+            left: 13px;
+            top: 36px;
+            width: 20px;
+            height: 18px;
+            border: 2px solid #555;
+            background: #a8b0af;
+        }
+
+        .mini-bucket::after {
+            content: "";
+            position: absolute;
+            left: 3px;
+            right: 3px;
+            bottom: 2px;
+            height: 7px;
+            background: #8ce7e1;
+        }
+
+        .bee.b1 {
+            left: 5%;
+            top: 10%;
+            animation: beeTrip1 5s ease-in-out infinite;
+        }
+
+        .bee.b2 {
+            left: 30%;
+            top: 55%;
+            animation: beeTrip2 5.5s .6s ease-in-out infinite;
+        }
+
+        .bee.b3 {
+            left: 68%;
+            top: 23%;
+            animation: beeTrip3 4.7s .3s ease-in-out infinite;
+        }
+
+        @keyframes beeTrip1 {
+            0%,100% { transform: translate(0,0); }
+            50% { transform: translate(250px,150px); }
+        }
+
+        @keyframes beeTrip2 {
+            0%,100% { transform: translate(0,0); }
+            50% { transform: translate(170px,-180px); }
+        }
+
+        @keyframes beeTrip3 {
+            0%,100% { transform: translate(0,0); }
+            50% { transform: translate(-200px,170px); }
+        }
+
+        .bee.steve {
+            left: 48%;
+            top: 63%;
+        }
+
+        .bee-scene.active .bee.steve {
+            animation: steve 4s 1.5s forwards;
+        }
+
+        @keyframes steve {
+            0% {
+                transform: translate(0,0);
+            }
+
+            20% {
+                transform: translate(30px,-20px);
+            }
+
+            100% {
+                transform: translate(900px,-450px) rotate(25deg);
+            }
+        }
+
+        .steve .mini-bucket {
+            transform-origin: top;
+        }
+
+        .bee-scene.active .steve .mini-bucket {
+            animation: bucketDrop .6s 2s forwards;
+        }
+
+        @keyframes bucketDrop {
+            to {
+                transform: translate(-40px,220px) rotate(140deg);
+            }
+        }
+
+        .teaspoon {
+            position: absolute;
+            right: 10%;
+            bottom: 20%;
+            width: 145px;
+            height: 50px;
+            border: 7px solid #999;
+            border-radius: 50%;
+            background: #b6e5e1;
+        }
+
+        .teaspoon::after {
+            content: "";
+            position: absolute;
+            left: 120px;
+            top: 11px;
+            width: 150px;
+            height: 14px;
+            border-radius: 10px;
+            background: #999;
+        }
+
+        .timer {
+            position: absolute;
+            right: 6%;
+            top: 20%;
+            color: rgba(255,255,255,.8);
+            font: 900 clamp(1rem,2.5vw,2rem) "Courier New", monospace;
+        }
+
+        .steve-text {
+            position: absolute;
+            left: 5%;
+            bottom: 7%;
+            z-index: 30;
+            padding: 17px 24px;
+            border: 5px solid #111;
+            box-shadow: 8px 8px #111;
+            background: white;
+            color: #111;
+            font-size: clamp(1.4rem,4vw,3.5rem);
+            font-weight: 1000;
+            transform: scale(0) rotate(-3deg);
+        }
+
+        .bee-scene.active .steve-text {
+            animation: steveText .4s 2.6s forwards;
+        }
+
+        @keyframes steveText {
+            to {
+                transform: scale(1) rotate(-3deg);
+            }
+        }
+
+        /* =========================================================
+           RELOCATE RIVER
+        ========================================================= */
+
+        .relocate-scene {
+            min-height: 120vh;
+            background: #ddd7c4;
+            color: #18231f;
+        }
+
+        .map {
+            position: relative;
+            width: min(900px,94%);
+            aspect-ratio: 16 / 10;
+            overflow: hidden;
+            margin: 50px auto 0;
+            border: 14px solid #504a3d;
+            background: #ebe4cc;
+        }
+
+        .map-river {
+            position: absolute;
+            left: -10%;
+            top: 15%;
+            width: 120%;
+            height: 62%;
+            border-top: 28px solid #70b9c5;
+            border-radius: 50%;
+            transform: rotate(-14deg);
+        }
+
+        .map-factory {
+            position: absolute;
+            right: 12%;
+            bottom: 14%;
+            width: 100px;
+            height: 75px;
+            background: #777;
+        }
+
+        .map-arrow {
+            position: absolute;
+            left: 30%;
+            top: 48%;
+            width: 0;
+            height: 14px;
+            background: #c8493f;
+            transform: rotate(16deg);
+        }
+
+        .relocate-scene.active .map-arrow {
+            animation: mapArrow 2.5s .8s forwards;
+        }
+
+        @keyframes mapArrow {
+            to {
+                width: 42%;
+            }
+        }
+
+        .map-arrow::after {
+            content: "";
+            position: absolute;
+            right: -25px;
+            top: -17px;
+            border-left: 40px solid #c8493f;
+            border-top: 24px solid transparent;
+            border-bottom: 24px solid transparent;
+        }
+
+        /* =========================================================
+           FINAL RIVER / DRINK
+        ========================================================= */
+
+        .final-river {
+            min-height: 150vh;
+        }
+
+        .drinker {
+            position: absolute;
+            z-index: 30;
+            left: 47%;
+            bottom: 15%;
+            width: 130px;
+            height: 245px;
+            transform-origin: bottom center;
+        }
+
+        .drinker-head {
+            position: absolute;
+            left: 35px;
+            width: 60px;
+            height: 65px;
+            border-radius: 50%;
+            background: var(--skin);
+        }
+
+        .drinker-body {
+            position: absolute;
+            top: 55px;
+            width: 110px;
+            height: 135px;
+            border-radius: 40px;
+            background: #ddd4b6;
+        }
+
+        .drinker-arm {
+            position: absolute;
+            left: 93px;
+            top: 90px;
+            width: 18px;
+            height: 100px;
+            border-radius: 20px;
+            background: var(--skin);
+            transform-origin: top;
+        }
+
+        .final-river.active .drinker {
+            animation: kneelDrink 5s ease-in-out infinite;
+        }
+
+        .final-river.active .drinker-arm {
+            animation: scoopWater 5s ease-in-out infinite;
+        }
+
+        @keyframes kneelDrink {
+            0%,15%,100% {
+                transform: rotate(0);
+            }
+
+            35%,55% {
+                transform: rotate(28deg) translate(20px,15px);
+            }
+
+            72% {
+                transform: rotate(5deg);
+            }
+        }
+
+        @keyframes scoopWater {
+            0%,20%,100% {
+                transform: rotate(10deg);
+            }
+
+            40% {
+                transform: rotate(55deg) translateY(10px);
+            }
+
+            68% {
+                transform: rotate(-70deg) translate(-20px,-20px);
+            }
+        }
+
+        /* =========================================================
+           FINAL BRAND
+        ========================================================= */
+
+        .brand-card {
+            min-height: 130vh;
+            display: grid;
+            place-items: center;
+            padding: 90px 20px;
+            background: var(--cream);
+            color: #17362d;
+            text-align: center;
+        }
+
+        .brand-logo {
+            position: relative;
+            width: min(550px,90vw);
+            height: 290px;
+            margin: auto;
+        }
+
+        .brand-drop {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 165px;
+            height: 205px;
+            border-radius: 70% 15% 70% 70%;
+            background: linear-gradient(135deg,#b9efea,#61bdb4);
+            transform: translateX(-50%) rotate(45deg);
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+            50% {
+                transform: translateX(-50%) rotate(45deg) translate(-7px,-7px);
+            }
+        }
+
+        .brand-leaf {
+            position: absolute;
+            left: calc(50% + 35px);
+            top: 40px;
+            width: 160px;
+            height: 90px;
+            border-radius: 100% 0 100% 0;
+            background: #568b4f;
+            transform: rotate(-25deg);
+        }
+
+        .brand-name {
+            font-family: Georgia, serif;
+            font-size: clamp(4rem,13vw,10rem);
+            line-height: .8;
+            letter-spacing: -.07em;
+        }
+
+        .brand-name sup {
+            font-family: Arial, sans-serif;
+            font-size: .12em;
+            vertical-align: top;
+            letter-spacing: 0;
+        }
+
+        .tagline {
+            margin-top: 45px;
+            font-family: Georgia, serif;
+            font-size: clamp(1.5rem,4vw,3rem);
+            font-style: italic;
+        }
+
+        .price {
+            margin-top: 80px;
+            font-size: clamp(2.5rem,7vw,6rem);
+            font-weight: 900;
+            letter-spacing: -.05em;
+        }
+
+        .price span {
+            display: block;
+            margin-top: 15px;
+            color: #6b7e77;
+            font-size: .22em;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+        }
+
+        .fake-button {
+            display: inline-block;
+            margin-top: 60px;
+            padding: 17px 25px;
+            border: 2px solid #17362d;
+            color: #17362d;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: .13em;
+            font-weight: 900;
+        }
+
+        .fake-button:hover {
+            background: #17362d;
+            color: white;
+        }
+
+        .fine-print {
+            min-height: 75vh;
+            display: grid;
+            place-items: center;
+            padding: 60px 20px;
+            background: #050706;
+            text-align: center;
+        }
+
+        .fine-print h2 {
+            max-width: 850px;
+            margin: 15px auto;
+            font-size: clamp(2rem,6vw,5rem);
+        }
+
+        .fine-print p {
+            color: #7c8580;
+            text-transform: uppercase;
+            letter-spacing: .18em;
+            font-size: .75rem;
+        }
+
+        footer {
+            padding: 60px 20px;
+            border-top: 1px solid #17251f;
+            background: #050706;
+            color: #718079;
+            text-align: center;
+        }
+
+        footer strong {
+            color: white;
+        }
+
+        @media (max-width: 800px) {
+            .spit-line {
+                left: 3%;
+                right: 3%;
+            }
+
+            .spitter {
+                transform: scale(.7);
+                margin: -10px;
+            }
+
+            .source-worker {
+                transform: scale(.75);
+                transform-origin: bottom;
+            }
+
+            .factory-building {
+                width: 38%;
+            }
+
+            .leaf-worker {
+                transform: scale(.8);
+            }
+
+            .fall-worker {
+                transform-origin: bottom;
+            }
+
+            .digger {
+                transform: scale(.75);
+                transform-origin: bottom;
+            }
+
+            .supervisor {
+                transform: scale(.72);
+                transform-origin: bottom left;
+            }
+
+            .teaspoon {
+                transform: scale(.7);
+                transform-origin: right;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: .001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .001ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="progress" id="progress"></div>
+
+<site-navbar
+    cart-href="https://unlim8ted.com/sign-in/cart"
+    signin-href="https://unlim8ted.com/sign-in"
+    profile-href="https://unlim8ted.com/profile">
+</site-navbar>
+
+<!-- =========================================================
+     DISCLAIMER
+========================================================= -->
+
+<section class="disclaimer">
+    <div class="disclaimer-box reveal">
+        This is not an actual commercial.
+        <br><br>
+        It is a skit.
+    </div>
+</section>
+
+<!-- =========================================================
+     OPENING
+========================================================= -->
+
+<section class="scene river-scene">
+
+    <div class="mountains">
+        <div class="mountain one"></div>
+        <div class="mountain two"></div>
+    </div>
+
+    <div class="forest-line">
+        <div class="tree" style="left:2%"></div>
+        <div class="tree" style="left:10%;transform:scale(.8)"></div>
+        <div class="tree" style="left:19%;transform:scale(1.15)"></div>
+        <div class="tree" style="left:28%;transform:scale(.7)"></div>
+        <div class="tree" style="right:4%"></div>
+        <div class="tree" style="right:13%;transform:scale(.75)"></div>
+        <div class="tree" style="right:22%;transform:scale(1.1)"></div>
+        <div class="tree" style="right:31%;transform:scale(.7)"></div>
+    </div>
+
+    <div class="river"></div>
+
+    <div class="opening-copy reveal">
+        <div class="first">
+            This is the water you drink every day.
+        </div>
+
+        <div class="second">
+            Pure. Natural.
+        </div>
+    </div>
+
+</section>
+
+<!-- =========================================================
+     CAMERA FOLLOWS WATER INTO INDUSTRIAL SYSTEM
+========================================================= -->
+
+<section class="scene factory-pan-scene animated-scene">
+
+    <div class="factory-camera">
+
+        <div class="factory-pan-ground"></div>
+
+        <div class="pan-river"></div>
+
+        <div class="intake"></div>
+
+        <div class="pipe-horizontal"></div>
+        <div class="pipe-water"></div>
+
+        <div class="pipe-support s1"></div>
+        <div class="pipe-support s2"></div>
+        <div class="pipe-support s3"></div>
+
+        <div class="factory-stack a"></div>
+        <div class="factory-stack b"></div>
+
+        <div class="factory-building"></div>
+
+        <div class="factory-smoke sm1"></div>
+        <div class="factory-smoke sm2"></div>
+
+    </div>
+
+    <div class="pan-label">
+        But modern companies have forgotten what
+        <em>“natural”</em> really means.
+    </div>
+
+    <div class="camera-note">
+        River → intake → pipes → bottling plant
+    </div>
+
+</section>
+
+<!-- =========================================================
+     LEAVES
+========================================================= -->
+
+<section class="scene leaf-scene animated-scene">
+
+    <div class="method-label">
+        Experimental Method
+        <span class="method-number">01</span>
+    </div>
+
+    <div class="leaf-path"></div>
+
+    <div class="scene-inner" style="align-self:start;margin-top:4vh;">
+        <div class="narration small reveal">
+            At first, we transported every drop using only
+            materials found in nature.
+        </div>
+    </div>
+
+    <div class="leaf-worker walk1">
+        <div class="head"></div>
+        <div class="body"></div>
+        <div class="arm left"></div>
+        <div class="arm right"></div>
+        <div class="leg left"></div>
+        <div class="leg right"></div>
+
+        <div class="carried-leaf">
+            <div class="leaf-water"></div>
+        </div>
+    </div>
+
+    <div class="leaf-worker walk2">
+        <div class="head"></div>
+        <div class="body"></div>
+        <div class="arm left"></div>
+        <div class="arm right"></div>
+        <div class="leg left"></div>
+        <div class="leg right"></div>
+
+        <div class="carried-leaf">
+            <div class="leaf-water"></div>
+        </div>
+    </div>
+
+    <div class="leaf-worker walk3">
+        <div class="head"></div>
+        <div class="body"></div>
+        <div class="arm left"></div>
+        <div class="arm right"></div>
+        <div class="leg left"></div>
+        <div class="leg right"></div>
+
+        <div class="carried-leaf">
+            <div class="leaf-water"></div>
+        </div>
+    </div>
+
+    <div class="leaf-worker fall-worker">
+        <div class="head"></div>
+        <div class="body"></div>
+        <div class="arm left"></div>
+        <div class="arm right"></div>
+        <div class="leg left"></div>
+        <div class="leg right"></div>
+
+        <div class="carried-leaf">
+            <div class="leaf-water"></div>
+        </div>
+    </div>
+
+    <div class="spill">
+        <div class="spill-drop"></div>
+        <div class="spill-drop"></div>
+        <div class="spill-drop"></div>
+    </div>
+
+    <div class="day-lost">
+        ONE WHOLE DAY'S WORK
+    </div>
+
+</section>
+
+<section class="beat">
+    <p class="reveal">
+        <span class="tiny">Unfortunately</span>
+        But then we realized...
+    </p>
+</section>
+
+<section class="beat" style="background:#102d24;">
+    <p class="reveal">
+        ...the leaves weren't naturally growing there.
+    </p>
+</section>
+
+<!-- =========================================================
+     HUMAN HYDRATION TRANSFER NETWORK
+========================================================= -->
+
+<section class="scene spit-scene animated-scene">
+
+    <div class="method-label">
+        Experimental Method
+        <span class="method-number">02</span>
+    </div>
+
+    <div class="spit-river"></div>
+    <div class="spit-factory"></div>
+
+    <div class="scene-inner" style="align-self:start;margin-top:3vh;">
+        <div class="narration small reveal">
+            So we created the world's first
+            <strong>all-natural hydration transfer network.</strong>
+        </div>
+    </div>
+
+    <!-- First worker physically drinks from river -->
+    <div class="source-worker">
+        <div class="head"></div>
+        <div class="body"></div>
+        <div class="legs"></div>
+    </div>
+
+    <!-- Visible chain -->
+    <div class="spit-line">
+
+        <div class="spitter">
+            <div class="spitter-head">
+                <div class="spitter-face"></div>
+            </div>
+            <div class="spitter-body"></div>
+            <div class="spitter-legs"></div>
+        </div>
+
+        <div class="spitter">
+            <div class="spitter-head">
+                <div class="spitter-face"></div>
+            </div>
+            <div class="spitter-body"></div>
+            <div class="spitter-legs"></div>
+        </div>
+
+        <div class="spitter">
+            <div class="spitter-head">
+                <div class="spitter-face"></div>
+            </div>
+            <div class="spitter-body"></div>
+            <div class="spitter-legs"></div>
+        </div>
+
+        <div class="spitter">
+            <div class="spitter-head">
+                <div class="spitter-face"></div>
+            </div>
+            <div class="spitter-body"></div>
+            <div class="spitter-legs"></div>
+        </div>
+
+        <div class="spitter">
+            <div class="spitter-head">
+                <div class="spitter-face"></div>
+            </div>
+            <div class="spitter-body"></div>
+            <div class="spitter-legs"></div>
+        </div>
+
+        <div class="spitter">
+            <div class="spitter-head">
+                <div class="spitter-face"></div>
+            </div>
+            <div class="spitter-body"></div>
+            <div class="spitter-legs"></div>
+        </div>
+
+        <div class="spitter">
+            <div class="spitter-head">
+                <div class="spitter-face"></div>
+            </div>
+            <div class="spitter-body"></div>
+            <div class="spitter-legs"></div>
+        </div>
+
+        <div class="spitter">
+            <div class="spitter-head">
+                <div class="spitter-face"></div>
+            </div>
+            <div class="spitter-body"></div>
+            <div class="spitter-legs"></div>
+        </div>
+
+    </div>
+
+    <!-- Each spit is animated sequentially -->
+    <div class="spit-streams">
+        <div class="spit-arc a1"></div>
+        <div class="spit-arc a2"></div>
+        <div class="spit-arc a3"></div>
+        <div class="spit-arc a4"></div>
+        <div class="spit-arc a5"></div>
+        <div class="spit-arc a6"></div>
+        <div class="spit-arc a7"></div>
+    </div>
+
+    <!-- A bright water marker travels across the whole line -->
+    <div class="mouth-fill"></div>
+
+    <div class="relay-caption">
+        RIVER → MOUTH → MOUTH → MOUTH → MOUTH → FACTORY
+    </div>
+
+</section>
+
+<!-- =========================================================
+     CLOSE-UP: SOMEONE MISSES
+========================================================= -->
+
+<section class="scene miss-scene animated-scene">
+
+    <div class="miss-pair">
+
+        <div class="big-person left">
+            <div class="big-head">
+                <div class="big-mouth"></div>
+            </div>
+            <div class="big-body"></div>
+        </div>
+
+        <div class="big-person right">
+            <div class="big-head">
+                <div class="big-mouth"></div>
+            </div>
+            <div class="big-body" style="background:#e59a42;"></div>
+        </div>
+
+        <div class="miss-jet"></div>
+        <div class="ground-splat"></div>
+
+        <div class="groan">
+            EVERYONE: “UGHHHHHH.”
+        </div>
+
+    </div>
+
+</section>
+
+<section class="beat">
+    <p class="reveal">
+        <span class="tiny">Unfortunately, again</span>
+        But then we realized...
+    </p>
+</section>
+
+<section class="beat" style="background:#102d24;">
+    <p class="reveal">
+        ...mouths weren't naturally growing there.
+    </p>
+</section>
+
+<!-- =========================================================
+     REROUTING THE RIVER
+========================================================= -->
+
+<section class="scene reroute-scene animated-scene">
+
+    <div class="method-label">
+        Experimental Method
+        <span class="method-number">03</span>
+    </div>
+
+    <div class="original-river"></div>
+
+    <div class="trench">
+        <div class="trench-water"></div>
+    </div>
+
+    <div class="scene-inner" style="align-self:start;margin-top:3vh;">
+        <div class="narration small reveal">
+            We briefly considered rerouting the river.
+        </div>
+    </div>
+
+    <div class="digger d1">
+        <div class="hardhat"></div>
+        <div class="digger-head"></div>
+        <div class="digger-body"></div>
+        <div class="digger-legs"></div>
+        <div class="shovel"></div>
+    </div>
+
+    <div class="digger d2">
+        <div class="hardhat"></div>
+        <div class="digger-head"></div>
+        <div class="digger-body"></div>
+        <div class="digger-legs"></div>
+        <div class="shovel"></div>
+    </div>
+
+    <div class="digger d3">
+        <div class="hardhat"></div>
+        <div class="digger-head"></div>
+        <div class="digger-body"></div>
+        <div class="digger-legs"></div>
+        <div class="shovel"></div>
+    </div>
+
+    <div class="dirt x1"></div>
+    <div class="dirt x2"></div>
+
+    <div class="thumbs-up">
+        ✓ IT WORKS
+    </div>
+
+</section>
+
+<section class="beat">
+    <p class="reveal">
+        But then we realized...
+    </p>
+</section>
+
+<section class="beat" style="background:#102d24;">
+    <p class="reveal">
+        ...the new path wasn't naturally there.
+    </p>
+</section>
+
+<section class="scene refill-scene animated-scene">
+
+    <div class="refill-trench">
+        <div class="refill-dirt"></div>
+    </div>
+
+    <div class="refill-copy">
+        Everyone silently fills the trench back in.
+    </div>
+
+</section>
+
+<!-- =========================================================
+     BEES
+========================================================= -->
+
+<section class="scene bee-scene animated-scene">
+
+    <div class="method-label">
+        Experimental Method
+        <span class="method-number">04</span>
+    </div>
+
+    <div class="scene-inner" style="align-self:start;margin-top:3vh;">
+        <div class="narration small reveal">
+            Finally...
+            <br><br>
+            we hired nature's own workforce.
+        </div>
+    </div>
+
+    <div class="bee-table"></div>
+
+    <div class="supervisor">
+        <div class="supervisor-head"></div>
+        <div class="supervisor-body"></div>
+        <div class="clipboard"></div>
+    </div>
+
+    <div class="bee-zone">
+
+        <div class="bee b1">
+            <div class="mini-harness"></div>
+            <div class="mini-bucket"></div>
+        </div>
+
+        <div class="bee b2">
+            <div class="mini-harness"></div>
+            <div class="mini-bucket"></div>
+        </div>
+
+        <div class="bee b3">
+            <div class="mini-harness"></div>
+            <div class="mini-bucket"></div>
+        </div>
+
+        <div class="bee steve">
+            <div class="mini-harness"></div>
+            <div class="mini-bucket"></div>
+        </div>
+
+    </div>
+
+    <div class="teaspoon"></div>
+
+    <div class="timer">
+        ELAPSED TIME
+        <br>
+        06:47:13
+        <br><br>
+        WATER COLLECTED
+        <br>
+        ~½ TEASPOON
+    </div>
+
+    <div class="steve-text">
+        THERE GOES STEVE!
+    </div>
+
+</section>
+
+<section class="beat">
+    <p class="reveal">
+        But then we realized...
+    </p>
+</section>
+
+<section class="beat" style="background:#102d24;">
+    <p class="reveal">
+        ...the bees weren't naturally domesticated.
+    </p>
+</section>
+
+<!-- =========================================================
+     RELOCATING NATURE
+========================================================= -->
+
+<section class="scene relocate-scene animated-scene">
+
+    <div class="scene-inner">
+
+        <div class="narration reveal"
+            style="color:#18231f;text-shadow:none;">
+            We briefly considered relocating nature.
+        </div>
+
+        <div class="map">
+
+            <div class="map-river"></div>
+            <div class="map-factory"></div>
+            <div class="map-arrow"></div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<section class="beat">
+    <p class="reveal">
+        But then we realized...
+    </p>
+</section>
+
+<section class="beat" style="background:#102d24;">
+    <p class="reveal">
+        ...the river wasn't naturally over there.
+    </p>
+</section>
+
+<!-- =========================================================
+     YEARS OF RESEARCH
+========================================================= -->
+
+<section class="beat" style="min-height:100vh;background:#050b09;">
+    <p class="reveal">
+        <span class="tiny">After years of research</span>
+        We finally made a breakthrough.
+    </p>
+</section>
+
+<!-- =========================================================
+     BACK TO THE EXACT SAME RIVER
+========================================================= -->
+
+<section class="scene river-scene final-river animated-scene">
+
+    <div class="mountains">
+        <div class="mountain one"></div>
+        <div class="mountain two"></div>
+    </div>
+
+    <div class="forest-line">
+        <div class="tree" style="left:2%"></div>
+        <div class="tree" style="left:10%;transform:scale(.8)"></div>
+        <div class="tree" style="left:19%;transform:scale(1.15)"></div>
+        <div class="tree" style="left:28%;transform:scale(.7)"></div>
+        <div class="tree" style="right:4%"></div>
+        <div class="tree" style="right:13%;transform:scale(.75)"></div>
+        <div class="tree" style="right:22%;transform:scale(1.1)"></div>
+    </div>
+
+    <div class="river"></div>
+
+    <div class="drinker">
+        <div class="drinker-head"></div>
+        <div class="drinker-body"></div>
+        <div class="drinker-arm"></div>
+    </div>
+
+    <div class="scene-inner" style="align-self:start;margin-top:10vh;">
+        <div class="narration reveal">
+            We realized...
+        </div>
+    </div>
+
+</section>
+
+<section class="beat" style="background:#09271f;">
+    <p class="reveal">
+        ...the most natural water...
+    </p>
+</section>
+
+<section class="beat" style="background:#061b16;min-height:100vh;">
+    <p class="reveal">
+        ...is the water you don't move.
+    </p>
+</section>
+
+<!-- =========================================================
+     PRODUCT CARD
+========================================================= -->
+
+<section class="brand-card">
+
+    <div class="reveal">
+
+        <div class="brand-logo">
+            <div class="brand-drop"></div>
+            <div class="brand-leaf"></div>
+        </div>
+
+        <div class="brand-name">
+            Natural<sup>™</sup>
+            <br>
+            Water
+        </div>
+
+        <div class="tagline">
+            Available exactly where nature left it.
+        </div>
+
+        <div class="price">
+            $66.64
+            <span>per sip</span>
+        </div>
+
+        <a class="fake-button" href="#fine-print">
+            Find water near literally any river
+        </a>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     BUTTON JOKE
+========================================================= -->
+
+<section class="fine-print" id="fine-print">
+
+    <div class="reveal">
+
+        <p>
+            Natural™ Water customer instructions
+        </p>
+
+        <h2>
+            Please bring your own cup.
+        </h2>
+
+        <p>
+            Cup not included because that wouldn't be natural.
+        </p>
+
+    </div>
+
+</section>
+
+<footer>
+    <strong>Unlim8ted Studio Productions</strong>
+    <br><br>
+    <span id="copyright"></span>
+</footer>
+
+<script>
+    (() => {
+        "use strict";
+
+        const progress = document.getElementById("progress");
+
+        /*
+         * Reveal ordinary copy as it enters.
+         */
+        const revealObserver = new IntersectionObserver(
+            entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("visible");
+                    }
+                });
+            },
+            {
+                threshold: 0.15,
+                rootMargin: "0px 0px -7% 0px"
+            }
+        );
+
+        document.querySelectorAll(".reveal").forEach(element => {
+            revealObserver.observe(element);
+        });
+
+        /*
+         * Animated scenes receive .active the first time the viewer
+         * actually reaches them. This means complicated sequences
+         * such as the factory pan don't finish before they are visible.
+         */
+        const sceneObserver = new IntersectionObserver(
+            entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("active");
+                    }
+                });
+            },
+            {
+                threshold: 0.28
+            }
+        );
+
+        document.querySelectorAll(".animated-scene").forEach(scene => {
+            sceneObserver.observe(scene);
+        });
+
+        /*
+         * Scroll progress.
+         */
+        function updateProgress() {
+            const available =
+                document.documentElement.scrollHeight -
+                window.innerHeight;
+
+            const ratio =
+                available > 0
+                    ? window.scrollY / available
+                    : 0;
+
+            progress.style.width =
+                `${Math.max(0, Math.min(1, ratio)) * 100}%`;
+        }
+
+        let ticking = false;
+
+        window.addEventListener(
+            "scroll",
+            () => {
+                if (ticking) {
+                    return;
+                }
+
+                ticking = true;
+
+                requestAnimationFrame(() => {
+                    updateProgress();
+                    ticking = false;
+                });
+            },
+            { passive: true }
+        );
+
+        /*
+         * Animate the fake elapsed-time counter while the bee
+         * experiment is visible.
+         */
+        const timer = document.querySelector(".timer");
+
+        if (timer) {
+            let fakeSeconds = (6 * 3600) + (47 * 60) + 13;
+
+            setInterval(() => {
+                const beeScene =
+                    document.querySelector(".bee-scene");
+
+                if (!beeScene ||
+                    !beeScene.classList.contains("active")) {
+                    return;
+                }
+
+                fakeSeconds += 37;
+
+                const hours =
+                    Math.floor(fakeSeconds / 3600);
+
+                const minutes =
+                    Math.floor((fakeSeconds % 3600) / 60);
+
+                const seconds =
+                    fakeSeconds % 60;
+
+                timer.innerHTML =
+                    "ELAPSED TIME<br>" +
+                    String(hours).padStart(2, "0") + ":" +
+                    String(minutes).padStart(2, "0") + ":" +
+                    String(seconds).padStart(2, "0") +
+                    "<br><br>" +
+                    "WATER COLLECTED<br>" +
+                    "~½ TEASPOON";
+            }, 1000);
+        }
+
+        /*
+         * Automatic copyright year.
+         */
+        const year = new Date().getFullYear();
+
+        document.getElementById("copyright").textContent =
+            `© 2019-${year} Unlim8ted Studio Productions. All rights reserved.`;
+
+        updateProgress();
+    })();
+</script>
+
+</body>
+</html>

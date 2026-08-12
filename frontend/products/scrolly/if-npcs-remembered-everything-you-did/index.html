@@ -1,0 +1,3836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#11152a">
+
+    <title>If NPCs Remembered Everything You Did | Unlim8ted</title>
+    <meta
+        name="description"
+        content="A scrolling animated RPG comedy from Unlim8ted Studios about what happens when NPCs remember absolutely everything the player has done."
+    >
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="If NPCs Remembered Everything You Did">
+    <meta
+        property="og:description"
+        content="You saved the kingdom. Unfortunately, the kingdom remembers what else you did."
+    >
+
+    <script type="module" src="https://unlim8ted.com/components/site-navbar.js"></script>
+
+    <script type="module">
+        import { getFirebase } from "/components/firebase-init.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+        import {
+            collection,
+            doc,
+            setDoc,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+        const { auth, db } = getFirebase();
+
+        onAuthStateChanged(auth, user => {
+            document.documentElement.dataset.auth = user ? "signed-in" : "signed-out";
+        });
+
+        window.unlim8tedFirebase = {
+            auth,
+            db,
+            collection,
+            doc,
+            setDoc,
+            serverTimestamp
+        };
+    </script>
+
+    <style>
+        :root {
+            --ink: #151323;
+            --cream: #fff4d1;
+            --paper: #f6e4b4;
+            --paper-dark: #d5b878;
+            --sky: #80cce3;
+            --sky-light: #dff7f5;
+            --mountain: #8293b7;
+            --mountain-dark: #5b6687;
+            --grass: #82ae62;
+            --grass-light: #a9cf79;
+            --grass-dark: #567e4b;
+            --wood: #70482f;
+            --wood-light: #a86f45;
+            --red: #c84e48;
+            --gold: #e5b84b;
+            --blue: #4f70a4;
+            --shadow: rgba(18, 16, 32, .18);
+            --white: #fffdf4;
+            --panel: #fff9df;
+            --panel-border: #302b38;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            background: var(--cream);
+        }
+
+        body {
+            margin: 0;
+            overflow-x: hidden;
+            background:
+                radial-gradient(circle at 20% 0%, rgba(255,255,255,.8), transparent 24rem),
+                var(--cream);
+            color: var(--ink);
+            font-family:
+                "Trebuchet MS",
+                "Arial Rounded MT Bold",
+                system-ui,
+                sans-serif;
+        }
+
+        button,
+        a {
+            font: inherit;
+        }
+
+        site-navbar {
+            position: relative;
+            z-index: 9999;
+        }
+
+        .story {
+            overflow: clip;
+        }
+
+        .scene {
+            position: relative;
+            min-height: 100vh;
+            overflow: hidden;
+            isolation: isolate;
+        }
+
+        .scene-inner {
+            width: min(1180px, calc(100% - 32px));
+            margin: auto;
+            position: relative;
+            z-index: 5;
+        }
+
+        .comic-outline {
+            filter:
+                drop-shadow(2px 0 0 var(--ink))
+                drop-shadow(-2px 0 0 var(--ink))
+                drop-shadow(0 2px 0 var(--ink))
+                drop-shadow(0 -2px 0 var(--ink));
+        }
+
+        .scene-number {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+            padding: 8px 13px;
+            border: 3px solid var(--ink);
+            border-radius: 999px;
+            background: var(--white);
+            font-size: .72rem;
+            font-weight: 900;
+            letter-spacing: .13em;
+            text-transform: uppercase;
+            box-shadow: 4px 4px 0 var(--ink);
+        }
+
+        .speech {
+            position: relative;
+            display: inline-block;
+            max-width: 420px;
+            padding: 17px 20px;
+            border: 4px solid var(--ink);
+            border-radius: 24px;
+            background: var(--white);
+            box-shadow: 6px 7px 0 rgba(21,19,35,.13);
+            font-weight: 800;
+            font-size: clamp(1rem, 2vw, 1.35rem);
+            line-height: 1.3;
+        }
+
+        .speech.small {
+            font-size: .98rem;
+            padding: 12px 16px;
+        }
+
+        .speech::after {
+            content: "";
+            position: absolute;
+            bottom: -18px;
+            left: 36px;
+            width: 28px;
+            height: 28px;
+            background: var(--white);
+            border-right: 4px solid var(--ink);
+            border-bottom: 4px solid var(--ink);
+            transform: rotate(45deg);
+        }
+
+        .speech.right::after {
+            left: auto;
+            right: 36px;
+        }
+
+        .speech.dark {
+            background: var(--ink);
+            color: white;
+        }
+
+        .speech.dark::after {
+            background: var(--ink);
+        }
+
+        .caption {
+            display: inline-block;
+            padding: 10px 15px;
+            border: 3px solid var(--ink);
+            background: #fff5a9;
+            box-shadow: 5px 5px 0 var(--ink);
+            font-weight: 900;
+            transform: rotate(-1deg);
+        }
+
+        .game-box {
+            border: 5px solid var(--ink);
+            border-radius: 12px;
+            background: rgba(18,18,30,.93);
+            color: white;
+            box-shadow:
+                0 12px 0 rgba(21,19,35,.18),
+                inset 0 0 0 3px rgba(255,255,255,.08);
+        }
+
+        /* -------------------------------------------------- */
+        /* CHARACTERS                                         */
+        /* -------------------------------------------------- */
+
+        .person {
+            position: relative;
+            width: 112px;
+            height: 210px;
+            flex: 0 0 auto;
+        }
+
+        .person .head {
+            position: absolute;
+            z-index: 3;
+            top: 8px;
+            left: 28px;
+            width: 58px;
+            height: 66px;
+            border: 4px solid var(--ink);
+            border-radius: 47% 47% 44% 44%;
+            background: #efbd89;
+        }
+
+        .person .hair {
+            position: absolute;
+            z-index: 4;
+            top: 5px;
+            left: 25px;
+            width: 65px;
+            height: 30px;
+            border: 4px solid var(--ink);
+            border-bottom: 0;
+            border-radius: 45px 45px 15px 15px;
+            background: #6c432f;
+        }
+
+        .person .eye {
+            position: absolute;
+            z-index: 5;
+            top: 36px;
+            width: 6px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--ink);
+        }
+
+        .person .eye.left {
+            left: 44px;
+        }
+
+        .person .eye.right {
+            left: 68px;
+        }
+
+        .person .mouth {
+            position: absolute;
+            z-index: 5;
+            top: 57px;
+            left: 51px;
+            width: 17px;
+            height: 7px;
+            border-bottom: 3px solid var(--ink);
+            border-radius: 50%;
+        }
+
+        .person .body {
+            position: absolute;
+            z-index: 2;
+            top: 69px;
+            left: 21px;
+            width: 73px;
+            height: 92px;
+            border: 4px solid var(--ink);
+            border-radius: 17px 17px 10px 10px;
+            background: var(--blue);
+        }
+
+        .person .belt {
+            position: absolute;
+            z-index: 5;
+            top: 128px;
+            left: 21px;
+            width: 73px;
+            height: 13px;
+            border: 3px solid var(--ink);
+            background: #68402d;
+        }
+
+        .person .leg {
+            position: absolute;
+            z-index: 1;
+            top: 154px;
+            width: 23px;
+            height: 53px;
+            border: 4px solid var(--ink);
+            background: #453c4f;
+        }
+
+        .person .leg.left {
+            left: 30px;
+            transform: rotate(2deg);
+        }
+
+        .person .leg.right {
+            left: 62px;
+            transform: rotate(-2deg);
+        }
+
+        .person.hero .body {
+            background: #4c6595;
+        }
+
+        .person.hero .hair {
+            background: #56382e;
+        }
+
+        .person.hero::after {
+            content: "";
+            position: absolute;
+            z-index: 0;
+            top: 79px;
+            left: 6px;
+            width: 98px;
+            height: 90px;
+            background: #a93e48;
+            clip-path: polygon(50% 0, 100% 100%, 50% 83%, 0 100%);
+        }
+
+        .person.guard .body {
+            background: #76869c;
+        }
+
+        .person.guard .hair {
+            height: 38px;
+            background: #aeb7bd;
+            border-radius: 50% 50% 10px 10px;
+        }
+
+        .person.shopkeeper .body {
+            background: #8c6645;
+        }
+
+        .person.innkeeper .body {
+            background: #8f5352;
+        }
+
+        .person.farmer .body {
+            background: #74884f;
+        }
+
+        .person.woman .body {
+            background: #8d5d82;
+        }
+
+        /* -------------------------------------------------- */
+        /* OPENING                                            */
+        /* -------------------------------------------------- */
+
+        .opening {
+            min-height: 145vh;
+            background: linear-gradient(var(--sky-light) 0 9%, var(--sky) 56%, #dff0b2 56%);
+        }
+
+        .sun {
+            position: absolute;
+            top: 10%;
+            right: 10%;
+            width: 120px;
+            aspect-ratio: 1;
+            border: 5px solid var(--ink);
+            border-radius: 50%;
+            background: #ffd867;
+            box-shadow: 0 0 0 14px rgba(255,216,103,.2);
+        }
+
+        .mountain {
+            position: absolute;
+            bottom: 31%;
+            width: 50vw;
+            height: 38vh;
+            border-top: 5px solid var(--ink);
+            background: var(--mountain);
+            clip-path: polygon(0 100%, 20% 51%, 34% 70%, 55% 12%, 72% 58%, 84% 39%, 100% 100%);
+        }
+
+        .mountain.m1 {
+            left: -7vw;
+        }
+
+        .mountain.m2 {
+            right: -10vw;
+            transform: scaleX(-1);
+            background: var(--mountain-dark);
+        }
+
+        .opening-ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 36%;
+            border-top: 5px solid var(--ink);
+            background:
+                repeating-linear-gradient(
+                    105deg,
+                    transparent 0 50px,
+                    rgba(40,80,40,.07) 51px 55px
+                ),
+                var(--grass-light);
+        }
+
+        .road {
+            position: absolute;
+            bottom: -3%;
+            left: 50%;
+            width: 36%;
+            height: 47%;
+            background: #e3c98e;
+            border-left: 5px solid var(--ink);
+            border-right: 5px solid var(--ink);
+            transform: translateX(-50%) perspective(500px) rotateX(22deg);
+            clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%);
+        }
+
+        .castle {
+            position: absolute;
+            z-index: 2;
+            bottom: 32%;
+            left: 50%;
+            width: 230px;
+            height: 170px;
+            transform: translateX(-50%) scale(.72);
+        }
+
+        .castle-main,
+        .castle-tower {
+            position: absolute;
+            bottom: 0;
+            border: 5px solid var(--ink);
+            background: #d5c7aa;
+        }
+
+        .castle-main {
+            left: 45px;
+            width: 140px;
+            height: 115px;
+        }
+
+        .castle-tower {
+            width: 62px;
+            height: 155px;
+        }
+
+        .castle-tower.left {
+            left: 0;
+        }
+
+        .castle-tower.right {
+            right: 0;
+        }
+
+        .opening-copy {
+            padding-top: 18vh;
+            text-align: center;
+        }
+
+        .opening-kicker {
+            font-size: clamp(.8rem, 2vw, 1.05rem);
+            font-weight: 1000;
+            letter-spacing: .28em;
+            text-transform: uppercase;
+        }
+
+        .opening h1 {
+            max-width: 920px;
+            margin: 14px auto;
+            font-family: Georgia, serif;
+            font-size: clamp(3rem, 8vw, 7.8rem);
+            line-height: .87;
+            letter-spacing: -.055em;
+            text-shadow: 6px 6px 0 rgba(255,255,255,.45);
+        }
+
+        .opening h1 em {
+            color: #b43e43;
+            font-style: normal;
+        }
+
+        .opening-subtitle {
+            max-width: 650px;
+            margin: 26px auto;
+            font-size: clamp(1.05rem, 2vw, 1.35rem);
+            font-weight: 800;
+        }
+
+        .hero-return {
+            position: absolute;
+            z-index: 7;
+            bottom: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .opening .hero-return .person {
+            transform: scale(1.2);
+        }
+
+        .village-reaction {
+            position: absolute;
+            z-index: 6;
+            bottom: 26%;
+            left: 50%;
+            width: min(980px, 90%);
+            height: 170px;
+            transform: translateX(-50%);
+        }
+
+        .tiny-house {
+            position: absolute;
+            bottom: 0;
+            width: 150px;
+            height: 110px;
+            border: 5px solid var(--ink);
+            background: #e4b779;
+        }
+
+        .tiny-house::before {
+            content: "";
+            position: absolute;
+            left: -15px;
+            top: -65px;
+            width: 170px;
+            height: 80px;
+            border: 5px solid var(--ink);
+            background: #91494a;
+            clip-path: polygon(50% 0, 100% 100%, 0 100%);
+        }
+
+        .tiny-house.h1 {
+            left: 2%;
+        }
+
+        .tiny-house.h2 {
+            left: 22%;
+            transform: scale(.86);
+        }
+
+        .tiny-house.h3 {
+            right: 22%;
+            transform: scale(.9);
+        }
+
+        .tiny-house.h4 {
+            right: 1%;
+        }
+
+        .window {
+            position: absolute;
+            z-index: 3;
+            top: 22px;
+            width: 39px;
+            height: 40px;
+            border: 4px solid var(--ink);
+            background: #a9e0e4;
+        }
+
+        .window.left {
+            left: 14px;
+        }
+
+        .window.right {
+            right: 14px;
+        }
+
+        .shutter {
+            position: absolute;
+            z-index: 5;
+            top: -4px;
+            width: 22px;
+            height: 48px;
+            border: 4px solid var(--ink);
+            background: #65412f;
+            transition: transform .25s ease;
+        }
+
+        .window .shutter:first-child {
+            left: -24px;
+            transform-origin: right;
+        }
+
+        .window .shutter:last-child {
+            right: -24px;
+            transform-origin: left;
+        }
+
+        .opening.awake .window .shutter:first-child {
+            transform: translateX(24px);
+        }
+
+        .opening.awake .window .shutter:last-child {
+            transform: translateX(-24px);
+        }
+
+        .reaction-dialogue {
+            position: absolute;
+            z-index: 20;
+            bottom: 44%;
+            left: 50%;
+            display: flex;
+            width: min(930px, 92%);
+            justify-content: space-between;
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
+
+        .reaction-dialogue .speech:nth-child(2) {
+            margin-top: 95px;
+        }
+
+        /* -------------------------------------------------- */
+        /* SHOP                                               */
+        /* -------------------------------------------------- */
+
+        .shop-scene {
+            padding: 110px 0 150px;
+            background:
+                linear-gradient(rgba(69,42,30,.05), rgba(69,42,30,.05)),
+                #e9c58b;
+        }
+
+        .shop-room {
+            position: relative;
+            min-height: 720px;
+            border: 6px solid var(--ink);
+            background:
+                linear-gradient(90deg, rgba(60,35,25,.08) 2px, transparent 2px) 0 0 / 85px 100%,
+                #d7a66d;
+            box-shadow: 14px 16px 0 rgba(21,19,35,.15);
+        }
+
+        .shelf {
+            position: absolute;
+            left: 4%;
+            right: 4%;
+            height: 22px;
+            border: 4px solid var(--ink);
+            background: var(--wood);
+        }
+
+        .shelf.one {
+            top: 130px;
+        }
+
+        .shelf.two {
+            top: 300px;
+        }
+
+        .bottle {
+            position: absolute;
+            bottom: 19px;
+            width: 31px;
+            height: 53px;
+            border: 4px solid var(--ink);
+            border-radius: 7px 7px 12px 12px;
+            background: #d75b62;
+        }
+
+        .bottle::before {
+            content: "";
+            position: absolute;
+            top: -18px;
+            left: 6px;
+            width: 11px;
+            height: 17px;
+            border: 4px solid var(--ink);
+            background: #c8d8d5;
+        }
+
+        .counter {
+            position: absolute;
+            z-index: 5;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 190px;
+            border-top: 6px solid var(--ink);
+            background:
+                repeating-linear-gradient(
+                    90deg,
+                    var(--wood) 0 95px,
+                    #68412c 95px 101px
+                );
+        }
+
+        .shopkeeper-wrap {
+            position: absolute;
+            z-index: 6;
+            right: 19%;
+            bottom: 152px;
+        }
+
+        .shop-hero {
+            position: absolute;
+            z-index: 7;
+            left: 17%;
+            bottom: 70px;
+        }
+
+        .debt-sign {
+            position: absolute;
+            z-index: 10;
+            top: 385px;
+            right: 8%;
+            width: 350px;
+            padding: 20px;
+            border: 5px solid var(--ink);
+            background: #fff5b4;
+            box-shadow: 7px 7px 0 var(--ink);
+            font-size: 1.35rem;
+            font-weight: 1000;
+            text-align: center;
+            transform: rotate(2deg);
+        }
+
+        .receipt-zone {
+            padding: 80px 20px 130px;
+            background: #6d4a32;
+            border-left: 6px solid var(--ink);
+            border-right: 6px solid var(--ink);
+        }
+
+        .receipt {
+            width: min(640px, 94%);
+            margin: auto;
+            padding: 35px 30px 55px;
+            border: 5px solid var(--ink);
+            background:
+                linear-gradient(rgba(75,65,48,.05) 1px, transparent 1px) 0 0 / 100% 28px,
+                #fffbea;
+            box-shadow: 13px 15px 0 rgba(0,0,0,.18);
+            font-family: "Courier New", monospace;
+            transform-origin: top;
+        }
+
+        .receipt h3 {
+            margin: 0 0 8px;
+            text-align: center;
+            font-size: 1.7rem;
+        }
+
+        .receipt .receipt-sub {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .receipt-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 18px;
+            padding: 14px 0;
+            border-bottom: 2px dashed #827b6b;
+            font-weight: 900;
+        }
+
+        .receipt-row.bad {
+            color: #a42e34;
+        }
+
+        .receipt-total {
+            margin-top: 25px;
+            font-size: 1.45rem;
+            font-weight: 1000;
+            text-align: right;
+        }
+
+        .shop-punchline {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 35px;
+            align-items: start;
+            width: min(900px, 92%);
+            margin: 70px auto 0;
+        }
+
+        /* -------------------------------------------------- */
+        /* STEALTH HOUSE                                      */
+        /* -------------------------------------------------- */
+
+        .stealth {
+            min-height: 150vh;
+            padding-top: 110px;
+            background: linear-gradient(#19253f, #35446b 54%, #52674b 54%);
+            color: white;
+        }
+
+        .moon {
+            position: absolute;
+            top: 130px;
+            right: 10%;
+            width: 110px;
+            height: 110px;
+            border: 5px solid var(--ink);
+            border-radius: 50%;
+            background: #fff1b5;
+        }
+
+        .stealth-house {
+            position: absolute;
+            bottom: 8%;
+            left: 50%;
+            width: min(920px, 92%);
+            height: 610px;
+            border: 6px solid var(--ink);
+            background: #d09a68;
+            transform: translateX(-50%);
+        }
+
+        .stealth-house::before {
+            content: "";
+            position: absolute;
+            top: -145px;
+            left: -45px;
+            width: calc(100% + 90px);
+            height: 155px;
+            border: 6px solid var(--ink);
+            background: #713d48;
+            clip-path: polygon(50% 0, 100% 100%, 0 100%);
+        }
+
+        .tracking-window {
+            position: absolute;
+            top: 115px;
+            width: 135px;
+            height: 155px;
+            border: 6px solid var(--ink);
+            background: #e8cf83;
+            overflow: hidden;
+        }
+
+        .tracking-window:nth-child(1) {
+            left: 8%;
+        }
+
+        .tracking-window:nth-child(2) {
+            left: 34%;
+        }
+
+        .tracking-window:nth-child(3) {
+            right: 8%;
+        }
+
+        .watch-face {
+            position: absolute;
+            left: 50%;
+            bottom: 8px;
+            width: 76px;
+            height: 90px;
+            transform: translateX(-50%);
+        }
+
+        .watch-face .face {
+            position: absolute;
+            left: 10px;
+            top: 0;
+            width: 58px;
+            height: 62px;
+            border: 4px solid var(--ink);
+            border-radius: 50%;
+            background: #eabb84;
+        }
+
+        .watch-face .eyes {
+            position: absolute;
+            top: 27px;
+            left: 23px;
+            width: 33px;
+            height: 8px;
+        }
+
+        .watch-face .eyes::before,
+        .watch-face .eyes::after {
+            content: "";
+            position: absolute;
+            width: 7px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--ink);
+        }
+
+        .watch-face .eyes::after {
+            right: 0;
+        }
+
+        .sneaking-hero {
+            position: absolute;
+            z-index: 10;
+            left: 10%;
+            bottom: 1%;
+            transition: left .15s linear;
+        }
+
+        .sneaking-hero .person {
+            transform: rotate(-10deg) scale(.85);
+        }
+
+        .stealth-prompt {
+            position: sticky;
+            z-index: 20;
+            top: 100px;
+            width: max-content;
+            max-width: 90%;
+            margin: 0 auto;
+            padding: 13px 18px;
+            font-family: monospace;
+            font-weight: 900;
+            letter-spacing: .1em;
+        }
+
+        .door-confrontation {
+            position: absolute;
+            z-index: 25;
+            right: 8%;
+            bottom: 12%;
+            display: flex;
+            align-items: end;
+            gap: 18px;
+        }
+
+        /* -------------------------------------------------- */
+        /* INN                                                */
+        /* -------------------------------------------------- */
+
+        .inn {
+            padding: 100px 0 140px;
+            background: #c37b4f;
+        }
+
+        .inn-room {
+            position: relative;
+            min-height: 780px;
+            border: 6px solid var(--ink);
+            background:
+                linear-gradient(90deg, transparent 48%, rgba(62,33,22,.08) 49% 51%, transparent 52%) 0 0 / 120px 100%,
+                #e1ad6f;
+            box-shadow: 13px 15px 0 rgba(21,19,35,.16);
+        }
+
+        .inn-beam {
+            position: absolute;
+            background: var(--wood);
+            border: 5px solid var(--ink);
+        }
+
+        .inn-beam.horizontal {
+            top: 120px;
+            left: 0;
+            right: 0;
+            height: 30px;
+        }
+
+        .inn-beam.vertical {
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 30px;
+        }
+
+        .bar {
+            position: absolute;
+            z-index: 5;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 185px;
+            border-top: 6px solid var(--ink);
+            background: var(--wood);
+        }
+
+        .innkeeper-wrap {
+            position: absolute;
+            z-index: 8;
+            bottom: 145px;
+            left: 17%;
+        }
+
+        .inn-hero {
+            position: absolute;
+            z-index: 8;
+            bottom: 75px;
+            right: 15%;
+        }
+
+        .new-policy {
+            position: absolute;
+            z-index: 8;
+            top: 180px;
+            left: 7%;
+            padding: 17px;
+            border: 5px solid var(--ink);
+            background: #fff5a9;
+            box-shadow: 7px 7px 0 var(--ink);
+            font-size: clamp(1rem, 2vw, 1.4rem);
+            font-weight: 1000;
+            text-align: center;
+            transform: rotate(-2deg);
+        }
+
+        .inn-man {
+            position: absolute;
+            top: 225px;
+            right: 13%;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .inn-dialogue {
+            position: relative;
+            z-index: 20;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 25px;
+            width: min(950px, 92%);
+            margin: 55px auto 0;
+        }
+
+        .cheese-panic {
+            position: relative;
+            min-height: 500px;
+            margin-top: 70px;
+            border: 6px solid var(--ink);
+            background: #9a5d3e;
+            overflow: hidden;
+        }
+
+        .cheese {
+            position: absolute;
+            width: 90px;
+            height: 65px;
+            border: 5px solid var(--ink);
+            border-radius: 50% 50% 18px 18px;
+            background:
+                radial-gradient(circle at 25% 35%, #c38c28 0 5px, transparent 6px),
+                radial-gradient(circle at 67% 62%, #c38c28 0 7px, transparent 8px),
+                #f2c94f;
+        }
+
+        .cheese.c1 { left: 12%; bottom: 30%; }
+        .cheese.c2 { left: 35%; bottom: 15%; transform: rotate(12deg); }
+        .cheese.c3 { right: 28%; bottom: 38%; transform: rotate(-9deg); }
+        .cheese.c4 { right: 8%; bottom: 17%; }
+
+        .panic-person {
+            position: absolute;
+            bottom: 20px;
+        }
+
+        .panic-person.p1 { left: 8%; }
+        .panic-person.p2 { left: 32%; }
+        .panic-person.p3 { right: 30%; }
+        .panic-person.p4 { right: 5%; }
+
+        .panic-person .person {
+            transform: scale(.75);
+        }
+
+        .railing {
+            position: absolute;
+            z-index: 9;
+            top: 85px;
+            left: 0;
+            right: 0;
+            height: 35px;
+            border-top: 6px solid var(--ink);
+            border-bottom: 6px solid var(--ink);
+            background: var(--wood);
+        }
+
+        .hero-peek {
+            position: absolute;
+            z-index: 12;
+            top: -8px;
+            left: 50%;
+            width: 80px;
+            height: 90px;
+            transform: translateX(-50%);
+        }
+
+        .hero-peek .head {
+            position: absolute;
+            left: 10px;
+            top: 0;
+            width: 62px;
+            height: 67px;
+            border: 5px solid var(--ink);
+            border-radius: 50%;
+            background: #efbd89;
+        }
+
+        .hero-peek .hair {
+            position: absolute;
+            left: 7px;
+            top: -3px;
+            width: 69px;
+            height: 32px;
+            border: 5px solid var(--ink);
+            border-bottom: 0;
+            border-radius: 50% 50% 10px 10px;
+            background: #56382e;
+        }
+
+        .hero-peek .eyes {
+            position: absolute;
+            top: 34px;
+            left: 27px;
+            width: 30px;
+            height: 7px;
+        }
+
+        .hero-peek .eyes::before,
+        .hero-peek .eyes::after {
+            content: "";
+            position: absolute;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--ink);
+        }
+
+        .hero-peek .eyes::after {
+            right: 0;
+        }
+
+        /* -------------------------------------------------- */
+        /* POT                                                */
+        /* -------------------------------------------------- */
+
+        .pot-scene {
+            min-height: 125vh;
+            padding: 120px 0;
+            background: #ddd0a6;
+        }
+
+        .pot-room {
+            position: relative;
+            min-height: 650px;
+            border: 6px solid var(--ink);
+            background: #efddad;
+        }
+
+        .pot {
+            position: absolute;
+            z-index: 6;
+            left: 50%;
+            bottom: 115px;
+            width: 130px;
+            height: 150px;
+            transform: translateX(-50%);
+        }
+
+        .pot .rim {
+            position: absolute;
+            z-index: 2;
+            top: 0;
+            left: 5px;
+            width: 120px;
+            height: 40px;
+            border: 5px solid var(--ink);
+            border-radius: 10px;
+            background: #c96e4f;
+        }
+
+        .pot .body {
+            position: absolute;
+            top: 25px;
+            left: 17px;
+            width: 96px;
+            height: 120px;
+            border: 5px solid var(--ink);
+            border-radius: 20px 20px 45px 45px;
+            background: #d67b57;
+        }
+
+        .pot-owner {
+            position: absolute;
+            left: 12%;
+            bottom: 60px;
+        }
+
+        .pot-hero {
+            position: absolute;
+            right: 12%;
+            bottom: 60px;
+        }
+
+        .pot-label {
+            position: absolute;
+            z-index: 20;
+            left: 50%;
+            bottom: 315px;
+            padding: 12px 20px;
+            transform: translateX(-50%);
+            font-family: monospace;
+            font-size: 1.1rem;
+            font-weight: 900;
+        }
+
+        .coin {
+            position: absolute;
+            z-index: 8;
+            bottom: 105px;
+            width: 30px;
+            height: 30px;
+            border: 4px solid var(--ink);
+            border-radius: 50%;
+            background: var(--gold);
+            opacity: 0;
+        }
+
+        .pot-scene.smashed .pot {
+            opacity: 0;
+        }
+
+        .pot-scene.smashed .coin {
+            opacity: 1;
+        }
+
+        .coin.one { left: 44%; transform: rotate(12deg); }
+        .coin.two { left: 49%; bottom: 80px; }
+        .coin.three { left: 54%; transform: rotate(-18deg); }
+
+        .pot-dialogue {
+            position: relative;
+            z-index: 25;
+            display: flex;
+            justify-content: space-between;
+            width: min(950px, 92%);
+            margin: 40px auto;
+        }
+
+        /* -------------------------------------------------- */
+        /* QUEST                                              */
+        /* -------------------------------------------------- */
+
+        .quest-scene {
+            padding: 120px 0;
+            background: linear-gradient(#9dd4e1 0 45%, #8eb367 45%);
+        }
+
+        .quest-stage {
+            position: relative;
+            min-height: 660px;
+        }
+
+        .blacksmith {
+            position: absolute;
+            left: 25%;
+            bottom: 50px;
+        }
+
+        .quest-hero {
+            position: absolute;
+            right: 25%;
+            bottom: 50px;
+        }
+
+        .exclamation {
+            position: absolute;
+            z-index: 10;
+            left: 29%;
+            top: 60px;
+            font-family: Georgia, serif;
+            font-size: 9rem;
+            font-weight: 1000;
+            color: var(--gold);
+            -webkit-text-stroke: 5px var(--ink);
+            filter: drop-shadow(6px 6px 0 white);
+        }
+
+        .quest-card {
+            position: absolute;
+            z-index: 20;
+            top: 50%;
+            left: 50%;
+            width: min(520px, 90%);
+            padding: 28px;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .quest-card h3 {
+            margin: 0;
+            color: #ffdf65;
+            font-family: Georgia, serif;
+            font-size: 2.4rem;
+        }
+
+        .quest-objective {
+            margin: 18px 0 0;
+            padding: 14px;
+            border: 2px solid rgba(255,255,255,.25);
+            font-family: monospace;
+        }
+
+        .tomato {
+            position: absolute;
+            z-index: 30;
+            top: 47%;
+            right: 31%;
+            width: 42px;
+            height: 42px;
+            border: 4px solid var(--ink);
+            border-radius: 50%;
+            background: #db4a3e;
+            transform: rotate(-20deg);
+        }
+
+        /* -------------------------------------------------- */
+        /* CONSEQUENCES                                       */
+        /* -------------------------------------------------- */
+
+        .consequences {
+            padding: 120px 0 160px;
+            background: #f1d38e;
+        }
+
+        .consequence-road {
+            position: relative;
+            display: grid;
+            gap: 80px;
+            width: min(1000px, 92%);
+            margin: auto;
+        }
+
+        .consequence {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 35px;
+            align-items: center;
+            min-height: 250px;
+        }
+
+        .consequence:nth-child(even) {
+            grid-template-columns: 1fr 240px;
+        }
+
+        .consequence:nth-child(even) .consequence-art {
+            order: 2;
+        }
+
+        .consequence-art {
+            position: relative;
+            min-height: 220px;
+            border: 5px solid var(--ink);
+            border-radius: 30px;
+            background: #fff2c5;
+            box-shadow: 9px 9px 0 var(--ink);
+        }
+
+        .fence {
+            position: absolute;
+            left: 15px;
+            right: 15px;
+            bottom: 40px;
+            height: 90px;
+            border-top: 14px solid var(--wood);
+            border-bottom: 14px solid var(--wood);
+            transform: skewY(-7deg);
+        }
+
+        .fence::before,
+        .fence::after {
+            content: "";
+            position: absolute;
+            top: -35px;
+            width: 20px;
+            height: 150px;
+            background: var(--wood);
+            border: 4px solid var(--ink);
+        }
+
+        .fence::before { left: 45px; }
+        .fence::after { right: 45px; }
+
+        .barrel-stack {
+            position: absolute;
+            inset: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .mini-barrel {
+            width: 42px;
+            height: 55px;
+            border: 4px solid var(--ink);
+            border-radius: 10px;
+            background: #9b613c;
+        }
+
+        .sword-stack {
+            position: absolute;
+            inset: 10px;
+        }
+
+        .mini-sword {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 12px;
+            height: 130px;
+            border: 3px solid var(--ink);
+            background: #c7d0d5;
+            transform-origin: center;
+        }
+
+        .horse {
+            position: absolute;
+            left: 18px;
+            right: 18px;
+            bottom: 40px;
+            height: 110px;
+        }
+
+        .horse-body {
+            position: absolute;
+            left: 35px;
+            top: 28px;
+            width: 130px;
+            height: 70px;
+            border: 5px solid var(--ink);
+            border-radius: 45% 40% 30% 35%;
+            background: #9b6b49;
+        }
+
+        .horse-head {
+            position: absolute;
+            right: 12px;
+            top: 0;
+            width: 65px;
+            height: 75px;
+            border: 5px solid var(--ink);
+            border-radius: 40% 50% 45% 40%;
+            background: #9b6b49;
+            transform: rotate(-7deg);
+        }
+
+        .horse-eye {
+            position: absolute;
+            z-index: 3;
+            right: 35px;
+            top: 25px;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--ink);
+        }
+
+        .horse-eye::after {
+            content: "";
+            position: absolute;
+            left: 15px;
+            top: -4px;
+            width: 24px;
+            height: 3px;
+            background: var(--ink);
+            transform: rotate(-12deg);
+        }
+
+        .old-quest {
+            min-height: 500px;
+            padding: 45px;
+            border: 6px solid var(--ink);
+            background: #8eb56c;
+            box-shadow: 12px 12px 0 var(--ink);
+        }
+
+        .old-quest-inner {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .old-man {
+            position: relative;
+        }
+
+        .old-man .person {
+            transform: scale(1.1);
+        }
+
+        .old-man .beard {
+            position: absolute;
+            z-index: 9;
+            top: 62px;
+            left: 35px;
+            width: 48px;
+            height: 90px;
+            background: #e8e4d5;
+            border: 4px solid var(--ink);
+            clip-path: polygon(0 0,100% 0,82% 100%,55% 78%,32% 100%);
+        }
+
+        .quest-waiting {
+            position: absolute;
+            top: -42px;
+            left: -70px;
+            width: 260px;
+            padding: 8px 10px;
+            font-family: monospace;
+            font-size: .72rem;
+            text-align: center;
+        }
+
+        .inventory {
+            padding: 18px;
+            text-align: center;
+        }
+
+        .mushroom {
+            position: relative;
+            width: 95px;
+            height: 90px;
+            margin: 20px auto;
+        }
+
+        .mushroom-cap {
+            position: absolute;
+            top: 0;
+            left: 5px;
+            width: 85px;
+            height: 50px;
+            border: 5px solid var(--ink);
+            border-radius: 50px 50px 15px 15px;
+            background: #c74d49;
+        }
+
+        .mushroom-stem {
+            position: absolute;
+            bottom: 0;
+            left: 34px;
+            width: 31px;
+            height: 52px;
+            border: 5px solid var(--ink);
+            border-radius: 8px;
+            background: #f4e6bd;
+        }
+
+        /* -------------------------------------------------- */
+        /* GATE                                               */
+        /* -------------------------------------------------- */
+
+        .gate-scene {
+            min-height: 140vh;
+            padding: 120px 0;
+            background: #8ba8b7;
+        }
+
+        .gate {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            width: min(1000px, 100%);
+            height: 78%;
+            border-left: 100px solid #9b927d;
+            border-right: 100px solid #9b927d;
+            transform: translateX(-50%);
+        }
+
+        .gate::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100px;
+            width: calc(100% + 200px);
+            height: 110px;
+            border: 6px solid var(--ink);
+            background: #9b927d;
+        }
+
+        .gate-characters {
+            position: absolute;
+            z-index: 10;
+            bottom: 90px;
+            left: 50%;
+            display: flex;
+            width: min(720px, 85%);
+            justify-content: space-between;
+            align-items: end;
+            transform: translateX(-50%);
+        }
+
+        .crime-scroll {
+            position: relative;
+            z-index: 20;
+            width: min(620px, 90%);
+            margin: 130px auto 0;
+            padding: 30px;
+            border: 5px solid var(--ink);
+            background: #f8edc7;
+            box-shadow: 10px 10px 0 var(--ink);
+        }
+
+        .crime-scroll h3 {
+            margin-top: 0;
+            font-family: Georgia, serif;
+            font-size: 2rem;
+            text-align: center;
+        }
+
+        .crime {
+            padding: 13px 0;
+            border-bottom: 2px dashed #8d8166;
+            font-size: 1.1rem;
+            font-weight: 900;
+        }
+
+        .horse-card {
+            position: relative;
+            z-index: 30;
+            width: min(520px, 90%);
+            min-height: 270px;
+            margin: 80px auto 0;
+            padding: 25px;
+            border: 6px solid var(--ink);
+            background: #e8d7aa;
+            box-shadow: 10px 10px 0 var(--ink);
+        }
+
+        .horse-card .horse {
+            transform: scale(1.5);
+            transform-origin: bottom left;
+        }
+
+        .horse-caption {
+            position: absolute;
+            right: 20px;
+            top: 30px;
+            width: 190px;
+            font-size: 1.25rem;
+            font-weight: 1000;
+        }
+
+        /* -------------------------------------------------- */
+        /* DRAGON                                             */
+        /* -------------------------------------------------- */
+
+        .dragon-scene {
+            min-height: 150vh;
+            padding: 120px 0;
+            background: linear-gradient(#e68b68, #e8b36f 46%, #687649 46%);
+        }
+
+        .dragon {
+            position: absolute;
+            z-index: 4;
+            right: 5%;
+            bottom: 12%;
+            width: min(500px, 46vw);
+            aspect-ratio: 1.35;
+        }
+
+        .dragon-body {
+            position: absolute;
+            left: 10%;
+            bottom: 10%;
+            width: 65%;
+            height: 55%;
+            border: 7px solid var(--ink);
+            border-radius: 50% 55% 35% 45%;
+            background: #6e8d4d;
+        }
+
+        .dragon-head {
+            position: absolute;
+            right: 0;
+            top: 6%;
+            width: 42%;
+            height: 42%;
+            border: 7px solid var(--ink);
+            border-radius: 45% 55% 40% 45%;
+            background: #789d52;
+        }
+
+        .dragon-eye {
+            position: absolute;
+            right: 15%;
+            top: 40%;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: var(--ink);
+        }
+
+        .dragon-wing {
+            position: absolute;
+            left: 10%;
+            top: 0;
+            width: 58%;
+            height: 62%;
+            border: 7px solid var(--ink);
+            background: #8ba965;
+            clip-path: polygon(100% 100%, 0 0, 25% 82%, 42% 34%, 59% 88%, 78% 50%);
+        }
+
+        .town-mob {
+            position: absolute;
+            z-index: 8;
+            left: 3%;
+            bottom: 5%;
+            display: flex;
+            align-items: end;
+        }
+
+        .town-mob .person {
+            margin-right: -22px;
+            transform: scale(.78);
+        }
+
+        .town-argument {
+            position: relative;
+            z-index: 20;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+            width: min(1050px, 92%);
+            margin: 40px auto;
+        }
+
+        .dragon-question {
+            position: absolute;
+            z-index: 30;
+            right: 12%;
+            bottom: 46%;
+        }
+
+        .everybody-yes {
+            position: absolute;
+            z-index: 31;
+            left: 16%;
+            bottom: 29%;
+            font-size: clamp(2rem, 5vw, 5rem);
+            font-weight: 1000;
+            transform: rotate(-5deg);
+            -webkit-text-stroke: 2px white;
+        }
+
+        /* -------------------------------------------------- */
+        /* FINAL BOSS                                         */
+        /* -------------------------------------------------- */
+
+        .finale {
+            min-height: 170vh;
+            padding-top: 100px;
+            background: #252235;
+            color: white;
+        }
+
+        .finale-title {
+            position: relative;
+            z-index: 20;
+            text-align: center;
+        }
+
+        .finale-title small {
+            display: block;
+            color: #e9d481;
+            font-family: monospace;
+            font-size: 1rem;
+            letter-spacing: .3em;
+        }
+
+        .finale-title h2 {
+            margin: 10px 0;
+            font-family: Georgia, serif;
+            font-size: clamp(3rem, 8vw, 7rem);
+        }
+
+        .boss-arena {
+            position: relative;
+            width: min(1180px, 96%);
+            min-height: 830px;
+            margin: 70px auto 0;
+            border: 7px solid #0d0c13;
+            background:
+                radial-gradient(circle at 50% 35%, #8d846b 0 8%, transparent 8.5%),
+                linear-gradient(#5d6174 0 40%, #777557 40%);
+            overflow: hidden;
+            box-shadow: 0 0 0 10px rgba(255,255,255,.05);
+        }
+
+        .boss-town {
+            position: absolute;
+            left: 2%;
+            right: 2%;
+            bottom: 70px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: end;
+        }
+
+        .boss-town .person {
+            margin: 0 -17px -25px;
+            transform: scale(.63);
+        }
+
+        .boss-hero {
+            position: absolute;
+            z-index: 8;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+        }
+
+        .boss-hero .person {
+            transform: scale(.88);
+        }
+
+        .boss-ui {
+            position: sticky;
+            z-index: 100;
+            top: 90px;
+            width: min(900px, 92%);
+            margin: 0 auto;
+            padding: 25px;
+        }
+
+        .boss-name {
+            margin-bottom: 12px;
+            font-family: Georgia, serif;
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            font-weight: 1000;
+            text-align: center;
+        }
+
+        .health-track {
+            height: 34px;
+            border: 4px solid white;
+            background: #211d29;
+            overflow: hidden;
+        }
+
+        .health-fill {
+            width: 100%;
+            height: 100%;
+            background:
+                repeating-linear-gradient(
+                    90deg,
+                    #b9383d 0 25px,
+                    #cf4a4d 25px 50px
+                );
+        }
+
+        .hero-hp {
+            margin-top: 12px;
+            font-family: monospace;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .reload-dialogue {
+            position: absolute;
+            z-index: 30;
+            left: 50%;
+            bottom: 310px;
+            display: flex;
+            gap: 25px;
+            transform: translateX(-50%);
+        }
+
+        .autosave {
+            min-height: 70vh;
+            display: grid;
+            place-items: center;
+            background: #08070c;
+            text-align: center;
+        }
+
+        .autosave-inner {
+            padding: 30px;
+        }
+
+        .autosave-text {
+            margin-bottom: 45px;
+            color: #e5e5e5;
+            font-family: monospace;
+            font-size: 1.2rem;
+        }
+
+        .autosave h2 {
+            max-width: 900px;
+            margin: auto;
+            font-family: Georgia, serif;
+            font-size: clamp(2.5rem, 7vw, 6.5rem);
+            line-height: .95;
+        }
+
+        .autosave .hero-final {
+            margin-top: 50px;
+            color: #b8b6c3;
+            font-weight: 900;
+        }
+
+        /* -------------------------------------------------- */
+        /* END                                                */
+        /* -------------------------------------------------- */
+
+        .end-card {
+            padding: 100px 20px 80px;
+            background: var(--cream);
+            text-align: center;
+        }
+
+        .end-card h2 {
+            max-width: 900px;
+            margin: 0 auto 25px;
+            font-family: Georgia, serif;
+            font-size: clamp(2.4rem, 6vw, 5.8rem);
+            line-height: .95;
+        }
+
+        .end-card p {
+            max-width: 760px;
+            margin: auto;
+            font-size: 1.2rem;
+            line-height: 1.7;
+        }
+
+        .studio {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 55px;
+            padding: 13px 18px;
+            border: 4px solid var(--ink);
+            border-radius: 999px;
+            background: white;
+            color: var(--ink);
+            font-weight: 1000;
+            text-decoration: none;
+            box-shadow: 5px 5px 0 var(--ink);
+        }
+
+        .studio-mark {
+            display: grid;
+            width: 32px;
+            height: 32px;
+            place-items: center;
+            border-radius: 50%;
+            background: var(--ink);
+            color: white;
+            font-family: Georgia, serif;
+        }
+
+        footer {
+            padding: 30px 20px 45px;
+            background: var(--cream);
+            text-align: center;
+            font-size: .88rem;
+            font-weight: 700;
+            color: #625b57;
+        }
+
+        .scroll-hint {
+            position: absolute;
+            z-index: 30;
+            left: 50%;
+            bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            transform: translateX(-50%);
+            font-size: .75rem;
+            font-weight: 1000;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .scroll-arrow {
+            width: 24px;
+            height: 24px;
+            border-right: 4px solid var(--ink);
+            border-bottom: 4px solid var(--ink);
+            transform: rotate(45deg);
+            animation: bounce 1.5s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) rotate(45deg); }
+            50% { transform: translateY(8px) rotate(45deg); }
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(35px);
+            transition:
+                opacity .7s ease,
+                transform .7s cubic-bezier(.2,.8,.2,1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 760px) {
+            .scene-inner {
+                width: min(100% - 20px, 1180px);
+            }
+
+            .opening {
+                min-height: 130vh;
+            }
+
+            .reaction-dialogue {
+                bottom: 45%;
+                flex-direction: column;
+                gap: 25px;
+            }
+
+            .reaction-dialogue .speech:nth-child(2) {
+                align-self: end;
+                margin-top: 0;
+            }
+
+            .castle {
+                transform: translateX(-50%) scale(.5);
+            }
+
+            .tiny-house {
+                width: 105px;
+                height: 80px;
+            }
+
+            .tiny-house::before {
+                top: -48px;
+                left: -10px;
+                width: 125px;
+                height: 58px;
+            }
+
+            .tiny-house.h2,
+            .tiny-house.h3 {
+                display: none;
+            }
+
+            .shop-room {
+                min-height: 670px;
+            }
+
+            .shopkeeper-wrap {
+                right: 5%;
+            }
+
+            .shop-hero {
+                left: 5%;
+            }
+
+            .debt-sign {
+                top: 350px;
+                right: 3%;
+                width: 270px;
+                font-size: 1rem;
+            }
+
+            .shop-punchline,
+            .inn-dialogue,
+            .town-argument {
+                grid-template-columns: 1fr;
+            }
+
+            .tracking-window {
+                width: 100px;
+                height: 130px;
+            }
+
+            .tracking-window:nth-child(1) { left: 4%; }
+            .tracking-window:nth-child(2) { left: 37%; }
+            .tracking-window:nth-child(3) { right: 4%; }
+
+            .stealth-house {
+                height: 520px;
+            }
+
+            .door-confrontation {
+                right: 2%;
+                transform: scale(.75);
+                transform-origin: bottom right;
+            }
+
+            .inn-room {
+                min-height: 720px;
+            }
+
+            .innkeeper-wrap {
+                left: 4%;
+            }
+
+            .inn-hero {
+                right: 3%;
+            }
+
+            .inn-man {
+                top: 290px;
+                right: 4%;
+                transform: scale(.75);
+                transform-origin: right;
+            }
+
+            .new-policy {
+                left: 3%;
+                top: 175px;
+                max-width: 220px;
+            }
+
+            .panic-person .person {
+                transform: scale(.55);
+            }
+
+            .panic-person.p1 { left: 0; }
+            .panic-person.p2 { left: 24%; }
+            .panic-person.p3 { right: 22%; }
+            .panic-person.p4 { right: -3%; }
+
+            .pot-owner {
+                left: 1%;
+                transform: scale(.75);
+                transform-origin: bottom left;
+            }
+
+            .pot-hero {
+                right: 1%;
+                transform: scale(.75);
+                transform-origin: bottom right;
+            }
+
+            .pot-dialogue {
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .pot-dialogue .speech:last-child {
+                align-self: end;
+            }
+
+            .blacksmith {
+                left: 5%;
+            }
+
+            .quest-hero {
+                right: 5%;
+            }
+
+            .exclamation {
+                left: 14%;
+            }
+
+            .consequence,
+            .consequence:nth-child(even) {
+                grid-template-columns: 1fr;
+            }
+
+            .consequence:nth-child(even) .consequence-art {
+                order: initial;
+            }
+
+            .old-quest-inner {
+                grid-template-columns: 1fr;
+                justify-items: center;
+            }
+
+            .gate {
+                border-left-width: 40px;
+                border-right-width: 40px;
+            }
+
+            .gate::before {
+                left: -40px;
+                width: calc(100% + 80px);
+            }
+
+            .gate-characters {
+                width: 95%;
+            }
+
+            .horse-card .horse {
+                transform: scale(1);
+            }
+
+            .horse-caption {
+                right: 8px;
+                width: 145px;
+                font-size: .95rem;
+            }
+
+            .dragon {
+                right: -10%;
+                width: 68vw;
+            }
+
+            .town-mob {
+                left: -8%;
+            }
+
+            .town-mob .person {
+                transform: scale(.55);
+            }
+
+            .dragon-question {
+                right: 3%;
+                bottom: 42%;
+                transform: scale(.8);
+                transform-origin: right;
+            }
+
+            .everybody-yes {
+                left: 8%;
+            }
+
+            .reload-dialogue {
+                bottom: 270px;
+                width: 92%;
+                flex-direction: column;
+            }
+
+            .boss-town .person {
+                margin-left: -30px;
+                margin-right: -30px;
+                transform: scale(.48);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .01ms !important;
+            }
+
+            .reveal {
+                opacity: 1;
+                transform: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <site-navbar
+        cart-href="https://unlim8ted.com/sign-in/cart"
+        signin-href="https://unlim8ted.com/sign-in"
+        profile-href="https://unlim8ted.com/profile">
+    </site-navbar>
+
+    <main class="story">
+
+        <!-- ==================================================
+             OPENING
+        =================================================== -->
+
+        <section class="scene opening" id="opening">
+
+            <div class="sun"></div>
+
+            <div class="mountain m1"></div>
+            <div class="mountain m2"></div>
+
+            <div class="castle">
+                <div class="castle-main"></div>
+                <div class="castle-tower left"></div>
+                <div class="castle-tower right"></div>
+            </div>
+
+            <div class="opening-ground"></div>
+            <div class="road"></div>
+
+            <div class="village-reaction">
+                <div class="tiny-house h1">
+                    <div class="window left">
+                        <div class="shutter"></div>
+                        <div class="shutter"></div>
+                    </div>
+                </div>
+
+                <div class="tiny-house h2">
+                    <div class="window right">
+                        <div class="shutter"></div>
+                        <div class="shutter"></div>
+                    </div>
+                </div>
+
+                <div class="tiny-house h3">
+                    <div class="window left">
+                        <div class="shutter"></div>
+                        <div class="shutter"></div>
+                    </div>
+                </div>
+
+                <div class="tiny-house h4">
+                    <div class="window right">
+                        <div class="shutter"></div>
+                        <div class="shutter"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scene-inner opening-copy">
+                <div class="opening-kicker">An Unlim8ted Scrolly</div>
+
+                <h1>
+                    IF NPCs REMEMBERED
+                    <em>EVERYTHING</em>
+                    YOU DID
+                </h1>
+
+                <p class="opening-subtitle">
+                    You saved the kingdom.
+                    Unfortunately, the kingdom has been keeping records.
+                </p>
+            </div>
+
+            <div class="reaction-dialogue">
+                <div class="speech reveal">
+                    Oh! You're back!
+                </div>
+
+                <div class="speech right reveal">
+                    ...Wait.
+                </div>
+            </div>
+
+            <div class="hero-return">
+                <div class="person hero">
+                    <div class="hair"></div>
+                    <div class="head"></div>
+                    <div class="eye left"></div>
+                    <div class="eye right"></div>
+                    <div class="mouth"></div>
+                    <div class="body"></div>
+                    <div class="belt"></div>
+                    <div class="leg left"></div>
+                    <div class="leg right"></div>
+                </div>
+            </div>
+
+            <div class="scroll-hint">
+                The village remembers
+                <div class="scroll-arrow"></div>
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             SHOPKEEPER
+        =================================================== -->
+
+        <section class="scene shop-scene">
+
+            <div class="scene-inner">
+
+                <div class="scene-number">01 · The Shopkeeper</div>
+
+                <div class="shop-room">
+
+                    <div class="shelf one">
+                        <div class="bottle" style="left:9%"></div>
+                        <div class="bottle" style="left:17%;background:#6da6c8"></div>
+                        <div class="bottle" style="left:28%;background:#a263ba"></div>
+                        <div class="bottle" style="right:32%;background:#e4ba46"></div>
+                        <div class="bottle" style="right:20%;background:#69a768"></div>
+                    </div>
+
+                    <div class="shelf two"></div>
+
+                    <div class="debt-sign reveal">
+                        YOU STILL OWE ME<br>
+                        <strong>4,720 GOLD</strong>
+                    </div>
+
+                    <div class="shopkeeper-wrap">
+                        <div class="person shopkeeper">
+                            <div class="hair"></div>
+                            <div class="head"></div>
+                            <div class="eye left"></div>
+                            <div class="eye right"></div>
+                            <div class="mouth"></div>
+                            <div class="body"></div>
+                            <div class="belt"></div>
+                            <div class="leg left"></div>
+                            <div class="leg right"></div>
+                        </div>
+                    </div>
+
+                    <div class="shop-hero">
+                        <div class="person hero">
+                            <div class="hair"></div>
+                            <div class="head"></div>
+                            <div class="eye left"></div>
+                            <div class="eye right"></div>
+                            <div class="mouth"></div>
+                            <div class="body"></div>
+                            <div class="belt"></div>
+                            <div class="leg left"></div>
+                            <div class="leg right"></div>
+                        </div>
+                    </div>
+
+                    <div class="counter"></div>
+
+                </div>
+
+                <div class="receipt-zone">
+
+                    <div class="receipt reveal">
+
+                        <h3>YE OLDE ITEM SHOPPE</h3>
+                        <div class="receipt-sub">
+                            OUTSTANDING BALANCE
+                        </div>
+
+                        <div class="receipt-row bad">
+                            <span>1× IRON SWORD — STOLEN</span>
+                            <span>400G</span>
+                        </div>
+
+                        <div class="receipt-row bad">
+                            <span>3× HEALTH POTION — STOLEN</span>
+                            <span>180G</span>
+                        </div>
+
+                        <div class="receipt-row bad">
+                            <span>17× CHEESE WHEELS — STOLEN</span>
+                            <span>510G</span>
+                        </div>
+
+                        <div class="receipt-row bad">
+                            <span>1× DECORATIVE SPOON — STOLEN</span>
+                            <span>12G</span>
+                        </div>
+
+                        <div class="receipt-row bad">
+                            <span>6× PLATES — STOLEN</span>
+                            <span>48G</span>
+                        </div>
+
+                        <div class="receipt-row bad">
+                            <span>SHOPKEEPER'S PERSONAL WEDDING RING — STOLEN</span>
+                            <span>3,570G</span>
+                        </div>
+
+                        <div class="receipt-total">
+                            TOTAL: 4,720 GOLD
+                        </div>
+
+                    </div>
+
+                    <div class="shop-punchline">
+
+                        <div class="speech reveal">
+                            Okay, some of those were accidents.
+                        </div>
+
+                        <div class="speech right reveal">
+                            You sold the ring back to me.
+                        </div>
+
+                        <div class="speech reveal">
+                            ...Did you buy it?
+                        </div>
+
+                        <div class="speech right dark reveal">
+                            I DIDN'T KNOW IT WAS MINE.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             STEALTH
+        =================================================== -->
+
+        <section class="scene stealth" id="stealth">
+
+            <div class="moon"></div>
+
+            <div class="scene-inner">
+                <div class="scene-number">02 · Stealth</div>
+
+                <div class="game-box stealth-prompt">
+                    CROUCH TO ENTER STEALTH
+                </div>
+            </div>
+
+            <div class="stealth-house">
+
+                <div class="tracking-window">
+                    <div class="watch-face">
+                        <div class="face"></div>
+                        <div class="eyes"></div>
+                    </div>
+                </div>
+
+                <div class="tracking-window">
+                    <div class="watch-face">
+                        <div class="face"></div>
+                        <div class="eyes"></div>
+                    </div>
+                </div>
+
+                <div class="tracking-window">
+                    <div class="watch-face">
+                        <div class="face"></div>
+                        <div class="eyes"></div>
+                    </div>
+                </div>
+
+                <div class="sneaking-hero" id="sneakingHero">
+                    <div class="person hero">
+                        <div class="hair"></div>
+                        <div class="head"></div>
+                        <div class="eye left"></div>
+                        <div class="eye right"></div>
+                        <div class="mouth"></div>
+                        <div class="body"></div>
+                        <div class="belt"></div>
+                        <div class="leg left"></div>
+                        <div class="leg right"></div>
+                    </div>
+                </div>
+
+                <div class="door-confrontation reveal">
+
+                    <div class="speech dark">
+                        Can I help you?
+                    </div>
+
+                    <div class="person farmer">
+                        <div class="hair"></div>
+                        <div class="head"></div>
+                        <div class="eye left"></div>
+                        <div class="eye right"></div>
+                        <div class="mouth"></div>
+                        <div class="body"></div>
+                        <div class="belt"></div>
+                        <div class="leg left"></div>
+                        <div class="leg right"></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             THE INN
+        =================================================== -->
+
+        <section class="scene inn">
+
+            <div class="scene-inner">
+
+                <div class="scene-number">03 · The Inn</div>
+
+                <div class="inn-room">
+
+                    <div class="inn-beam horizontal"></div>
+                    <div class="inn-beam vertical"></div>
+
+                    <div class="new-policy reveal">
+                        NEW POLICY:<br>
+                        PAYMENT BEFORE SLEEPING
+                    </div>
+
+                    <div class="innkeeper-wrap">
+                        <div class="person innkeeper">
+                            <div class="hair"></div>
+                            <div class="head"></div>
+                            <div class="eye left"></div>
+                            <div class="eye right"></div>
+                            <div class="mouth"></div>
+                            <div class="body"></div>
+                            <div class="belt"></div>
+                            <div class="leg left"></div>
+                            <div class="leg right"></div>
+                        </div>
+                    </div>
+
+                    <div class="inn-hero">
+                        <div class="person hero">
+                            <div class="hair"></div>
+                            <div class="head"></div>
+                            <div class="eye left"></div>
+                            <div class="eye right"></div>
+                            <div class="mouth"></div>
+                            <div class="body"></div>
+                            <div class="belt"></div>
+                            <div class="leg left"></div>
+                            <div class="leg right"></div>
+                        </div>
+                    </div>
+
+                    <div class="inn-man reveal">
+
+                        <div class="person farmer">
+                            <div class="hair"></div>
+                            <div class="head"></div>
+                            <div class="eye left"></div>
+                            <div class="eye right"></div>
+                            <div class="mouth"></div>
+                            <div class="body"></div>
+                            <div class="belt"></div>
+                            <div class="leg left"></div>
+                            <div class="leg right"></div>
+                        </div>
+
+                        <div class="speech small">
+                            It was my bed.
+                        </div>
+
+                    </div>
+
+                    <div class="bar"></div>
+
+                </div>
+
+                <div class="inn-dialogue">
+
+                    <div class="speech reveal">
+                        You walked into room three at two in the afternoon, got into a stranger's bed fully armored, and slept until ten.
+                    </div>
+
+                    <div class="speech right reveal">
+                        That's generally how sleeping works.
+                    </div>
+
+                    <div class="speech reveal">
+                        I was in it.
+                    </div>
+
+                    <div class="speech right reveal">
+                        ...Oh.
+                    </div>
+
+                    <div class="speech reveal">
+                        Then you ate fourteen wheels of cheese.
+                    </div>
+
+                    <div class="speech right reveal">
+                        Health.
+                    </div>
+
+                    <div class="speech reveal">
+                        Then you opened every cabinet in the building.
+                    </div>
+
+                    <div class="speech right reveal">
+                        Loot.
+                    </div>
+
+                    <div class="speech reveal">
+                        Then you left without paying.
+                    </div>
+
+                    <div class="speech right reveal">
+                        I don't think the game actually lets me pay for beds.
+                    </div>
+
+                    <div class="speech dark reveal">
+                        What game?
+                    </div>
+
+                    <div class="speech right reveal">
+                        ...One room, please.
+                    </div>
+
+                    <div class="speech reveal">
+                        8,000 gold.
+                    </div>
+
+                    <div class="speech right dark reveal">
+                        WHAT?!
+                    </div>
+
+                    <div class="speech reveal">
+                        Security deposit.
+                    </div>
+
+                </div>
+
+                <div class="cheese-panic">
+
+                    <div class="railing"></div>
+
+                    <div class="hero-peek">
+                        <div class="head"></div>
+                        <div class="hair"></div>
+                        <div class="eyes"></div>
+                    </div>
+
+                    <div class="cheese c1"></div>
+                    <div class="cheese c2"></div>
+                    <div class="cheese c3"></div>
+                    <div class="cheese c4"></div>
+
+                    <div class="panic-person p1">
+                        <div class="person farmer">
+                            <div class="hair"></div>
+                            <div class="head"></div>
+                            <div class="eye left"></div>
+                            <div class="eye right"></div>
+                            <div class="mouth"></div>
+                            <div class="body"></div>
+                            <div class="belt"></div>
+                            <div class="leg left"></div>
+                            <div class="leg right"></div>
+                        </div>
+                    </div>
+
+                    <div class="panic-person p2">
+                        <div class="person woman">
+                            <div class="hair"></div>
+                            <div class="head"></div>
+                            <div class="eye left"></div>
+                            <div class="eye right"></div>
+                            <div class="mouth"></div>
+                            <div class="body"></div>
+                            <div class="belt"></div>
+                            <div class="leg left"></div>
+                            <div class="leg right"></div>
+                        </div>
+                    </div>
+
+                    <div class="panic-person p3">
+                        <div class="person shopkeeper">
+                            <div class="hair"></div>
+                            <div class="head"></div>
+                            <div class="eye left"></div>
+                            <div class="eye right"></div>
+                            <div class="mouth"></div>
+                            <div class="body"></div>
+                            <div class="belt"></div>
+                            <div class="leg left"></div>
+                            <div class="leg right"></div>
+                        </div>
+                    </div>
+
+                    <div class="panic-person p4">
+                        <div class="person guard">
+                            <div class="hair"></div>
+                            <div class="head"></div>
+                            <div class="eye left"></div>
+                            <div class="eye right"></div>
+                            <div class="mouth"></div>
+                            <div class="body"></div>
+                            <div class="belt"></div>
+                            <div class="leg left"></div>
+                            <div class="leg right"></div>
+                        </div>
+                    </div>
+
+                    <div class="speech dark" style="position:absolute;top:145px;left:50%;transform:translateX(-50%);z-index:30;">
+                        ...Why are you hiding the cheese?
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             THE POT
+        =================================================== -->
+
+        <section class="scene pot-scene" id="potScene">
+
+            <div class="scene-inner">
+
+                <div class="scene-number">04 · The Pot</div>
+
+                <div class="pot-dialogue">
+                    <div class="speech reveal">Don't.</div>
+                    <div class="speech right reveal">I'm not doing anything.</div>
+                </div>
+
+                <div class="pot-room">
+
+                    <div class="pot-owner">
+                        <div class="person farmer">
+                            <div class="hair"></div>
+                            <div class="head"></div>
+                            <div class="eye left"></div>
+                            <div class="eye right"></div>
+                            <div class="mouth"></div>
+                            <div class="body"></div>
+                            <div class="belt"></div>
+                            <div class="leg left"></div>
+                            <div class="leg right"></div>
+                        </div>
+                    </div>
+
+                    <div class="pot">
+                        <div class="rim"></div>
+                        <div class="body"></div>
+                    </div>
+
+                    <div class="coin one"></div>
+                    <div class="coin two"></div>
+                    <div class="coin three"></div>
+
+                    <div class="pot-hero">
+                        <div class="person hero">
+                            <div class="hair"></div>
+                            <div class="head"></div>
+                            <div class="eye left"></div>
+                            <div class="eye right"></div>
+                            <div class="mouth"></div>
+                            <div class="body"></div>
+                            <div class="belt"></div>
+                            <div class="leg left"></div>
+                            <div class="leg right"></div>
+                        </div>
+                    </div>
+
+                    <div class="game-box pot-label">
+                        POT — 3 GOLD
+                    </div>
+
+                </div>
+
+                <div class="pot-dialogue">
+
+                    <div class="speech dark reveal">
+                        THAT IS MY URN.
+                    </div>
+
+                    <div class="speech right reveal">
+                        Your...
+                    </div>
+
+                    <div class="speech reveal">
+                        My father.
+                    </div>
+
+                    <div class="speech right reveal">
+                        ...
+                    </div>
+
+                </div>
+
+                <div style="text-align:center;margin-top:50px;">
+                    <div class="caption reveal">
+                        SMASH
+                    </div>
+                </div>
+
+                <div class="pot-dialogue">
+                    <div class="speech dark reveal">
+                        Get out.
+                    </div>
+
+                    <div class="speech right small reveal">
+                        +3 GOLD
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             QUEST GIVER
+        =================================================== -->
+
+        <section class="scene quest-scene">
+
+            <div class="scene-inner">
+
+                <div class="scene-number">05 · The Quest Giver</div>
+
+                <div class="quest-stage">
+
+                    <div class="exclamation">!</div>
+
+                    <div class="blacksmith">
+                        <div class="person shopkeeper">
+                            <div class="hair"></div>
+                            <div class="head"></div>
+                            <div class="eye left"></div>
+                            <div class="eye right"></div>
+                            <div class="mouth"></div>
+                            <div class="body"></div>
+                            <div class="belt"></div>
+                            <div class="leg left"></div>
+                            <div class="leg right"></div>
+                        </div>
+                    </div>
+
+                    <div class="quest-hero">
+                        <div class="person hero">
+                            <div class="hair"></div>
+                            <div class="head"></div>
+                            <div class="eye left"></div>
+                            <div class="eye right"></div>
+                            <div class="mouth"></div>
+                            <div class="body"></div>
+                            <div class="belt"></div>
+                            <div class="leg left"></div>
+                            <div class="leg right"></div>
+                        </div>
+                    </div>
+
+                    <div class="game-box quest-card reveal">
+
+                        <div style="font-family:monospace;opacity:.7;">
+                            QUEST ACCEPTED
+                        </div>
+
+                        <h3>LEAVE</h3>
+
+                        <div class="quest-objective">
+                            OBJECTIVE:<br>
+                            Leave.
+                        </div>
+
+                    </div>
+
+                    <div class="tomato"></div>
+
+                </div>
+
+                <div class="shop-punchline">
+                    <div class="speech reveal">
+                        What's the reward?
+                    </div>
+
+                    <div class="speech right reveal">
+                        We stop throwing things at you.
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             CONSEQUENCES
+        =================================================== -->
+
+        <section class="scene consequences">
+
+            <div class="scene-inner">
+
+                <div class="scene-number">06 · Consequences</div>
+
+                <div class="consequence-road">
+
+                    <div class="consequence reveal">
+
+                        <div class="consequence-art">
+                            <div class="fence"></div>
+                        </div>
+
+                        <div class="speech">
+                            You jumped over this fence
+                            <strong>614 times.</strong>
+                        </div>
+
+                    </div>
+
+
+                    <div class="consequence reveal">
+
+                        <div class="consequence-art">
+                            <div class="barrel-stack">
+                                <div class="mini-barrel"></div>
+                                <div class="mini-barrel"></div>
+                                <div class="mini-barrel"></div>
+                                <div class="mini-barrel"></div>
+                                <div class="mini-barrel"></div>
+                                <div class="mini-barrel"></div>
+                                <div class="mini-barrel"></div>
+                                <div class="mini-barrel"></div>
+                                <div class="mini-barrel"></div>
+                                <div class="mini-barrel"></div>
+                            </div>
+                        </div>
+
+                        <div class="speech right">
+                            You know these aren't free, right?
+                        </div>
+
+                    </div>
+
+
+                    <div class="consequence reveal">
+
+                        <div class="consequence-art">
+
+                            <div class="sword-stack">
+                                <div class="mini-sword" style="transform:translate(-50%,-50%) rotate(8deg)"></div>
+                                <div class="mini-sword" style="transform:translate(-50%,-50%) rotate(32deg)"></div>
+                                <div class="mini-sword" style="transform:translate(-50%,-50%) rotate(61deg)"></div>
+                                <div class="mini-sword" style="transform:translate(-50%,-50%) rotate(95deg)"></div>
+                                <div class="mini-sword" style="transform:translate(-50%,-50%) rotate(128deg)"></div>
+                                <div class="mini-sword" style="transform:translate(-50%,-50%) rotate(160deg)"></div>
+                            </div>
+
+                        </div>
+
+                        <div>
+                            <div class="speech">
+                                Why did you have
+                                <strong>forty-seven swords?</strong>
+                            </div>
+
+                            <div class="speech right" style="margin:30px 0 0 60px;">
+                                Different stats.
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="old-quest reveal">
+
+                        <div class="old-quest-inner">
+
+                            <div>
+                                <div class="speech">
+                                    You haven't spoken to my husband in six years.
+                                </div>
+                            </div>
+
+                            <div class="old-man">
+
+                                <div class="game-box quest-waiting">
+                                    WAITING FOR PLAYER TO COMPLETE<br>
+                                    "A SMALL FAVOR"
+                                </div>
+
+                                <div class="person farmer">
+                                    <div class="hair"></div>
+                                    <div class="head"></div>
+                                    <div class="eye left"></div>
+                                    <div class="eye right"></div>
+                                    <div class="mouth"></div>
+                                    <div class="body"></div>
+                                    <div class="belt"></div>
+                                    <div class="leg left"></div>
+                                    <div class="leg right"></div>
+                                </div>
+
+                                <div class="beard"></div>
+
+                            </div>
+
+                            <div class="speech right">
+                                Did you get the mushrooms?
+                            </div>
+
+                        </div>
+
+                        <div class="game-box inventory" style="max-width:280px;margin:60px auto 0;">
+
+                            INVENTORY
+
+                            <div class="mushroom">
+                                <div class="mushroom-cap"></div>
+                                <div class="mushroom-stem"></div>
+                            </div>
+
+                            MUSHROOM × 1
+
+                        </div>
+
+                        <div style="text-align:center;margin-top:35px;">
+                            <div class="speech">
+                                ...Oh.
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             GUARD
+        =================================================== -->
+
+        <section class="scene gate-scene">
+
+            <div class="gate"></div>
+
+            <div class="scene-inner">
+
+                <div class="scene-number">07 · The Guard</div>
+
+                <div class="crime-scroll reveal">
+
+                    <h3>Kingdom Incident Report</h3>
+
+                    <div class="crime">Breaking and entering</div>
+                    <div class="crime">Theft</div>
+                    <div class="crime">Assault</div>
+                    <div class="crime">Grave robbing</div>
+                    <div class="crime">Trespassing</div>
+                    <div class="crime">Livestock theft</div>
+
+                </div>
+
+                <div class="shop-punchline">
+
+                    <div class="speech reveal">
+                        Those were dungeons.
+                    </div>
+
+                    <div class="speech right reveal">
+                        Municipal cemetery.
+                    </div>
+
+                    <div class="speech reveal">
+                        It had loot.
+                    </div>
+
+                    <div class="speech right reveal">
+                        You stole a horse.
+                    </div>
+
+                    <div class="speech reveal">
+                        I borrowed the horse.
+                    </div>
+
+                    <div class="speech right reveal">
+                        For eleven months.
+                    </div>
+
+                    <div class="speech reveal">
+                        I brought it back.
+                    </div>
+
+                </div>
+
+                <div class="horse-card reveal">
+
+                    <div class="horse">
+                        <div class="horse-body"></div>
+                        <div class="horse-head"></div>
+                        <div class="horse-eye"></div>
+                    </div>
+
+                    <div class="horse-caption">
+                        LOOK AT HIM.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="gate-characters">
+
+                <div class="person guard">
+                    <div class="hair"></div>
+                    <div class="head"></div>
+                    <div class="eye left"></div>
+                    <div class="eye right"></div>
+                    <div class="mouth"></div>
+                    <div class="body"></div>
+                    <div class="belt"></div>
+                    <div class="leg left"></div>
+                    <div class="leg right"></div>
+                </div>
+
+                <div class="person hero">
+                    <div class="hair"></div>
+                    <div class="head"></div>
+                    <div class="eye left"></div>
+                    <div class="eye right"></div>
+                    <div class="mouth"></div>
+                    <div class="body"></div>
+                    <div class="belt"></div>
+                    <div class="leg left"></div>
+                    <div class="leg right"></div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             DRAGON
+        =================================================== -->
+
+        <section class="scene dragon-scene">
+
+            <div class="scene-inner">
+
+                <div class="scene-number">08 · The Dragon</div>
+
+                <div class="town-argument">
+
+                    <div class="speech reveal">
+                        Don't worry.
+                        <br><br>
+                        <strong>I'll save you.</strong>
+                    </div>
+
+                    <div class="speech dark reveal">
+                        No.
+                    </div>
+
+                    <div class="speech reveal">
+                        Absolutely not.
+                    </div>
+
+                    <div class="speech reveal">
+                        Last time you "saved" us, seventeen buildings caught fire.
+                    </div>
+
+                    <div class="speech right reveal">
+                        There was a necromancer!
+                    </div>
+
+                    <div class="speech dark reveal">
+                        YOU KILLED HIM IN MY KITCHEN.
+                    </div>
+
+                    <div class="speech reveal">
+                        He ran in there!
+                    </div>
+
+                    <div class="speech dark reveal">
+                        THEN YOU TOOK MY CHEESE.
+                    </div>
+
+                    <div class="speech right reveal">
+                        I NEEDED HEALTH.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="town-mob">
+
+                <div class="person farmer">
+                    <div class="hair"></div>
+                    <div class="head"></div>
+                    <div class="eye left"></div>
+                    <div class="eye right"></div>
+                    <div class="mouth"></div>
+                    <div class="body"></div>
+                    <div class="belt"></div>
+                    <div class="leg left"></div>
+                    <div class="leg right"></div>
+                </div>
+
+                <div class="person shopkeeper">
+                    <div class="hair"></div>
+                    <div class="head"></div>
+                    <div class="eye left"></div>
+                    <div class="eye right"></div>
+                    <div class="mouth"></div>
+                    <div class="body"></div>
+                    <div class="belt"></div>
+                    <div class="leg left"></div>
+                    <div class="leg right"></div>
+                </div>
+
+                <div class="person woman">
+                    <div class="hair"></div>
+                    <div class="head"></div>
+                    <div class="eye left"></div>
+                    <div class="eye right"></div>
+                    <div class="mouth"></div>
+                    <div class="body"></div>
+                    <div class="belt"></div>
+                    <div class="leg left"></div>
+                    <div class="leg right"></div>
+                </div>
+
+                <div class="person guard">
+                    <div class="hair"></div>
+                    <div class="head"></div>
+                    <div class="eye left"></div>
+                    <div class="eye right"></div>
+                    <div class="mouth"></div>
+                    <div class="body"></div>
+                    <div class="belt"></div>
+                    <div class="leg left"></div>
+                    <div class="leg right"></div>
+                </div>
+
+                <div class="person innkeeper">
+                    <div class="hair"></div>
+                    <div class="head"></div>
+                    <div class="eye left"></div>
+                    <div class="eye right"></div>
+                    <div class="mouth"></div>
+                    <div class="body"></div>
+                    <div class="belt"></div>
+                    <div class="leg left"></div>
+                    <div class="leg right"></div>
+                </div>
+
+            </div>
+
+            <div class="dragon">
+                <div class="dragon-wing"></div>
+                <div class="dragon-body"></div>
+                <div class="dragon-head">
+                    <div class="dragon-eye"></div>
+                </div>
+            </div>
+
+            <div class="dragon-question speech right reveal">
+                ...Is this a bad time?
+            </div>
+
+            <div class="everybody-yes reveal">
+                YES.
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             FINAL BOSS
+        =================================================== -->
+
+        <section class="scene finale">
+
+            <div class="finale-title">
+
+                <small>ENCOUNTER</small>
+
+                <h2>FINAL BOSS</h2>
+
+            </div>
+
+            <div class="game-box boss-ui">
+
+                <div class="boss-name">
+                    THE CONSEQUENCES OF YOUR ACTIONS
+                </div>
+
+                <div class="health-track">
+                    <div class="health-fill"></div>
+                </div>
+
+                <div class="hero-hp">
+                    HERO HP: 14
+                </div>
+
+            </div>
+
+            <div class="boss-arena">
+
+                <div class="boss-town">
+
+                    <div class="person farmer">
+                        <div class="hair"></div><div class="head"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
+                        <div class="mouth"></div><div class="body"></div>
+                        <div class="belt"></div><div class="leg left"></div><div class="leg right"></div>
+                    </div>
+
+                    <div class="person shopkeeper">
+                        <div class="hair"></div><div class="head"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
+                        <div class="mouth"></div><div class="body"></div>
+                        <div class="belt"></div><div class="leg left"></div><div class="leg right"></div>
+                    </div>
+
+                    <div class="person guard">
+                        <div class="hair"></div><div class="head"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
+                        <div class="mouth"></div><div class="body"></div>
+                        <div class="belt"></div><div class="leg left"></div><div class="leg right"></div>
+                    </div>
+
+                    <div class="person woman">
+                        <div class="hair"></div><div class="head"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
+                        <div class="mouth"></div><div class="body"></div>
+                        <div class="belt"></div><div class="leg left"></div><div class="leg right"></div>
+                    </div>
+
+                    <div class="person innkeeper">
+                        <div class="hair"></div><div class="head"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
+                        <div class="mouth"></div><div class="body"></div>
+                        <div class="belt"></div><div class="leg left"></div><div class="leg right"></div>
+                    </div>
+
+                    <div class="person farmer">
+                        <div class="hair"></div><div class="head"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
+                        <div class="mouth"></div><div class="body"></div>
+                        <div class="belt"></div><div class="leg left"></div><div class="leg right"></div>
+                    </div>
+
+                    <div class="person shopkeeper">
+                        <div class="hair"></div><div class="head"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
+                        <div class="mouth"></div><div class="body"></div>
+                        <div class="belt"></div><div class="leg left"></div><div class="leg right"></div>
+                    </div>
+
+                    <div class="person guard">
+                        <div class="hair"></div><div class="head"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
+                        <div class="mouth"></div><div class="body"></div>
+                        <div class="belt"></div><div class="leg left"></div><div class="leg right"></div>
+                    </div>
+
+                    <div class="person woman">
+                        <div class="hair"></div><div class="head"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
+                        <div class="mouth"></div><div class="body"></div>
+                        <div class="belt"></div><div class="leg left"></div><div class="leg right"></div>
+                    </div>
+
+                </div>
+
+                <div class="boss-hero">
+                    <div class="person hero">
+                        <div class="hair"></div>
+                        <div class="head"></div>
+                        <div class="eye left"></div>
+                        <div class="eye right"></div>
+                        <div class="mouth"></div>
+                        <div class="body"></div>
+                        <div class="belt"></div>
+                        <div class="leg left"></div>
+                        <div class="leg right"></div>
+                    </div>
+                </div>
+
+                <div class="reload-dialogue">
+
+                    <div class="speech reveal">
+                        ...Can I reload a save?
+                    </div>
+
+                    <div class="speech dark right reveal">
+                        We remember those too.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             BLACK
+        =================================================== -->
+
+        <section class="autosave">
+
+            <div class="autosave-inner">
+
+                <div class="autosave-text">
+                    Autosaving...
+                </div>
+
+                <h2>
+                    IF NPCs REMEMBERED<br>
+                    EVERYTHING YOU DID
+                </h2>
+
+                <div class="hero-final">
+                    HERO (O.S.)<br><br>
+                    Oh, come ON.
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             END CARD
+        =================================================== -->
+
+        <section class="end-card">
+
+            <h2>
+                Your quest log isn't the only thing keeping track.
+            </h2>
+
+            <p>
+                An RPG parody about what happens when the people you've robbed,
+                insulted, abandoned, exploited, repeatedly jumped on, forced to
+                wait six years for a mushroom, and deprived of approximately
+                seventeen wheels of cheese are finally allowed to compare notes.
+            </p>
+
+            <a class="studio" href="https://unlim8ted.com">
+                <span class="studio-mark">8</span>
+                Unlim8ted Studios
+            </a>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+        <span id="copyright"></span>
+    </footer>
+
+
+    <script>
+        (() => {
+            "use strict";
+
+            /* -----------------------------------------------
+               COPYRIGHT
+            ------------------------------------------------ */
+
+            const year = new Date().getFullYear();
+
+            document.getElementById("copyright").textContent =
+                `© 2019-${year} Unlim8ted Studio Productions. All rights reserved.`;
+
+
+            /* -----------------------------------------------
+               SCROLL REVEALS
+            ------------------------------------------------ */
+
+            const revealObserver = new IntersectionObserver(
+                entries => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add("visible");
+                        }
+                    }
+                },
+                {
+                    threshold: 0.18,
+                    rootMargin: "0px 0px -7% 0px"
+                }
+            );
+
+            document.querySelectorAll(".reveal").forEach(element => {
+                revealObserver.observe(element);
+            });
+
+
+            /* -----------------------------------------------
+               OPENING:
+               VILLAGE REALIZES WHO JUST ARRIVED
+            ------------------------------------------------ */
+
+            const opening = document.getElementById("opening");
+
+            const openingObserver = new IntersectionObserver(
+                entries => {
+                    for (const entry of entries) {
+                        if (!entry.isIntersecting) continue;
+
+                        const rect = opening.getBoundingClientRect();
+                        const progress =
+                            Math.max(
+                                0,
+                                Math.min(
+                                    1,
+                                    -rect.top /
+                                    Math.max(1, rect.height - window.innerHeight)
+                                )
+                            );
+
+                        if (progress > 0.16) {
+                            opening.classList.add("awake");
+                        }
+                    }
+                },
+                {
+                    threshold: Array.from(
+                        { length: 20 },
+                        (_, i) => i / 20
+                    )
+                }
+            );
+
+            openingObserver.observe(opening);
+
+
+            /* -----------------------------------------------
+               STEALTH:
+               HERO SNEAKS ACROSS THE HOUSE WHILE OWNER
+               VERY OBVIOUSLY WATCHES
+            ------------------------------------------------ */
+
+            const stealth = document.getElementById("stealth");
+            const sneakingHero = document.getElementById("sneakingHero");
+
+            function updateStealth() {
+                if (!stealth || !sneakingHero) return;
+
+                const rect = stealth.getBoundingClientRect();
+
+                if (
+                    rect.bottom < 0 ||
+                    rect.top > window.innerHeight
+                ) {
+                    return;
+                }
+
+                const scrollable =
+                    rect.height + window.innerHeight;
+
+                const progress =
+                    Math.max(
+                        0,
+                        Math.min(
+                            1,
+                            (window.innerHeight - rect.top) /
+                            scrollable
+                        )
+                    );
+
+                const left =
+                    7 + progress * 68;
+
+                sneakingHero.style.left = `${left}%`;
+
+                const windows =
+                    stealth.querySelectorAll(".watch-face");
+
+                windows.forEach((face, index) => {
+                    const offset =
+                        (progress - index * 0.16) * 30;
+
+                    const clamped =
+                        Math.max(-14, Math.min(14, offset));
+
+                    face.style.transform =
+                        `translateX(calc(-50% + ${clamped}px))`;
+                });
+            }
+
+
+            /* -----------------------------------------------
+               POT SMASH
+            ------------------------------------------------ */
+
+            const potScene =
+                document.getElementById("potScene");
+
+            function updatePot() {
+                if (!potScene) return;
+
+                const rect =
+                    potScene.getBoundingClientRect();
+
+                const trigger =
+                    window.innerHeight * 0.15;
+
+                if (
+                    rect.top < trigger &&
+                    rect.bottom > 0
+                ) {
+                    potScene.classList.add("smashed");
+                }
+            }
+
+
+            /* -----------------------------------------------
+               PARALLAX
+            ------------------------------------------------ */
+
+            const sun =
+                document.querySelector(".sun");
+
+            const castle =
+                document.querySelector(".castle");
+
+            function updateOpeningParallax() {
+                if (!opening) return;
+
+                const rect =
+                    opening.getBoundingClientRect();
+
+                if (
+                    rect.bottom < 0 ||
+                    rect.top > window.innerHeight
+                ) {
+                    return;
+                }
+
+                const amount =
+                    Math.max(
+                        0,
+                        Math.min(
+                            1,
+                            -rect.top /
+                            Math.max(
+                                1,
+                                rect.height - window.innerHeight
+                            )
+                        )
+                    );
+
+                if (sun) {
+                    sun.style.transform =
+                        `translateY(${amount * 55}px)`;
+                }
+
+                if (castle) {
+                    const mobile =
+                        window.innerWidth <= 760;
+
+                    const scale =
+                        mobile ? 0.5 : 0.72;
+
+                    castle.style.transform =
+                        `translateX(-50%) translateY(${amount * 22}px) scale(${scale})`;
+                }
+            }
+
+
+            /* -----------------------------------------------
+               SCROLL LOOP
+            ------------------------------------------------ */
+
+            let ticking = false;
+
+            function updateScrollEffects() {
+                updateStealth();
+                updatePot();
+                updateOpeningParallax();
+
+                ticking = false;
+            }
+
+            function requestScrollUpdate() {
+                if (ticking) return;
+
+                ticking = true;
+
+                requestAnimationFrame(
+                    updateScrollEffects
+                );
+            }
+
+            window.addEventListener(
+                "scroll",
+                requestScrollUpdate,
+                { passive: true }
+            );
+
+            window.addEventListener(
+                "resize",
+                requestScrollUpdate
+            );
+
+            requestScrollUpdate();
+
+
+            /* -----------------------------------------------
+               OPENING SHUTTER TIMING
+            ------------------------------------------------ */
+
+            function checkOpeningReaction() {
+                const rect =
+                    opening.getBoundingClientRect();
+
+                const viewport =
+                    window.innerHeight;
+
+                if (
+                    rect.top < -viewport * 0.12
+                ) {
+                    opening.classList.add("awake");
+                }
+            }
+
+            window.addEventListener(
+                "scroll",
+                checkOpeningReaction,
+                { passive: true }
+            );
+
+            checkOpeningReaction();
+
+        })();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,3140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#050507">
+
+    <title>Trailers Be Like — Unlim8ted</title>
+
+    <meta
+        name="description"
+        content="A parody of modern movie trailers that reveals every twist, spoils the ending, and includes an inexplicable goose interrogation."
+    >
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Trailers Be Like">
+    <meta
+        property="og:description"
+        content="The murder mystery trailer that somehow manages to show you the entire movie."
+    >
+
+    <script
+        type="module"
+        src="https://unlim8ted.com/components/site-navbar.js">
+    </script>
+
+    <script type="module">
+        import {
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+        import {
+            getFirebase
+        } from "/components/firebase-init.js";
+
+        const { auth, db } = getFirebase();
+
+        onAuthStateChanged(auth, user => {
+            document.documentElement.dataset.authenticated =
+                user ? "true" : "false";
+        });
+    </script>
+
+    <style>
+        :root {
+            --black: #050507;
+            --ink: #111116;
+            --cream: #eee9de;
+            --red: #a71925;
+            --red-bright: #e43039;
+            --gold: #d9b66c;
+            --blue: #435c74;
+            --storm: #252b35;
+            --mansion: #50443e;
+            --paper: #f4efe7;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            background: var(--black);
+        }
+
+        body {
+            margin: 0;
+            overflow-x: hidden;
+            background: var(--black);
+            color: white;
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+        }
+
+        site-navbar {
+            position: relative;
+            z-index: 10000;
+        }
+
+        .progress {
+            position: fixed;
+            z-index: 10001;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: white;
+            box-shadow: 0 0 15px rgba(255,255,255,.7);
+            pointer-events: none;
+        }
+
+        /* =========================================================
+           SHARED
+           ========================================================= */
+
+        .scene {
+            position: relative;
+            min-height: 100vh;
+            overflow: hidden;
+            display: grid;
+            place-items: center;
+            padding: 80px 20px;
+        }
+
+        .scene-inner {
+            position: relative;
+            z-index: 30;
+            width: min(1200px, 100%);
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(45px);
+            transition:
+                opacity .85s ease,
+                transform .85s cubic-bezier(.2,.8,.2,1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: none;
+        }
+
+        .trailer-voice {
+            position: relative;
+            z-index: 50;
+            max-width: 950px;
+            margin: auto;
+            text-align: center;
+            font-family:
+                Georgia,
+                "Times New Roman",
+                serif;
+            font-size: clamp(2rem, 5vw, 4.5rem);
+            line-height: 1.15;
+            text-shadow: 0 5px 30px black;
+        }
+
+        .trailer-voice.small {
+            font-size: clamp(1.3rem, 3vw, 2.4rem);
+        }
+
+        .eyebrow {
+            font-size: .72rem;
+            letter-spacing: .28em;
+            text-transform: uppercase;
+            color: #93939b;
+        }
+
+        .cut-flash {
+            position: fixed;
+            z-index: 9000;
+            inset: 0;
+            pointer-events: none;
+            background: white;
+            opacity: 0;
+        }
+
+        .cut-flash.fire {
+            animation: cutFlash .18s ease;
+        }
+
+        @keyframes cutFlash {
+            0% {
+                opacity: 0;
+            }
+
+            40% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        /* =========================================================
+           DISCLAIMER
+           ========================================================= */
+
+        .disclaimer {
+            min-height: 48vh;
+            background: #020203;
+            display: grid;
+            place-items: center;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .disclaimer div {
+            max-width: 700px;
+            padding: 22px 28px;
+            border: 1px solid #444;
+            color: #aaa;
+            font-size: .78rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+        }
+
+        /* =========================================================
+           BLACK SCREEN OPEN
+           ========================================================= */
+
+        .opening-black {
+            min-height: 110vh;
+            background:
+                radial-gradient(
+                    circle at 50% 50%,
+                    #101016,
+                    #030304 65%
+                );
+        }
+
+        .opening-black::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: .17;
+            background:
+                repeating-linear-gradient(
+                    90deg,
+                    transparent 0 3px,
+                    rgba(255,255,255,.025) 3px 4px
+                );
+        }
+
+        .opening-line {
+            position: relative;
+            z-index: 20;
+            text-align: center;
+        }
+
+        .opening-line .first {
+            font-family: Georgia, serif;
+            font-size: clamp(2.2rem, 6vw, 5rem);
+        }
+
+        .opening-line .second {
+            margin-top: 35px;
+            color: #777;
+            font-family: Georgia, serif;
+            font-size: clamp(1.4rem, 3vw, 2.6rem);
+            font-style: italic;
+        }
+
+        /* =========================================================
+           MANSION BODY DROP
+           ========================================================= */
+
+        .mansion-scene {
+            min-height: 135vh;
+            background: #141820;
+        }
+
+        .storm-sky {
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(
+                    to bottom,
+                    #202738,
+                    #11151d 70%
+                );
+        }
+
+        .cloud {
+            position: absolute;
+            width: 300px;
+            height: 85px;
+            border-radius: 50%;
+            background: #303746;
+            filter: blur(1px);
+            opacity: .75;
+        }
+
+        .cloud.c1 {
+            top: 10%;
+            left: 6%;
+        }
+
+        .cloud.c2 {
+            top: 16%;
+            right: 8%;
+            transform: scale(1.3);
+        }
+
+        .cloud.c3 {
+            top: 5%;
+            left: 42%;
+            transform: scale(.8);
+        }
+
+        .mansion {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            width: min(900px, 93vw);
+            height: 68%;
+            transform: translateX(-50%);
+            background: #514841;
+            border: 10px solid #241f1d;
+        }
+
+        .mansion::before {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: -170px;
+            width: 58%;
+            height: 180px;
+            transform: translateX(-50%);
+            background: #514841;
+            clip-path: polygon(
+                50% 0,
+                100% 100%,
+                0 100%
+            );
+        }
+
+        .mansion-window {
+            position: absolute;
+            width: 75px;
+            height: 125px;
+            border: 8px solid #241f1d;
+            background: #e5c471;
+        }
+
+        .mansion-window:nth-child(1) {
+            left: 12%;
+            top: 18%;
+        }
+
+        .mansion-window:nth-child(2) {
+            left: 32%;
+            top: 18%;
+        }
+
+        .mansion-window:nth-child(3) {
+            right: 32%;
+            top: 18%;
+        }
+
+        .mansion-window:nth-child(4) {
+            right: 12%;
+            top: 18%;
+        }
+
+        .mansion-window:nth-child(5) {
+            left: 20%;
+            bottom: 15%;
+        }
+
+        .mansion-window:nth-child(6) {
+            right: 20%;
+            bottom: 15%;
+        }
+
+        .mansion-door {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            width: 150px;
+            height: 230px;
+            transform: translateX(-50%);
+            border: 10px solid #251d18;
+            background: #35261f;
+        }
+
+        .lightning {
+            position: absolute;
+            z-index: 20;
+            left: 20%;
+            top: 0;
+            width: 140px;
+            height: 430px;
+            opacity: 0;
+            background: #eaf2ff;
+            clip-path: polygon(
+                50% 0,
+                85% 0,
+                62% 38%,
+                88% 38%,
+                25% 100%,
+                43% 52%,
+                17% 52%
+            );
+            filter: drop-shadow(0 0 35px white);
+        }
+
+        .mansion-scene.active .lightning {
+            animation: lightning 4s .5s infinite;
+        }
+
+        @keyframes lightning {
+            0%,12%,16%,100% {
+                opacity: 0;
+            }
+
+            13%,15% {
+                opacity: 1;
+            }
+        }
+
+        .body-drop {
+            position: absolute;
+            z-index: 30;
+            left: 50%;
+            top: -40%;
+            width: 120px;
+            height: 340px;
+            transform: translateX(-50%);
+        }
+
+        .body-head {
+            position: absolute;
+            left: 34px;
+            top: 0;
+            width: 55px;
+            height: 63px;
+            border-radius: 50%;
+            background: #17171b;
+        }
+
+        .body-torso {
+            position: absolute;
+            left: 10px;
+            top: 55px;
+            width: 100px;
+            height: 170px;
+            border-radius: 35px 35px 10px 10px;
+            background: #17171b;
+        }
+
+        .body-leg {
+            position: absolute;
+            top: 210px;
+            width: 28px;
+            height: 130px;
+            background: #17171b;
+            transform-origin: top;
+        }
+
+        .body-leg.l {
+            left: 25px;
+        }
+
+        .body-leg.r {
+            right: 25px;
+        }
+
+        .mansion-scene.active .body-drop {
+            animation: bodyDrop 1.2s 1.4s cubic-bezier(.5,0,1,1) forwards;
+        }
+
+        @keyframes bodyDrop {
+            0% {
+                top: -40%;
+                transform: translateX(-50%) rotate(0);
+            }
+
+            70% {
+                top: 61%;
+                transform: translateX(-50%) rotate(5deg);
+            }
+
+            100% {
+                top: 67%;
+                transform: translateX(-50%) rotate(87deg);
+            }
+        }
+
+        .gasps {
+            position: absolute;
+            z-index: 40;
+            left: 50%;
+            bottom: 10%;
+            transform: translateX(-50%) scale(0);
+            width: max-content;
+            max-width: 90vw;
+            padding: 15px 22px;
+            border: 5px solid #111;
+            background: white;
+            color: #111;
+            font-size: clamp(1.2rem, 3vw, 2.5rem);
+            font-weight: 900;
+        }
+
+        .mansion-scene.active .gasps {
+            animation: gaspPop .4s 2.7s forwards;
+        }
+
+        @keyframes gaspPop {
+            to {
+                transform: translateX(-50%) scale(1);
+            }
+        }
+
+        /* =========================================================
+           DETECTIVE SUNGLASSES
+           ========================================================= */
+
+        .detective-scene {
+            min-height: 120vh;
+            background:
+                linear-gradient(
+                    135deg,
+                    #665346 0 48%,
+                    #2a2725 48%
+                );
+        }
+
+        .detective-shot {
+            position: relative;
+            width: min(900px, 95vw);
+            height: 680px;
+        }
+
+        .detective {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            width: 330px;
+            height: 600px;
+            transform: translateX(-50%);
+        }
+
+        .detective-body {
+            position: absolute;
+            left: 25px;
+            bottom: 0;
+            width: 280px;
+            height: 390px;
+            border-radius: 100px 100px 0 0;
+            background: #27303a;
+        }
+
+        .detective-shirt {
+            position: absolute;
+            left: 103px;
+            bottom: 0;
+            width: 125px;
+            height: 345px;
+            background: #d4cabb;
+        }
+
+        .detective-tie {
+            position: absolute;
+            left: 145px;
+            top: 255px;
+            width: 40px;
+            height: 220px;
+            background: #68282e;
+            clip-path: polygon(
+                15% 0,
+                85% 0,
+                70% 55%,
+                100% 100%,
+                50% 92%,
+                0 100%,
+                30% 55%
+            );
+        }
+
+        .detective-head {
+            position: absolute;
+            left: 90px;
+            top: 30px;
+            width: 150px;
+            height: 180px;
+            border-radius: 48%;
+            background: #bd8563;
+        }
+
+        .detective-hair {
+            position: absolute;
+            left: 82px;
+            top: 17px;
+            width: 165px;
+            height: 70px;
+            border-radius: 60% 60% 20% 20%;
+            background: #30251e;
+        }
+
+        .detective-mouth {
+            position: absolute;
+            left: 145px;
+            top: 160px;
+            width: 40px;
+            height: 4px;
+            background: #51352d;
+        }
+
+        .glasses {
+            position: absolute;
+            z-index: 10;
+            left: 50%;
+            top: -130px;
+            width: 185px;
+            height: 70px;
+            transform: translateX(-50%) rotate(-6deg);
+        }
+
+        .lens {
+            position: absolute;
+            top: 10px;
+            width: 76px;
+            height: 45px;
+            border: 7px solid #0d0e10;
+            border-radius: 7px 7px 22px 22px;
+            background: #121518;
+        }
+
+        .lens.l {
+            left: 5px;
+        }
+
+        .lens.r {
+            right: 5px;
+        }
+
+        .glasses::before {
+            content: "";
+            position: absolute;
+            left: 76px;
+            top: 27px;
+            width: 34px;
+            height: 7px;
+            background: #0d0e10;
+        }
+
+        .detective-scene.active .glasses {
+            animation: glassesDown 1.3s .6s cubic-bezier(.17,.89,.32,1.4) forwards;
+        }
+
+        @keyframes glassesDown {
+            to {
+                top: 103px;
+                transform: translateX(-50%) rotate(0);
+            }
+        }
+
+        .detective-line {
+            position: absolute;
+            z-index: 40;
+            left: 50%;
+            bottom: 4%;
+            transform: translateX(-50%);
+            width: min(900px, 95%);
+            text-align: center;
+            font-family: Georgia, serif;
+            font-size: clamp(1.8rem, 4vw, 3.6rem);
+            text-shadow: 0 4px 20px black;
+        }
+
+        /* =========================================================
+           TITLE CARD
+           ========================================================= */
+
+        .title-slam {
+            min-height: 105vh;
+            background:
+                radial-gradient(
+                    circle,
+                    #22181a,
+                    #050506 70%
+                );
+        }
+
+        .title-card {
+            position: relative;
+            text-align: center;
+            transform: scale(4);
+            opacity: 0;
+        }
+
+        .title-slam.active .title-card {
+            animation: titleSlam .6s .3s cubic-bezier(.1,.8,.2,1.15) forwards;
+        }
+
+        @keyframes titleSlam {
+            0% {
+                opacity: 0;
+                transform: scale(4);
+                filter: blur(15px);
+            }
+
+            70% {
+                opacity: 1;
+                transform: scale(.92);
+                filter: blur(0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .title-card h1 {
+            margin: 0;
+            color: var(--cream);
+            font-family: Georgia, serif;
+            font-size: clamp(4rem, 13vw, 11rem);
+            line-height: .8;
+            letter-spacing: -.08em;
+            text-transform: uppercase;
+        }
+
+        .title-card p {
+            margin-top: 30px;
+            color: var(--gold);
+            letter-spacing: .3em;
+            text-transform: uppercase;
+            font-size: .8rem;
+        }
+
+        /* =========================================================
+           SUSPECTS
+           ========================================================= */
+
+        .suspects {
+            min-height: 170vh;
+            background: #e7e1d5;
+            color: var(--ink);
+            padding-top: 130px;
+            align-items: start;
+        }
+
+        .suspects-title {
+            text-align: center;
+            font-family: Georgia, serif;
+            font-size: clamp(2rem, 5vw, 4rem);
+            margin-bottom: 75px;
+        }
+
+        .suspect-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .suspect {
+            position: relative;
+            min-height: 620px;
+            overflow: hidden;
+            border: 6px solid #17171c;
+            background: #282a30;
+        }
+
+        .suspect:nth-child(2) {
+            background: #6e2935;
+        }
+
+        .suspect:nth-child(3) {
+            background: #34515a;
+        }
+
+        .suspect::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(
+                    to top,
+                    rgba(0,0,0,.75),
+                    transparent 55%
+                );
+        }
+
+        .suspect-person {
+            position: absolute;
+            z-index: 3;
+            left: 50%;
+            bottom: -30px;
+            width: 250px;
+            height: 500px;
+            transform: translateX(-50%);
+        }
+
+        .suspect-head {
+            position: absolute;
+            left: 65px;
+            top: 0;
+            width: 120px;
+            height: 135px;
+            border-radius: 50%;
+            background: #bd8765;
+        }
+
+        .suspect-body {
+            position: absolute;
+            left: 20px;
+            top: 120px;
+            width: 210px;
+            height: 390px;
+            border-radius: 70px 70px 0 0;
+            background: #131419;
+        }
+
+        .butler .suspect-body {
+            background: #151515;
+        }
+
+        .butler .suspect-body::after {
+            content: "";
+            position: absolute;
+            left: 87px;
+            top: 0;
+            width: 35px;
+            height: 160px;
+            background: #ece7dd;
+        }
+
+        .heiress .suspect-body {
+            background: #8d3c52;
+        }
+
+        .plumber .suspect-body {
+            background: #304f60;
+        }
+
+        .plumber-hat {
+            position: absolute;
+            z-index: 10;
+            left: 53px;
+            top: -15px;
+            width: 145px;
+            height: 55px;
+            border-radius: 50% 50% 8px 8px;
+            background: #315a73;
+        }
+
+        .suspect-name {
+            position: absolute;
+            z-index: 20;
+            left: 25px;
+            right: 25px;
+            bottom: 150px;
+            color: white;
+            font-size: clamp(2rem, 4vw, 3.3rem);
+            font-weight: 900;
+            letter-spacing: -.05em;
+            text-transform: uppercase;
+        }
+
+        .suspect-subtitle {
+            position: absolute;
+            z-index: 20;
+            left: 25px;
+            right: 25px;
+            bottom: 105px;
+            color: rgba(255,255,255,.6);
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            font-size: .7rem;
+        }
+
+        .suspect-quote {
+            position: absolute;
+            z-index: 20;
+            left: 25px;
+            right: 25px;
+            bottom: 25px;
+            color: white;
+            font-family: Georgia, serif;
+            font-size: 1.15rem;
+            line-height: 1.35;
+        }
+
+        .suspect {
+            opacity: 0;
+            transform: translateY(90px) rotate(var(--r));
+        }
+
+        .suspects.active .suspect {
+            animation: suspectReveal .75s forwards;
+        }
+
+        .suspect:nth-child(1) {
+            --r: -2deg;
+            animation-delay: .3s !important;
+        }
+
+        .suspect:nth-child(2) {
+            --r: 2deg;
+            animation-delay: .9s !important;
+        }
+
+        .suspect:nth-child(3) {
+            --r: -1deg;
+            animation-delay: 1.5s !important;
+        }
+
+        @keyframes suspectReveal {
+            to {
+                opacity: 1;
+                transform: translateY(0) rotate(var(--r));
+            }
+        }
+
+        /* =========================================================
+           HIDDEN BOOKSHELF
+           ========================================================= */
+
+        .clue-scene {
+            min-height: 140vh;
+            background: #3d2d27;
+        }
+
+        .library-wall {
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(
+                    90deg,
+                    #4f352b,
+                    #37251f
+                );
+        }
+
+        .bookshelf {
+            position: absolute;
+            z-index: 10;
+            left: 50%;
+            bottom: 0;
+            width: min(720px, 88vw);
+            height: 80%;
+            transform: translateX(-50%);
+            border: 18px solid #201612;
+            background: #5a392c;
+        }
+
+        .shelf {
+            position: absolute;
+            left: 6%;
+            right: 6%;
+            height: 12px;
+            background: #241914;
+        }
+
+        .shelf.s1 {
+            top: 24%;
+        }
+
+        .shelf.s2 {
+            top: 47%;
+        }
+
+        .shelf.s3 {
+            top: 70%;
+        }
+
+        .books {
+            position: absolute;
+            left: 8%;
+            right: 8%;
+            height: 17%;
+            background:
+                repeating-linear-gradient(
+                    90deg,
+                    #793c3d 0 28px,
+                    #253b4e 28px 55px,
+                    #b18a4d 55px 76px,
+                    #58436b 76px 100px
+                );
+        }
+
+        .books.b1 {
+            top: 7%;
+        }
+
+        .books.b2 {
+            top: 30%;
+        }
+
+        .books.b3 {
+            top: 53%;
+        }
+
+        .books.b4 {
+            top: 76%;
+        }
+
+        .secret-door {
+            position: absolute;
+            z-index: 5;
+            left: 50%;
+            bottom: 0;
+            width: 310px;
+            height: 70%;
+            transform: translateX(-50%);
+            border: 12px solid #111;
+            background: #09090b;
+        }
+
+        .secret-door::after {
+            content: "?";
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            color: #64141d;
+            font-size: 10rem;
+            font-family: Georgia, serif;
+        }
+
+        .clue-scene.active .bookshelf {
+            animation: bookshelfMove 3.1s 1s cubic-bezier(.3,.7,.2,1) forwards;
+        }
+
+        @keyframes bookshelfMove {
+            0%,20% {
+                transform: translateX(-50%);
+            }
+
+            100% {
+                transform: translateX(-110%);
+            }
+        }
+
+        .clue-detective {
+            position: absolute;
+            z-index: 20;
+            right: 11%;
+            bottom: 2%;
+            width: 180px;
+            height: 440px;
+        }
+
+        .clue-head {
+            position: absolute;
+            left: 50px;
+            width: 80px;
+            height: 90px;
+            border-radius: 50%;
+            background: #bd8563;
+        }
+
+        .clue-body {
+            position: absolute;
+            top: 80px;
+            width: 180px;
+            height: 360px;
+            border-radius: 55px 55px 0 0;
+            background: #27303a;
+        }
+
+        .clue-copy {
+            position: absolute;
+            z-index: 30;
+            left: 50%;
+            top: 8%;
+            transform: translateX(-50%);
+            width: min(1000px, 90%);
+            text-align: center;
+        }
+
+        .clue-copy .main {
+            font-family: Georgia, serif;
+            font-size: clamp(2rem, 5vw, 4rem);
+        }
+
+        .clue-copy .spoiler {
+            margin-top: 25px;
+            color: #e6b562;
+            font-size: clamp(1rem, 2vw, 1.4rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+        }
+
+        /* =========================================================
+           SPOILER MONTAGE
+           ========================================================= */
+
+        .spoiler-scroll {
+            height: 520vh;
+            position: relative;
+            background: #08080a;
+        }
+
+        .spoiler-sticky {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .spoiler-frame {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            opacity: 0;
+            transform: scale(1.12);
+            transition:
+                opacity .2s linear,
+                transform .2s linear;
+        }
+
+        .spoiler-frame.active-frame {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .spoiler-label {
+            position: absolute;
+            z-index: 100;
+            left: 35px;
+            top: 35px;
+            padding: 10px 14px;
+            border: 3px solid white;
+            background: black;
+            color: white;
+            font-size: .7rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+        }
+
+        .spoiler-number {
+            display: block;
+            font-size: 2.7rem;
+            font-weight: 900;
+            letter-spacing: -.06em;
+        }
+
+        /* TWIN */
+
+        .twin-frame {
+            background:
+                linear-gradient(
+                    90deg,
+                    #2f3544 0 50%,
+                    #57332f 50%
+                );
+        }
+
+        .twin-stage {
+            position: relative;
+            width: min(950px, 95vw);
+            height: 650px;
+        }
+
+        .twin {
+            position: absolute;
+            bottom: 20px;
+            width: 290px;
+            height: 580px;
+        }
+
+        .twin.one {
+            left: 13%;
+        }
+
+        .twin.two {
+            right: 13%;
+            transform: scaleX(-1);
+        }
+
+        .twin-head {
+            position: absolute;
+            left: 85px;
+            width: 120px;
+            height: 140px;
+            border-radius: 50%;
+            background: #bd8563;
+        }
+
+        .twin-body {
+            position: absolute;
+            left: 30px;
+            top: 125px;
+            width: 230px;
+            height: 450px;
+            border-radius: 80px 80px 0 0;
+            background: #1c2330;
+        }
+
+        .twin-question {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%,-50%);
+            color: white;
+            font-family: Georgia, serif;
+            font-size: clamp(3rem, 10vw, 9rem);
+            font-weight: 900;
+        }
+
+        /* CONFESSION */
+
+        .confession-frame {
+            background: #421d24;
+        }
+
+        .confession-box {
+            width: min(900px,90vw);
+            padding: 60px;
+            border: 10px solid white;
+            background: #eee5db;
+            color: #17171a;
+            text-align: center;
+            transform: rotate(-1deg);
+        }
+
+        .confession-box .small {
+            color: #7b6d67;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            font-size: .8rem;
+        }
+
+        .confession-box .quote {
+            margin-top: 30px;
+            font-family: Georgia, serif;
+            font-size: clamp(2rem, 5vw, 4rem);
+            line-height: 1.1;
+        }
+
+        /* KILLER */
+
+        .killer-frame {
+            background:
+                radial-gradient(
+                    circle,
+                    #a51c28,
+                    #22090d 70%
+                );
+        }
+
+        .killer-reveal {
+            position: relative;
+            width: min(950px,95vw);
+            height: 700px;
+        }
+
+        .killer-person {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            width: 350px;
+            height: 650px;
+            transform: translateX(-50%);
+        }
+
+        .killer-head {
+            position: absolute;
+            left: 100px;
+            width: 150px;
+            height: 170px;
+            border-radius: 50%;
+            background: #bd8563;
+        }
+
+        .killer-body {
+            position: absolute;
+            left: 30px;
+            top: 150px;
+            width: 290px;
+            height: 500px;
+            border-radius: 90px 90px 0 0;
+            background: #101013;
+        }
+
+        .killer-knife {
+            position: absolute;
+            right: 130px;
+            top: 230px;
+            width: 35px;
+            height: 230px;
+            background: #d9dcdd;
+            transform: rotate(22deg);
+            clip-path: polygon(
+                35% 0,
+                100% 75%,
+                63% 100%,
+                0 75%
+            );
+        }
+
+        .killer-caption {
+            position: absolute;
+            z-index: 30;
+            left: 50%;
+            bottom: 6%;
+            transform: translateX(-50%);
+            width: max-content;
+            max-width: 90vw;
+            padding: 13px 24px;
+            background: white;
+            color: #111;
+            font-weight: 1000;
+            font-size: clamp(1.5rem, 4vw, 3.5rem);
+        }
+
+        /* ENDING */
+
+        .ending-spoiler-frame {
+            background: #171d22;
+        }
+
+        .confrontation {
+            position: relative;
+            width: min(1100px,95vw);
+            height: 700px;
+        }
+
+        .confrontation-person {
+            position: absolute;
+            bottom: 0;
+            width: 250px;
+            height: 550px;
+        }
+
+        .confrontation-person.det {
+            left: 12%;
+        }
+
+        .confrontation-person.kill {
+            right: 12%;
+        }
+
+        .confrontation-head {
+            position: absolute;
+            left: 65px;
+            width: 120px;
+            height: 135px;
+            border-radius: 50%;
+            background: #bd8563;
+        }
+
+        .confrontation-body {
+            position: absolute;
+            left: 20px;
+            top: 120px;
+            width: 210px;
+            height: 430px;
+            border-radius: 65px 65px 0 0;
+            background: #26303a;
+        }
+
+        .kill .confrontation-body {
+            background: #111;
+        }
+
+        .spoiler-vs {
+            position: absolute;
+            left: 50%;
+            top: 45%;
+            transform: translate(-50%,-50%);
+            font-size: clamp(5rem, 13vw, 12rem);
+            font-weight: 1000;
+            color: #9f1f28;
+        }
+
+        .rushed-voice {
+            position: absolute;
+            z-index: 200;
+            left: 50%;
+            bottom: 5%;
+            transform: translateX(-50%);
+            width: min(1000px,92%);
+            padding: 20px 25px;
+            border: 4px solid white;
+            background: rgba(0,0,0,.83);
+            text-align: center;
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            font-weight: 900;
+            letter-spacing: .03em;
+        }
+
+        .spoiler-progress {
+            position: absolute;
+            z-index: 250;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 8px;
+            background: #222;
+        }
+
+        .spoiler-progress div {
+            width: 0;
+            height: 100%;
+            background: var(--red-bright);
+        }
+
+        /* =========================================================
+           EXPLOSION
+           ========================================================= */
+
+        .explosion-scene {
+            min-height: 120vh;
+            background:
+                linear-gradient(
+                    to bottom,
+                    #252934,
+                    #17191f
+                );
+        }
+
+        .explosion-mansion {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            width: min(850px, 90vw);
+            height: 62%;
+            transform: translateX(-50%);
+            background: #534640;
+            border: 10px solid #251f1d;
+        }
+
+        .explosion-mansion::before {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: -170px;
+            width: 62%;
+            height: 180px;
+            transform: translateX(-50%);
+            background: #534640;
+            clip-path: polygon(50% 0,100% 100%,0 100%);
+        }
+
+        .explosion-core {
+            position: absolute;
+            z-index: 20;
+            left: 50%;
+            top: 55%;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #fff7b0;
+            transform: translate(-50%,-50%) scale(0);
+            box-shadow:
+                0 0 0 60px #ffb52d,
+                0 0 0 120px #e8541d,
+                0 0 0 180px rgba(90,18,10,.6);
+        }
+
+        .explosion-scene.active .explosion-core {
+            animation: explode .9s .6s cubic-bezier(.15,.7,.2,1) forwards;
+        }
+
+        @keyframes explode {
+            0% {
+                transform: translate(-50%,-50%) scale(0);
+            }
+
+            65% {
+                transform: translate(-50%,-50%) scale(1.35);
+            }
+
+            100% {
+                transform: translate(-50%,-50%) scale(1);
+            }
+        }
+
+        .explosion-bit {
+            position: absolute;
+            z-index: 22;
+            left: 50%;
+            top: 55%;
+            width: 40px;
+            height: 30px;
+            background: #3d312c;
+            opacity: 0;
+        }
+
+        .explosion-scene.active .explosion-bit {
+            animation: debris 1.7s 1s forwards;
+        }
+
+        .explosion-bit.b1 {
+            --x: -330px;
+            --y: -180px;
+            --r: 270deg;
+        }
+
+        .explosion-bit.b2 {
+            --x: 290px;
+            --y: -220px;
+            --r: -190deg;
+        }
+
+        .explosion-bit.b3 {
+            --x: -240px;
+            --y: 180px;
+            --r: 360deg;
+        }
+
+        .explosion-bit.b4 {
+            --x: 370px;
+            --y: 130px;
+            --r: -300deg;
+        }
+
+        @keyframes debris {
+            0% {
+                opacity: 1;
+                transform: translate(0,0) rotate(0);
+            }
+
+            100% {
+                opacity: 0;
+                transform:
+                    translate(var(--x),var(--y))
+                    rotate(var(--r));
+            }
+        }
+
+        .why-explosion {
+            position: absolute;
+            z-index: 50;
+            left: 50%;
+            top: 10%;
+            transform: translateX(-50%) rotate(-2deg) scale(0);
+            width: max-content;
+            max-width: 90%;
+            padding: 13px 20px;
+            border: 5px solid #111;
+            background: white;
+            color: #111;
+            text-align: center;
+            font-size: clamp(1.5rem, 4vw, 3rem);
+            font-weight: 1000;
+        }
+
+        .explosion-scene.active .why-explosion {
+            animation: whyPop .45s 1.4s forwards;
+        }
+
+        @keyframes whyPop {
+            to {
+                transform: translateX(-50%) rotate(-2deg) scale(1);
+            }
+        }
+
+        /* =========================================================
+           GOOSE
+           ========================================================= */
+
+        .goose-scene {
+            min-height: 150vh;
+            background: #857661;
+            color: #111;
+        }
+
+        .interrogation-room {
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(
+                    to bottom,
+                    #8b8174 0 66%,
+                    #645446 66%
+                );
+        }
+
+        .hanging-light {
+            position: absolute;
+            left: 50%;
+            top: -40px;
+            width: 7px;
+            height: 180px;
+            background: #222;
+            transform: translateX(-50%);
+        }
+
+        .hanging-light::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: -45px;
+            width: 180px;
+            height: 90px;
+            transform: translateX(-50%);
+            border-radius: 100px 100px 0 0;
+            background: #191919;
+            box-shadow:
+                0 50px 110px rgba(255,245,180,.45);
+        }
+
+        .interrogation-table {
+            position: absolute;
+            z-index: 10;
+            left: 15%;
+            right: 15%;
+            bottom: 20%;
+            height: 28px;
+            background: #4f3c2e;
+            box-shadow: 0 17px 0 #30261f;
+        }
+
+        .interrogation-detective {
+            position: absolute;
+            z-index: 15;
+            left: 12%;
+            bottom: 22%;
+            width: 260px;
+            height: 500px;
+        }
+
+        .interrogation-detective .head {
+            position: absolute;
+            left: 70px;
+            width: 120px;
+            height: 135px;
+            border-radius: 50%;
+            background: #bd8563;
+        }
+
+        .interrogation-detective .body {
+            position: absolute;
+            top: 120px;
+            left: 25px;
+            width: 210px;
+            height: 380px;
+            border-radius: 70px 70px 0 0;
+            background: #27303a;
+        }
+
+        .goose {
+            position: absolute;
+            z-index: 20;
+            right: 16%;
+            bottom: 22%;
+            width: 270px;
+            height: 420px;
+        }
+
+        .goose-body {
+            position: absolute;
+            left: 25px;
+            bottom: 0;
+            width: 210px;
+            height: 250px;
+            border-radius: 50% 50% 35% 35%;
+            background: #eee;
+            border: 6px solid #bbb;
+        }
+
+        .goose-neck {
+            position: absolute;
+            right: 55px;
+            top: 50px;
+            width: 65px;
+            height: 230px;
+            border-radius: 60px;
+            background: #f3f3ef;
+            transform: rotate(-8deg);
+        }
+
+        .goose-head {
+            position: absolute;
+            right: 31px;
+            top: 10px;
+            width: 110px;
+            height: 90px;
+            border-radius: 55%;
+            background: #f3f3ef;
+        }
+
+        .goose-eye {
+            position: absolute;
+            right: 25px;
+            top: 27px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #111;
+        }
+
+        .goose-beak {
+            position: absolute;
+            right: -55px;
+            top: 43px;
+            width: 80px;
+            height: 28px;
+            background: #e6a62d;
+            clip-path: polygon(0 0,100% 50%,0 100%);
+        }
+
+        .goose-wing {
+            position: absolute;
+            left: 5px;
+            bottom: 55px;
+            width: 115px;
+            height: 140px;
+            border-radius: 60% 0 60% 60%;
+            background: #d6d6d2;
+            transform-origin: right center;
+        }
+
+        .goose-scene.active .goose-wing {
+            animation: angryWing .45s 2.2s 4 alternate;
+        }
+
+        @keyframes angryWing {
+            to {
+                transform: rotate(-40deg);
+            }
+        }
+
+        .goose-scene.active .goose-neck {
+            animation: gooseAttack 1s 2.1s ease-in-out;
+        }
+
+        @keyframes gooseAttack {
+            40% {
+                transform: rotate(-28deg) translate(18px,-10px);
+            }
+
+            70% {
+                transform: rotate(10deg) translate(-7px,5px);
+            }
+
+            100% {
+                transform: rotate(-8deg);
+            }
+        }
+
+        .question-bubble,
+        .honk-bubble,
+        .confession-bubble {
+            position: absolute;
+            z-index: 60;
+            padding: 17px 22px;
+            border: 5px solid #111;
+            background: white;
+            color: #111;
+            font-weight: 900;
+            box-shadow: 7px 7px #111;
+            opacity: 0;
+            transform: scale(.5);
+        }
+
+        .question-bubble {
+            left: 8%;
+            top: 11%;
+            max-width: 430px;
+        }
+
+        .honk-bubble {
+            right: 8%;
+            top: 25%;
+            background: #fff1a3;
+            font-size: clamp(2rem, 7vw, 6rem);
+        }
+
+        .confession-bubble {
+            left: 50%;
+            bottom: 6%;
+            transform: translateX(-50%) scale(.5);
+            font-size: clamp(1.1rem, 3vw, 2rem);
+        }
+
+        .goose-scene.active .question-bubble {
+            animation: bubblePop .35s .6s forwards;
+        }
+
+        .goose-scene.active .honk-bubble {
+            animation: bubblePop .35s 2.1s forwards;
+        }
+
+        .goose-scene.active .confession-bubble {
+            animation: confessionPop .35s 3.4s forwards;
+        }
+
+        @keyframes bubblePop {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes confessionPop {
+            to {
+                opacity: 1;
+                transform: translateX(-50%) scale(1);
+            }
+        }
+
+        /* =========================================================
+           FAKE QUOTES
+           ========================================================= */
+
+        .quotes-scene {
+            min-height: 160vh;
+            background:
+                radial-gradient(
+                    circle,
+                    #26191b,
+                    #060607 72%
+                );
+        }
+
+        .quotes-heading {
+            text-align: center;
+            margin-bottom: 70px;
+            color: #9f8e8e;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+            font-size: .75rem;
+        }
+
+        .quote-stack {
+            display: grid;
+            gap: 40px;
+        }
+
+        .review-quote {
+            padding: 35px 45px;
+            border: 3px solid #5e4d50;
+            background: rgba(255,255,255,.045);
+            text-align: center;
+            transform: translateX(var(--offset)) rotate(var(--r));
+            opacity: 0;
+        }
+
+        .quotes-scene.active .review-quote {
+            animation: quoteIn .8s forwards;
+        }
+
+        .review-quote.q1 {
+            --offset: -100px;
+            --r: -1deg;
+            animation-delay: .2s !important;
+        }
+
+        .review-quote.q2 {
+            --offset: 100px;
+            --r: 1.5deg;
+            animation-delay: .8s !important;
+        }
+
+        .review-quote.q3 {
+            --offset: -100px;
+            --r: -.5deg;
+            animation-delay: 1.4s !important;
+        }
+
+        @keyframes quoteIn {
+            to {
+                opacity: 1;
+                transform: translateX(0) rotate(var(--r));
+            }
+        }
+
+        .review-stars {
+            color: var(--gold);
+            letter-spacing: .12em;
+            font-size: 1.2rem;
+        }
+
+        .review-text {
+            margin-top: 18px;
+            font-family: Georgia, serif;
+            font-size: clamp(1.5rem, 4vw, 3.2rem);
+            line-height: 1.15;
+        }
+
+        .review-source {
+            margin-top: 18px;
+            color: #8d8587;
+            text-transform: uppercase;
+            letter-spacing: .15em;
+            font-size: .72rem;
+        }
+
+        /* =========================================================
+           SENTIMENTAL ENDING
+           ========================================================= */
+
+        .sentimental {
+            min-height: 145vh;
+            background:
+                linear-gradient(
+                    to bottom,
+                    #d7c79f,
+                    #936f56 46%,
+                    #34282a
+                );
+        }
+
+        .sunset {
+            position: absolute;
+            left: 50%;
+            top: 18%;
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            background: #f9d989;
+            transform: translateX(-50%);
+            box-shadow: 0 0 80px #f4bc68;
+        }
+
+        .sentimental-hills {
+            position: absolute;
+            left: -10%;
+            right: -10%;
+            bottom: 0;
+            height: 50%;
+            background: #302b2d;
+            clip-path: polygon(
+                0 50%,
+                20% 20%,
+                36% 45%,
+                52% 10%,
+                72% 50%,
+                84% 30%,
+                100% 55%,
+                100% 100%,
+                0 100%
+            );
+        }
+
+        .music-note {
+            position: absolute;
+            color: rgba(255,255,255,.42);
+            font-family: Georgia, serif;
+            font-size: 3rem;
+            animation: noteFloat 7s linear infinite;
+        }
+
+        .music-note.n1 {
+            left: 15%;
+            bottom: -50px;
+        }
+
+        .music-note.n2 {
+            left: 48%;
+            bottom: -120px;
+            animation-delay: 1.8s;
+        }
+
+        .music-note.n3 {
+            right: 15%;
+            bottom: -80px;
+            animation-delay: 3.4s;
+        }
+
+        @keyframes noteFloat {
+            from {
+                transform: translateY(0) rotate(0);
+                opacity: 0;
+            }
+
+            20% {
+                opacity: .5;
+            }
+
+            to {
+                transform: translateY(-900px) rotate(40deg);
+                opacity: 0;
+            }
+        }
+
+        .coming-soon {
+            position: relative;
+            z-index: 30;
+            text-align: center;
+            margin-top: -25vh;
+        }
+
+        .coming-soon .soft {
+            font-family: Georgia, serif;
+            font-size: clamp(1.6rem, 4vw, 3.2rem);
+            font-style: italic;
+        }
+
+        .coming-soon .soon {
+            margin-top: 25px;
+            font-family: Georgia, serif;
+            font-size: clamp(3rem, 9vw, 8rem);
+            text-transform: uppercase;
+            letter-spacing: -.05em;
+        }
+
+        /* =========================================================
+           FINAL TITLE
+           ========================================================= */
+
+        .final-title {
+            min-height: 135vh;
+            display: grid;
+            place-items: center;
+            background: #050506;
+            text-align: center;
+            padding: 70px 20px;
+        }
+
+        .final-title-inner {
+            width: min(1100px,100%);
+        }
+
+        .final-title h2 {
+            margin: 0;
+            font-family: Georgia, serif;
+            font-size: clamp(4rem, 14vw, 12rem);
+            line-height: .78;
+            letter-spacing: -.08em;
+            text-transform: uppercase;
+        }
+
+        .final-title .separator {
+            width: 130px;
+            height: 2px;
+            margin: 55px auto;
+            background: #70555a;
+        }
+
+        .final-title .trailer-name {
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: .22em;
+            font-size: .8rem;
+        }
+
+        .final-title .sub {
+            margin-top: 25px;
+            color: #aaa;
+            font-family: Georgia, serif;
+            font-size: clamp(1.1rem, 2.6vw, 2rem);
+            line-height: 1.5;
+        }
+
+        /* =========================================================
+           POST-CREDIT
+           ========================================================= */
+
+        .post-credit {
+            min-height: 85vh;
+            display: grid;
+            place-items: center;
+            background: #eee9de;
+            color: #161619;
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .runtime-card {
+            width: min(850px, 95vw);
+            padding: 50px;
+            border: 6px solid #161619;
+        }
+
+        .runtime-card .label {
+            text-transform: uppercase;
+            letter-spacing: .18em;
+            font-size: .72rem;
+            color: #777;
+        }
+
+        .runtime-row {
+            margin-top: 32px;
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+            border-bottom: 2px solid #bbb;
+            padding-bottom: 18px;
+            font-weight: 900;
+            font-size: clamp(1.2rem,3vw,2rem);
+        }
+
+        .runtime-row:last-child {
+            border-bottom: 0;
+        }
+
+        footer {
+            padding: 65px 20px;
+            background: #050506;
+            color: #777;
+            text-align: center;
+        }
+
+        footer strong {
+            color: white;
+        }
+
+        /* =========================================================
+           RESPONSIVE
+           ========================================================= */
+
+        @media (max-width: 850px) {
+            .suspect-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .suspect {
+                min-height: 540px;
+            }
+
+            .clue-detective {
+                opacity: .45;
+            }
+
+            .interrogation-detective {
+                left: 1%;
+                transform: scale(.75);
+                transform-origin: bottom;
+            }
+
+            .goose {
+                right: 2%;
+                transform: scale(.8);
+                transform-origin: bottom;
+            }
+
+            .question-bubble {
+                left: 3%;
+                max-width: 65%;
+            }
+
+            .honk-bubble {
+                right: 3%;
+            }
+
+            .review-quote {
+                padding: 28px 20px;
+            }
+
+            .confrontation-person.det {
+                left: 2%;
+                transform: scale(.75);
+                transform-origin: bottom;
+            }
+
+            .confrontation-person.kill {
+                right: 2%;
+                transform: scale(.75);
+                transform-origin: bottom;
+            }
+
+            .twin.one {
+                left: -1%;
+                transform: scale(.8);
+                transform-origin: bottom;
+            }
+
+            .twin.two {
+                right: -1%;
+                transform: scaleX(-1) scale(.8);
+                transform-origin: bottom;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: .001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .001ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div
+        class="progress"
+        id="progress">
+    </div>
+
+    <div
+        class="cut-flash"
+        id="cutFlash">
+    </div>
+
+    <site-navbar
+        cart-href="https://unlim8ted.com/sign-in/cart"
+        signin-href="https://unlim8ted.com/sign-in"
+        profile-href="https://unlim8ted.com/profile">
+    </site-navbar>
+
+    <!-- =========================================================
+         DISCLAIMER
+         ========================================================= -->
+
+    <section class="disclaimer">
+        <div class="reveal">
+            This is not a real movie trailer.
+            <br><br>
+            Unfortunately.
+        </div>
+    </section>
+
+    <!-- =========================================================
+         OPEN
+         ========================================================= -->
+
+    <section class="scene opening-black">
+
+        <div class="opening-line">
+
+            <div class="first reveal">
+                In a quiet town...
+            </div>
+
+            <div class="second reveal">
+                where nothing ever happens...
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- =========================================================
+         MANSION
+         ========================================================= -->
+
+    <section class="scene mansion-scene animated-scene">
+
+        <div class="storm-sky"></div>
+
+        <div class="cloud c1"></div>
+        <div class="cloud c2"></div>
+        <div class="cloud c3"></div>
+
+        <div class="lightning"></div>
+
+        <div class="mansion">
+
+            <div class="mansion-window"></div>
+            <div class="mansion-window"></div>
+            <div class="mansion-window"></div>
+            <div class="mansion-window"></div>
+            <div class="mansion-window"></div>
+            <div class="mansion-window"></div>
+
+            <div class="mansion-door"></div>
+
+        </div>
+
+        <div class="body-drop">
+
+            <div class="body-head"></div>
+            <div class="body-torso"></div>
+            <div class="body-leg l"></div>
+            <div class="body-leg r"></div>
+
+        </div>
+
+        <div class="gasps">
+            *GASP*
+        </div>
+
+        <div
+            class="trailer-voice reveal"
+            style="margin-top:-58vh;">
+            ...something finally did.
+        </div>
+
+    </section>
+
+    <!-- =========================================================
+         DETECTIVE
+         ========================================================= -->
+
+    <section class="scene detective-scene animated-scene">
+
+        <div class="detective-shot">
+
+            <div class="detective">
+
+                <div class="detective-body"></div>
+                <div class="detective-shirt"></div>
+                <div class="detective-tie"></div>
+
+                <div class="detective-head"></div>
+                <div class="detective-hair"></div>
+                <div class="detective-mouth"></div>
+
+                <div class="glasses">
+
+                    <div class="lens l"></div>
+                    <div class="lens r"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="detective-line reveal">
+            “This wasn't just murder...
+            <br>
+            this was <strong>intentional murder.</strong>”
+        </div>
+
+    </section>
+
+    <!-- =========================================================
+         TITLE
+         ========================================================= -->
+
+    <section class="scene title-slam animated-scene">
+
+        <div class="title-card">
+
+            <p>
+                This fall
+            </p>
+
+            <h1>
+                The Last
+                <br>
+                Guest
+            </h1>
+
+        </div>
+
+    </section>
+
+    <!-- =========================================================
+         SUSPECTS
+         ========================================================= -->
+
+    <section class="scene suspects animated-scene">
+
+        <div class="scene-inner">
+
+            <div class="suspects-title reveal">
+                Meet the suspects.
+            </div>
+
+            <div class="suspect-grid">
+
+                <article class="suspect butler">
+
+                    <div class="suspect-person">
+                        <div class="suspect-head"></div>
+                        <div class="suspect-body"></div>
+                    </div>
+
+                    <div class="suspect-name">
+                        The Butler
+                    </div>
+
+                    <div class="suspect-subtitle">
+                        Mysterious for contractual reasons
+                    </div>
+
+                    <div class="suspect-quote">
+                        “I know where the bodies are buried.”
+                    </div>
+
+                </article>
+
+                <article class="suspect heiress">
+
+                    <div class="suspect-person">
+                        <div class="suspect-head"></div>
+                        <div class="suspect-body"></div>
+                    </div>
+
+                    <div class="suspect-name">
+                        The Heiress
+                    </div>
+
+                    <div class="suspect-subtitle">
+                        Extremely trustworthy
+                    </div>
+
+                    <div class="suspect-quote">
+                        “I would never kill him.
+                        Unless I had to.”
+                    </div>
+
+                </article>
+
+                <article class="suspect plumber">
+
+                    <div class="suspect-person">
+                        <div class="plumber-hat"></div>
+                        <div class="suspect-head"></div>
+                        <div class="suspect-body"></div>
+                    </div>
+
+                    <div class="suspect-name">
+                        The Plumber
+                    </div>
+
+                    <div class="suspect-subtitle">
+                        Only appears in Act 2
+                    </div>
+
+                    <div class="suspect-quote">
+                        “I fix pipes...
+                        and I break hearts.”
+                    </div>
+
+                </article>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- =========================================================
+         HIDDEN DOOR
+         ========================================================= -->
+
+    <section class="scene clue-scene animated-scene">
+
+        <div class="library-wall"></div>
+
+        <div class="secret-door"></div>
+
+        <div class="bookshelf">
+
+            <div class="shelf s1"></div>
+            <div class="shelf s2"></div>
+            <div class="shelf s3"></div>
+
+            <div class="books b1"></div>
+            <div class="books b2"></div>
+            <div class="books b3"></div>
+            <div class="books b4"></div>
+
+        </div>
+
+        <div class="clue-detective">
+            <div class="clue-head"></div>
+            <div class="clue-body"></div>
+        </div>
+
+        <div class="clue-copy">
+
+            <div class="main reveal">
+                Uncover the clues...
+            </div>
+
+            <div class="spoiler reveal">
+                before we reveal all of them
+                right here in the trailer.
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- =========================================================
+         SPOILER MONTAGE
+         ========================================================= -->
+
+    <section
+        class="spoiler-scroll"
+        id="spoilerScroll">
+
+        <div class="spoiler-sticky">
+
+            <!-- TWIN -->
+
+            <div
+                class="spoiler-frame twin-frame"
+                data-spoiler-frame="0">
+
+                <div class="spoiler-label">
+                    Major spoiler
+                    <span class="spoiler-number">
+                        01
+                    </span>
+                </div>
+
+                <div class="twin-stage">
+
+                    <div class="twin one">
+                        <div class="twin-head"></div>
+                        <div class="twin-body"></div>
+                    </div>
+
+                    <div class="twin two">
+                        <div class="twin-head"></div>
+                        <div class="twin-body"></div>
+                    </div>
+
+                    <div class="twin-question">
+                        TWIN?!
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- CONFESSION -->
+
+            <div
+                class="spoiler-frame confession-frame"
+                data-spoiler-frame="1">
+
+                <div class="spoiler-label">
+                    Major spoiler
+                    <span class="spoiler-number">
+                        02
+                    </span>
+                </div>
+
+                <div class="confession-box">
+
+                    <div class="small">
+                        Surprise confession
+                    </div>
+
+                    <div class="quote">
+                        “Fine!
+                        <br><br>
+                        I was there the entire time.”
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- KILLER -->
+
+            <div
+                class="spoiler-frame killer-frame"
+                data-spoiler-frame="2">
+
+                <div class="spoiler-label">
+                    Literally the mystery
+                    <span class="spoiler-number">
+                        03
+                    </span>
+                </div>
+
+                <div class="killer-reveal">
+
+                    <div class="killer-person">
+                        <div class="killer-head"></div>
+                        <div class="killer-body"></div>
+                        <div class="killer-knife"></div>
+                    </div>
+
+                    <div class="killer-caption">
+                        THE BUTLER DID IT.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ENDING -->
+
+            <div
+                class="spoiler-frame ending-spoiler-frame"
+                data-spoiler-frame="3">
+
+                <div class="spoiler-label">
+                    Also the ending
+                    <span class="spoiler-number">
+                        04
+                    </span>
+                </div>
+
+                <div class="confrontation">
+
+                    <div class="confrontation-person det">
+                        <div class="confrontation-head"></div>
+                        <div class="confrontation-body"></div>
+                    </div>
+
+                    <div class="confrontation-person kill">
+                        <div class="confrontation-head"></div>
+                        <div class="confrontation-body"></div>
+                    </div>
+
+                    <div class="spoiler-vs">
+                        VS
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div
+                class="rushed-voice"
+                id="rushedVoice">
+                Yes, that was the twist.
+                And yep, here's the ending too.
+            </div>
+
+            <div class="spoiler-progress">
+                <div id="spoilerProgress"></div>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- =========================================================
+         EXPLOSION
+         ========================================================= -->
+
+    <section class="scene explosion-scene animated-scene">
+
+        <div class="explosion-mansion"></div>
+
+        <div class="explosion-core"></div>
+
+        <div class="explosion-bit b1"></div>
+        <div class="explosion-bit b2"></div>
+        <div class="explosion-bit b3"></div>
+        <div class="explosion-bit b4"></div>
+
+        <div class="why-explosion">
+            WHY IS THERE AN EXPLOSION?
+        </div>
+
+    </section>
+
+    <!-- =========================================================
+         GOOSE
+         ========================================================= -->
+
+    <section class="scene goose-scene animated-scene">
+
+        <div class="interrogation-room"></div>
+
+        <div class="hanging-light"></div>
+
+        <div class="interrogation-table"></div>
+
+        <div class="interrogation-detective">
+            <div class="head"></div>
+            <div class="body"></div>
+        </div>
+
+        <div class="goose">
+
+            <div class="goose-body"></div>
+            <div class="goose-wing"></div>
+            <div class="goose-neck"></div>
+
+            <div class="goose-head">
+                <div class="goose-eye"></div>
+                <div class="goose-beak"></div>
+            </div>
+
+        </div>
+
+        <div class="question-bubble">
+            Where were you the night of the 14th?
+        </div>
+
+        <div class="honk-bubble">
+            HONK.
+        </div>
+
+        <div class="confession-bubble">
+            “I'll take that as a confession.”
+        </div>
+
+    </section>
+
+    <!-- =========================================================
+         FAKE CRITIC QUOTES
+         ========================================================= -->
+
+    <section class="scene quotes-scene animated-scene">
+
+        <div class="scene-inner">
+
+            <div class="quotes-heading">
+                Critics are technically saying things
+            </div>
+
+            <div class="quote-stack">
+
+                <div class="review-quote q1">
+
+                    <div class="review-stars">
+                        ★★★★★
+                    </div>
+
+                    <div class="review-text">
+                        “This trailer showed the whole movie
+                        and I still wanna see it.”
+                    </div>
+
+                    <div class="review-source">
+                        Literally No One
+                    </div>
+
+                </div>
+
+                <div class="review-quote q2">
+
+                    <div class="review-stars">
+                        ★★★★★
+                    </div>
+
+                    <div class="review-text">
+                        “I laughed, I cried,
+                        I rewound to make sure
+                        I saw every spoiler.”
+                    </div>
+
+                    <div class="review-source">
+                        My Cousin Greg
+                    </div>
+
+                </div>
+
+                <div class="review-quote q3">
+
+                    <div class="review-stars">
+                        ★★★★★
+                    </div>
+
+                    <div class="review-text">
+                        “Oscar-worthy...
+                        for Best Use of Goose.”
+                    </div>
+
+                    <div class="review-source">
+                        The Internet Probably
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- =========================================================
+         OVERLY SENTIMENTAL ENDING
+         ========================================================= -->
+
+    <section class="scene sentimental">
+
+        <div class="sunset"></div>
+        <div class="sentimental-hills"></div>
+
+        <div class="music-note n1">
+            ♪
+        </div>
+
+        <div class="music-note n2">
+            ♫
+        </div>
+
+        <div class="music-note n3">
+            ♪
+        </div>
+
+        <div class="coming-soon reveal">
+
+            <div class="soft">
+                Coming to theaters...
+            </div>
+
+            <div class="soon">
+                Soon.
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- =========================================================
+         FINAL TITLE
+         ========================================================= -->
+
+    <section class="final-title">
+
+        <div class="final-title-inner reveal">
+
+            <div class="eyebrow">
+                You already know how it ends
+            </div>
+
+            <h2>
+                The Last
+                <br>
+                Guest
+            </h2>
+
+            <div class="separator"></div>
+
+            <div class="trailer-name">
+                Trailers Be Like
+            </div>
+
+            <div class="sub">
+                A parody of modern movie trailers that reveals every twist,
+                spoils the ending, and includes an inexplicable goose interrogation.
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- =========================================================
+         POST CREDIT
+         ========================================================= -->
+
+    <section class="post-credit">
+
+        <div class="runtime-card reveal">
+
+            <div class="label">
+                Runtime comparison
+            </div>
+
+            <div class="runtime-row">
+                <span>
+                    The Movie
+                </span>
+
+                <span>
+                    1h 52m
+                </span>
+            </div>
+
+            <div class="runtime-row">
+                <span>
+                    The Trailer
+                </span>
+
+                <span>
+                    1h 49m
+                </span>
+            </div>
+
+            <div
+                style="
+                    margin-top:35px;
+                    font-family:Georgia,serif;
+                    font-size:1.25rem;
+                    color:#555;
+                ">
+                Three minutes of original material.
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- =========================================================
+         FOOTER
+         ========================================================= -->
+
+    <footer>
+        <strong>
+            Unlim8ted Studio Productions
+        </strong>
+
+        <br><br>
+
+        <span id="copyright"></span>
+    </footer>
+
+    <script>
+        (() => {
+            "use strict";
+
+            const progress =
+                document.getElementById("progress");
+
+            const cutFlash =
+                document.getElementById("cutFlash");
+
+            const spoilerScroll =
+                document.getElementById("spoilerScroll");
+
+            const spoilerFrames =
+                Array.from(
+                    document.querySelectorAll(
+                        "[data-spoiler-frame]"
+                    )
+                );
+
+            const spoilerProgress =
+                document.getElementById("spoilerProgress");
+
+            const rushedVoice =
+                document.getElementById("rushedVoice");
+
+            /*
+             * Basic reveal observer.
+             */
+            const revealObserver =
+                new IntersectionObserver(
+                    entries => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add(
+                                    "visible"
+                                );
+                            }
+                        });
+                    },
+                    {
+                        threshold: .16,
+                        rootMargin: "0px 0px -6% 0px"
+                    }
+                );
+
+            document
+                .querySelectorAll(".reveal")
+                .forEach(element => {
+                    revealObserver.observe(element);
+                });
+
+            /*
+             * Complex animated scenes start only once they enter
+             * the viewport, so character actions are visible rather
+             * than finishing before the user reaches them.
+             */
+            const animatedObserver =
+                new IntersectionObserver(
+                    entries => {
+                        entries.forEach(entry => {
+                            if (
+                                entry.isIntersecting &&
+                                !entry.target.classList.contains(
+                                    "active"
+                                )
+                            ) {
+                                entry.target.classList.add(
+                                    "active"
+                                );
+
+                                flashCut();
+                            }
+                        });
+                    },
+                    {
+                        threshold: .28
+                    }
+                );
+
+            document
+                .querySelectorAll(".animated-scene")
+                .forEach(element => {
+                    animatedObserver.observe(element);
+                });
+
+            /*
+             * Flash cuts emulate obnoxiously aggressive trailer
+             * editing.
+             */
+            function flashCut() {
+                if (
+                    window.matchMedia(
+                        "(prefers-reduced-motion: reduce)"
+                    ).matches
+                ) {
+                    return;
+                }
+
+                cutFlash.classList.remove("fire");
+
+                void cutFlash.offsetWidth;
+
+                cutFlash.classList.add("fire");
+            }
+
+            /*
+             * Global reading progress.
+             */
+            function updateProgress() {
+                const available =
+                    document.documentElement.scrollHeight -
+                    window.innerHeight;
+
+                const ratio =
+                    available > 0
+                        ? window.scrollY / available
+                        : 0;
+
+                progress.style.width =
+                    `${Math.max(0, Math.min(1, ratio)) * 100}%`;
+            }
+
+            /*
+             * The spoiler montage is intentionally scroll-controlled.
+             * Each quarter of the scroll reveals a different plot
+             * twist.
+             */
+            let previousSpoilerFrame = -1;
+
+            function updateSpoilerMontage() {
+                const rect =
+                    spoilerScroll.getBoundingClientRect();
+
+                const travel =
+                    spoilerScroll.offsetHeight -
+                    window.innerHeight;
+
+                if (travel <= 0) {
+                    return;
+                }
+
+                const travelled =
+                    Math.max(
+                        0,
+                        Math.min(
+                            travel,
+                            -rect.top
+                        )
+                    );
+
+                const p =
+                    travelled / travel;
+
+                spoilerProgress.style.width =
+                    `${p * 100}%`;
+
+                let frameIndex =
+                    Math.floor(
+                        p * spoilerFrames.length
+                    );
+
+                frameIndex =
+                    Math.max(
+                        0,
+                        Math.min(
+                            spoilerFrames.length - 1,
+                            frameIndex
+                        )
+                    );
+
+                spoilerFrames.forEach(
+                    (frame, index) => {
+                        frame.classList.toggle(
+                            "active-frame",
+                            index === frameIndex
+                        );
+                    }
+                );
+
+                if (
+                    frameIndex !== previousSpoilerFrame &&
+                    rect.top <= 0 &&
+                    rect.bottom >= window.innerHeight
+                ) {
+                    previousSpoilerFrame =
+                        frameIndex;
+
+                    flashCut();
+                }
+
+                /*
+                 * The voiceover gets visibly more rushed as the
+                 * montage gets more ridiculous.
+                 */
+                const rush =
+                    Math.max(
+                        0,
+                        (p - .38) / .62
+                    );
+
+                rushedVoice.style.transform =
+                    `translateX(-50%) scale(${1 + rush * .16})`;
+
+                rushedVoice.style.letterSpacing =
+                    `${rush * -.02}em`;
+
+                rushedVoice.style.background =
+                    `rgba(${Math.round(0 + rush * 100)},0,0,.85)`;
+            }
+
+            let ticking = false;
+
+            function render() {
+                ticking = false;
+
+                updateProgress();
+                updateSpoilerMontage();
+            }
+
+            function requestRender() {
+                if (ticking) {
+                    return;
+                }
+
+                ticking = true;
+
+                requestAnimationFrame(render);
+            }
+
+            window.addEventListener(
+                "scroll",
+                requestRender,
+                {
+                    passive: true
+                }
+            );
+
+            window.addEventListener(
+                "resize",
+                requestRender,
+                {
+                    passive: true
+                }
+            );
+
+            /*
+             * Automatic copyright.
+             */
+            const currentYear =
+                new Date().getFullYear();
+
+            document
+                .getElementById("copyright")
+                .textContent =
+                    `© 2019-${currentYear} Unlim8ted Studio Productions. All rights reserved.`;
+
+            /*
+             * Start montage in a valid state.
+             */
+            if (spoilerFrames.length) {
+                spoilerFrames[0].classList.add(
+                    "active-frame"
+                );
+            }
+
+            render();
+        })();
+    </script>
+
+</body>
+</html>

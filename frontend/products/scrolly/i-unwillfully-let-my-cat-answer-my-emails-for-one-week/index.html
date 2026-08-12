@@ -1,0 +1,3950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>I (Unwillfully) Let My Cat Answer My Emails for ~1 Week — Unlim8ted</title>
+
+    <meta
+        name="description"
+        content="A comedy scrolly about letting a cat manage an email inbox and discovering it may be better at corporate communication than its owner."
+    >
+
+    <script type="module" src="https://unlim8ted.com/components/site-navbar.js"></script>
+
+    <script type="module">
+        import { getFirebase } from "/components/firebase-init.js";
+        const { auth, db } = getFirebase();
+    </script>
+
+    <style>
+        :root {
+            --ink: #171719;
+            --paper: #f5f0e5;
+            --blue: #456be6;
+            --blue-light: #dfe7ff;
+            --yellow: #ffe36c;
+            --red: #e4574f;
+            --cat: #aaa59d;
+            --cat-light: #c8c3ba;
+            --cat-dark: #77736d;
+            --desk: #a6744c;
+            --skin: #d7a47f;
+            --screen: #f8faff;
+            --nav-height: 52px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            margin: 0;
+            scroll-behavior: smooth;
+            background: var(--paper);
+        }
+
+        body {
+            margin: 0;
+            overflow-x: hidden;
+            background: var(--paper);
+            color: var(--ink);
+            font-family:
+                Inter,
+                ui-sans-serif,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+        }
+
+        svg {
+            display: block;
+        }
+
+        button {
+            font: inherit;
+        }
+
+        .scene {
+            position: relative;
+        }
+
+        .sticky {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            height: 100svh;
+            overflow: hidden;
+        }
+
+        .progress {
+            position: fixed;
+            z-index: 9999;
+            top: var(--nav-height);
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(0,0,0,.08);
+            pointer-events: none;
+        }
+
+        #progressFill {
+            width: 0;
+            height: 100%;
+            background: var(--blue);
+        }
+
+        .chapter-tag {
+            position: absolute;
+            z-index: 500;
+            top: 9%;
+            left: 5%;
+            padding: 9px 14px;
+            border: 4px solid var(--ink);
+            background: var(--yellow);
+            box-shadow: 5px 5px 0 var(--ink);
+            font-size: clamp(.68rem, 1.3vw, .95rem);
+            font-weight: 1000;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            transform: rotate(-2deg);
+        }
+
+        /* =====================================================
+           INTRO
+           ===================================================== */
+
+        #intro {
+            height: 300svh;
+        }
+
+        .intro-bg {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 80% 18%, rgba(255,227,108,.9), transparent 27%),
+                linear-gradient(135deg, #f6e8cd, #dce8ef);
+        }
+
+        .intro-grid {
+            position: absolute;
+            inset: 0;
+            opacity: .065;
+            background-image:
+                linear-gradient(var(--ink) 2px, transparent 2px),
+                linear-gradient(90deg, var(--ink) 2px, transparent 2px);
+            background-size: 70px 70px;
+        }
+
+        .intro-title {
+            position: absolute;
+            z-index: 20;
+            left: 5%;
+            top: 17%;
+            width: min(1050px, 91vw);
+            font-size: clamp(3.6rem, 10vw, 10rem);
+            font-weight: 1000;
+            line-height: .78;
+            letter-spacing: -.08em;
+            text-transform: uppercase;
+        }
+
+        .intro-title span {
+            display: inline-block;
+            color: var(--blue);
+            transform: rotate(-4deg);
+        }
+
+        .intro-copy {
+            position: absolute;
+            z-index: 21;
+            left: 6%;
+            top: 67%;
+            width: min(510px, 72vw);
+            font-size: clamp(1rem, 2vw, 1.4rem);
+            font-weight: 750;
+            line-height: 1.4;
+        }
+
+        .intro-cat {
+            position: absolute;
+            z-index: 15;
+            right: -2%;
+            bottom: -5%;
+            width: min(500px, 47vw);
+            filter: drop-shadow(15px 18px 0 rgba(0,0,0,.11));
+        }
+
+        .scroll-hint {
+            position: absolute;
+            z-index: 40;
+            right: 5%;
+            bottom: 6%;
+            font-size: .78rem;
+            font-weight: 1000;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .scroll-hint svg {
+            width: 25px;
+            margin: 9px auto 0;
+            animation: bounce 1.2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(9px);
+            }
+        }
+
+        /* =====================================================
+           SHARED OFFICE
+           ===================================================== */
+
+        .office {
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(
+                    to bottom,
+                    #dce6eb 0 66%,
+                    #b98255 66% 100%
+                );
+        }
+
+        .office.green {
+            background:
+                linear-gradient(
+                    to bottom,
+                    #dce8df 0 66%,
+                    #b98255 66% 100%
+                );
+        }
+
+        .wall-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 66%;
+            height: 7px;
+            background: var(--ink);
+        }
+
+        .poster {
+            position: absolute;
+            right: 5%;
+            top: 12%;
+            width: 180px;
+            padding: 18px;
+            border: 5px solid var(--ink);
+            background: #fff;
+            box-shadow: 7px 7px 0 rgba(0,0,0,.12);
+            text-align: center;
+            font-size: .8rem;
+            font-weight: 1000;
+            transform: rotate(2deg);
+        }
+
+        .poster strong {
+            display: block;
+            margin-top: 5px;
+            color: var(--blue);
+            font-size: 1.45rem;
+        }
+
+        /* =====================================================
+           EMAIL UI
+           ===================================================== */
+
+        .mail-ui {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            background: #fff;
+            color: #202124;
+            font-family: Arial, sans-serif;
+        }
+
+        .mail-topbar {
+            height: 54px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 16px;
+            border-bottom: 2px solid #ddd;
+            background: #edf2ff;
+        }
+
+        .mail-logo {
+            font-size: 1rem;
+            font-weight: 900;
+        }
+
+        .mail-search {
+            width: 42%;
+            margin-left: auto;
+            padding: 8px 13px;
+            border-radius: 99px;
+            background: #fff;
+            color: #888;
+            font-size: .72rem;
+            font-weight: 700;
+        }
+
+        .mail-body {
+            display: grid;
+            grid-template-columns: 145px 1fr;
+            height: calc(100% - 54px);
+        }
+
+        .mail-sidebar {
+            padding: 16px 10px;
+            border-right: 2px solid #ddd;
+            background: #f6f4ef;
+        }
+
+        .compose {
+            padding: 10px 13px;
+            margin-bottom: 15px;
+            border: 3px solid var(--ink);
+            border-radius: 8px;
+            background: var(--blue);
+            color: #fff;
+            box-shadow: 3px 3px 0 var(--ink);
+            font-size: .72rem;
+            font-weight: 900;
+        }
+
+        .mail-nav {
+            padding: 7px;
+            margin: 3px 0;
+            border-radius: 6px;
+            font-size: .7rem;
+            font-weight: 800;
+        }
+
+        .mail-nav.active {
+            background: var(--blue-light);
+        }
+
+        .email-pane {
+            position: relative;
+            overflow: hidden;
+            padding: 23px 28px;
+        }
+
+        .email-subject {
+            margin: 0 0 15px;
+            font-size: clamp(1rem, 2vw, 1.7rem);
+            font-weight: 900;
+        }
+
+        .email-meta {
+            padding-bottom: 12px;
+            border-bottom: 1px solid #ddd;
+            color: #777;
+            font-size: .67rem;
+            line-height: 1.5;
+        }
+
+        .email-copy {
+            padding-top: 20px;
+            font-family: Georgia, serif;
+            font-size: clamp(.78rem, 1.5vw, 1.12rem);
+            line-height: 1.55;
+        }
+
+        .typed-line {
+            min-height: 1.7em;
+            margin-top: 12px;
+            padding: 9px 12px;
+            border: 3px solid var(--ink);
+            background: #fff8c7;
+            font-family: monospace;
+            font-size: clamp(.8rem, 1.7vw, 1.35rem);
+            font-weight: 900;
+            overflow-wrap: anywhere;
+        }
+
+        .caret {
+            display: inline-block;
+            width: 3px;
+            height: 1.1em;
+            margin-left: 2px;
+            background: var(--ink);
+            vertical-align: -.15em;
+            animation: blink .7s steps(1) infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* =====================================================
+           DAY 1 — OVER THE SHOULDER
+           ===================================================== */
+
+        #day1 {
+            height: 650svh;
+        }
+
+        .ots-stage {
+            position: absolute;
+            inset: 0;
+            perspective: 1200px;
+        }
+
+        .monitor {
+            position: absolute;
+            z-index: 15;
+            left: 50%;
+            top: 42%;
+            width: min(900px, 73vw);
+            height: min(560px, 62vh);
+            overflow: hidden;
+            border: 10px solid var(--ink);
+            border-radius: 18px;
+            background: #30343a;
+            box-shadow: 18px 20px 0 rgba(0,0,0,.14);
+            transform: translate(-50%, -50%);
+        }
+
+        .monitor-screen {
+            position: absolute;
+            inset: 10px;
+            overflow: hidden;
+            border-radius: 6px;
+            background: var(--screen);
+        }
+
+        .monitor-stand {
+            position: absolute;
+            z-index: 10;
+            left: 50%;
+            top: 70%;
+            width: 100px;
+            height: 100px;
+            border: 8px solid var(--ink);
+            background: #555b63;
+            transform: translateX(-50%);
+        }
+
+        .monitor-base {
+            position: absolute;
+            z-index: 11;
+            left: 50%;
+            top: calc(70% + 88px);
+            width: 270px;
+            height: 32px;
+            border: 8px solid var(--ink);
+            border-radius: 6px;
+            background: #6d737b;
+            transform: translateX(-50%);
+        }
+
+        .desk-front {
+            position: absolute;
+            z-index: 25;
+            left: -5%;
+            right: -5%;
+            bottom: -3%;
+            height: 27%;
+            border-top: 9px solid var(--ink);
+            background: var(--desk);
+        }
+
+        .keyboard {
+            position: absolute;
+            z-index: 40;
+            left: 50%;
+            bottom: 7%;
+            width: min(610px, 61vw);
+            height: 125px;
+            border: 8px solid var(--ink);
+            border-radius: 15px;
+            background: #d7d9dd;
+            transform:
+                translateX(-50%)
+                perspective(700px)
+                rotateX(52deg);
+            transform-origin: center bottom;
+        }
+
+        .keyboard-keys {
+            position: absolute;
+            inset: 13px;
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 5px;
+        }
+
+        .keyboard-key {
+            border: 3px solid var(--ink);
+            border-radius: 4px;
+            background: #fff;
+        }
+
+        .keyboard-key.space {
+            grid-column: 4 / span 5;
+        }
+
+        .cat-foreground {
+            position: absolute;
+            z-index: 60;
+            left: 50%;
+            bottom: -17%;
+            width: min(650px, 60vw);
+            transform: translateX(-50%);
+            pointer-events: none;
+            filter: drop-shadow(12px 14px 0 rgba(0,0,0,.12));
+        }
+
+        .email-reply {
+            margin-top: 18px;
+            padding: 12px 14px;
+            border: 3px solid var(--ink);
+            background: #f3f3f3;
+            box-shadow: 4px 4px 0 rgba(0,0,0,.13);
+            font-family: Arial, sans-serif;
+            font-size: clamp(.75rem, 1.4vw, 1rem);
+            font-weight: 900;
+            opacity: 0;
+        }
+
+        .reaction-card {
+            position: absolute;
+            z-index: 200;
+            right: 5%;
+            bottom: 8%;
+            padding: 15px 18px;
+            border: 4px solid var(--ink);
+            background: #fff;
+            box-shadow: 6px 6px 0 var(--ink);
+            font-size: clamp(1.2rem, 3vw, 2.5rem);
+            font-weight: 1000;
+            opacity: 0;
+        }
+
+        /* =====================================================
+           DAY 2 — LOW DESK ANGLE
+           ===================================================== */
+
+        #day2 {
+            height: 850svh;
+        }
+
+        .low-angle-stage {
+            position: absolute;
+            inset: 0;
+            perspective: 1100px;
+        }
+
+        .low-monitor {
+            position: absolute;
+            z-index: 20;
+            left: 53%;
+            top: 36%;
+            width: min(800px, 68vw);
+            height: min(510px, 57vh);
+            overflow: hidden;
+            border: 10px solid var(--ink);
+            border-radius: 18px;
+            background: #30343a;
+            box-shadow: 18px 20px 0 rgba(0,0,0,.14);
+            transform:
+                translate(-50%, -50%)
+                rotateY(-6deg)
+                rotateZ(1deg);
+        }
+
+        .low-monitor .monitor-screen {
+            inset: 9px;
+        }
+
+        .low-desk {
+            position: absolute;
+            z-index: 30;
+            left: -8%;
+            right: -8%;
+            bottom: -7%;
+            height: 42%;
+            border-top: 10px solid var(--ink);
+            background: var(--desk);
+            transform: perspective(700px) rotateX(11deg);
+            transform-origin: center top;
+        }
+
+        .low-keyboard {
+            position: absolute;
+            z-index: 50;
+            left: 42%;
+            bottom: 7%;
+            width: min(560px, 54vw);
+            height: 130px;
+            border: 8px solid var(--ink);
+            border-radius: 14px;
+            background: #d7d9dd;
+            transform:
+                translateX(-50%)
+                rotateZ(-4deg)
+                perspective(600px)
+                rotateX(50deg);
+        }
+
+        .cat-side {
+            position: absolute;
+            z-index: 65;
+            right: 2%;
+            bottom: -4%;
+            width: min(520px, 48vw);
+            filter: drop-shadow(12px 14px 0 rgba(0,0,0,.12));
+        }
+
+        .mouse {
+            position: absolute;
+            z-index: 60;
+            right: 15%;
+            bottom: 13%;
+            width: 85px;
+            height: 115px;
+            border: 7px solid var(--ink);
+            border-radius: 50% 50% 43% 43%;
+            background: #eee;
+            transform: rotate(12deg);
+        }
+
+        .mouse::before {
+            content: "";
+            position: absolute;
+            top: -3px;
+            left: 50%;
+            width: 5px;
+            height: 42px;
+            background: var(--ink);
+            transform: translateX(-50%);
+        }
+
+        .reply-actions {
+            display: flex;
+            gap: 9px;
+            margin-top: 22px;
+        }
+
+        .reply-button {
+            padding: 9px 13px;
+            border: 2px solid #aaa;
+            border-radius: 6px;
+            background: #fff;
+            color: #333;
+            font-size: .72rem;
+            font-weight: 800;
+        }
+
+        .cursor {
+            position: absolute;
+            z-index: 500;
+            width: 30px;
+            height: 38px;
+            opacity: 0;
+            pointer-events: none;
+            filter: drop-shadow(2px 3px 0 rgba(0,0,0,.2));
+        }
+
+        .click-ring {
+            position: absolute;
+            z-index: 490;
+            width: 40px;
+            height: 40px;
+            border: 5px solid var(--blue);
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .reply-compose {
+            position: absolute;
+            inset: 0;
+            padding: 22px 26px;
+            background: #fff;
+            opacity: 0;
+            transform: translateY(100%);
+        }
+
+        .compose-heading {
+            margin-bottom: 10px;
+            font-size: .8rem;
+            font-weight: 900;
+        }
+
+        .recipient-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 42px;
+            padding: 7px 0;
+            border-bottom: 2px solid #ddd;
+            font-size: .67rem;
+        }
+
+        .recipient-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .recipient-chip {
+            padding: 4px 7px;
+            border-radius: 99px;
+            background: #e7ebf6;
+            font-weight: 800;
+            opacity: 0;
+            transform: translate(0, 0);
+        }
+
+        .compose-editor {
+            min-height: 150px;
+            padding-top: 17px;
+            font-family: Georgia, serif;
+            font-size: clamp(.8rem, 1.5vw, 1.1rem);
+        }
+
+        .send-button {
+            position: absolute;
+            left: 25px;
+            bottom: 22px;
+            padding: 9px 20px;
+            border: 0;
+            border-radius: 5px;
+            background: var(--blue);
+            color: #fff;
+            font-size: .75rem;
+            font-weight: 900;
+        }
+
+        .send-flash {
+            position: absolute;
+            z-index: 800;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            background: var(--blue);
+            color: #fff;
+            font-size: clamp(3rem, 8vw, 8rem);
+            font-weight: 1000;
+            letter-spacing: -.06em;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .boss-reply {
+            position: absolute;
+            z-index: 700;
+            left: 50%;
+            top: 50%;
+            width: min(650px, 80vw);
+            padding: 25px 30px;
+            border: 6px solid var(--ink);
+            background: #fff;
+            box-shadow: 12px 12px 0 var(--ink);
+            text-align: center;
+            transform: translate(-50%, -50%) rotate(-5deg);
+            opacity: 0;
+        }
+
+        .boss-label {
+            margin-bottom: 12px;
+            color: #777;
+            font-size: .75rem;
+            font-weight: 1000;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+        }
+
+        .boss-text {
+            font-size: clamp(2rem, 6vw, 5.5rem);
+            font-weight: 1000;
+            letter-spacing: -.06em;
+        }
+
+        /* =====================================================
+           DAY 3 — SCREEN CLOSEUP / CLIENT POV
+           ===================================================== */
+
+        #day3 {
+            height: 600svh;
+        }
+
+        .client-pov {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            background: #ded8eb;
+        }
+
+        .client-monitor {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: min(1180px, 92vw);
+            height: min(700px, 82vh);
+            border: 12px solid var(--ink);
+            border-radius: 20px;
+            background: #353940;
+            box-shadow: 20px 22px 0 rgba(0,0,0,.14);
+            transform: translate(-50%, -50%) rotate(-1deg);
+        }
+
+        .client-screen {
+            position: absolute;
+            inset: 12px;
+            overflow: hidden;
+            background: #fffdf6;
+        }
+
+        .client-header {
+            padding: 24px 30px;
+            border-bottom: 4px solid var(--ink);
+            font-size: .8rem;
+            font-weight: 1000;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+        }
+
+        .abstract-copy {
+            position: absolute;
+            left: 5%;
+            right: 5%;
+            top: 25%;
+            color: var(--blue);
+            font-family: monospace;
+            font-size: clamp(2.3rem, 7vw, 7.4rem);
+            font-weight: 1000;
+            line-height: .84;
+            overflow-wrap: anywhere;
+        }
+
+        .client-feedback {
+            position: absolute;
+            z-index: 100;
+            right: 5%;
+            bottom: 8%;
+            max-width: 450px;
+            padding: 18px 21px;
+            border: 5px solid var(--ink);
+            background: var(--yellow);
+            box-shadow: 7px 7px 0 var(--ink);
+            font-size: clamp(1.3rem, 3vw, 2.5rem);
+            font-weight: 1000;
+            opacity: 0;
+        }
+
+        /* =====================================================
+           MIDWEEK — PROFILE / SIDE ANGLE
+           ===================================================== */
+
+        #miracle {
+            height: 800svh;
+        }
+
+        .side-stage {
+            position: absolute;
+            inset: 0;
+        }
+
+        .side-desk {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 31%;
+            border-top: 9px solid var(--ink);
+            background: var(--desk);
+        }
+
+        .side-monitor {
+            position: absolute;
+            z-index: 20;
+            right: 5%;
+            top: 15%;
+            width: min(760px, 59vw);
+            height: min(540px, 61vh);
+            overflow: hidden;
+            border: 10px solid var(--ink);
+            border-radius: 18px;
+            background: #30343a;
+            box-shadow: 16px 18px 0 rgba(0,0,0,.13);
+            transform: rotate(2deg);
+        }
+
+        .side-monitor-screen {
+            position: absolute;
+            inset: 10px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .side-keyboard {
+            position: absolute;
+            z-index: 35;
+            right: 9%;
+            bottom: 9%;
+            width: min(570px, 48vw);
+            height: 125px;
+            border: 8px solid var(--ink);
+            border-radius: 14px;
+            background: #d7d9dd;
+            transform:
+                rotate(-2deg)
+                perspective(600px)
+                rotateX(52deg);
+        }
+
+        .profile-cat {
+            position: absolute;
+            z-index: 60;
+            left: 3%;
+            bottom: 3%;
+            width: min(580px, 48vw);
+            filter: drop-shadow(12px 14px 0 rgba(0,0,0,.12));
+        }
+
+        .miracle-text {
+            min-height: 3em;
+            margin-top: 18px;
+            padding: 14px;
+            border: 3px solid var(--ink);
+            background: #fff;
+            font-family: monospace;
+            font-size: clamp(.9rem, 1.8vw, 1.4rem);
+            font-weight: 900;
+        }
+
+        .reaction-bubble {
+            position: absolute;
+            z-index: 150;
+            max-width: 290px;
+            padding: 14px 17px;
+            border: 4px solid var(--ink);
+            background: #fff;
+            box-shadow: 5px 5px 0 var(--ink);
+            font-size: clamp(.9rem, 2vw, 1.35rem);
+            font-weight: 1000;
+            opacity: 0;
+        }
+
+        #reaction1 {
+            left: 4%;
+            top: 13%;
+        }
+
+        #reaction2 {
+            right: 4%;
+            top: 12%;
+        }
+
+        #reaction3 {
+            right: 5%;
+            bottom: 8%;
+        }
+
+        /* =====================================================
+           DAY 7 — TOP-DOWN HUMAN TYPING
+           ===================================================== */
+
+        #day7 {
+            height: 900svh;
+        }
+
+        .day7-stage {
+            position: absolute;
+            inset: 0;
+            background: #d8dce2;
+        }
+
+        .day7-desk {
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(
+                    90deg,
+                    rgba(255,255,255,.04),
+                    rgba(0,0,0,.04)
+                ),
+                #a6744c;
+        }
+
+        .day7-coffee {
+            position: absolute;
+            z-index: 15;
+            left: 8%;
+            top: 14%;
+            width: 105px;
+            height: 105px;
+            border: 8px solid var(--ink);
+            border-radius: 50%;
+            background: #f2f0e7;
+            box-shadow: 8px 9px 0 rgba(0,0,0,.12);
+        }
+
+        .day7-coffee::before {
+            content: "";
+            position: absolute;
+            inset: 17px;
+            border-radius: 50%;
+            background: #5b3925;
+        }
+
+        .day7-coffee::after {
+            content: "";
+            position: absolute;
+            right: -40px;
+            top: 25px;
+            width: 48px;
+            height: 48px;
+            border: 8px solid var(--ink);
+            border-left: 0;
+            border-radius: 0 50% 50% 0;
+        }
+
+        .day7-note {
+            position: absolute;
+            z-index: 15;
+            right: 8%;
+            top: 11%;
+            width: 170px;
+            padding: 17px;
+            border: 4px solid var(--ink);
+            background: var(--yellow);
+            box-shadow: 6px 6px 0 rgba(0,0,0,.13);
+            font-family: "Comic Sans MS", cursive;
+            font-weight: 800;
+            transform: rotate(5deg);
+        }
+
+        .day7-laptop {
+            position: absolute;
+            z-index: 30;
+            left: 50%;
+            top: 38%;
+            width: min(900px, 75vw);
+            height: min(500px, 50vh);
+            overflow: hidden;
+            border: 10px solid var(--ink);
+            border-radius: 18px;
+            background: #353a40;
+            box-shadow: 15px 17px 0 rgba(0,0,0,.15);
+            transform:
+                translate(-50%, -50%)
+                perspective(900px)
+                rotateX(-8deg);
+        }
+
+        .day7-screen {
+            position: absolute;
+            inset: 10px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .human-compose {
+            position: absolute;
+            inset: 0;
+            padding: 24px 28px;
+            background: #fff;
+            font-family: Arial, sans-serif;
+        }
+
+        .human-compose-title {
+            padding-bottom: 13px;
+            border-bottom: 2px solid #ddd;
+            font-size: .82rem;
+            font-weight: 900;
+        }
+
+        .human-to {
+            padding: 12px 0;
+            border-bottom: 2px solid #ddd;
+            color: #666;
+            font-size: .75rem;
+        }
+
+        .human-subject {
+            padding: 12px 0;
+            border-bottom: 2px solid #ddd;
+            font-size: .8rem;
+            font-weight: 800;
+        }
+
+        .human-message {
+            padding-top: 18px;
+            font-family: Georgia, serif;
+            font-size: clamp(.82rem, 1.5vw, 1.08rem);
+            line-height: 1.55;
+        }
+
+        .human-message .awkward {
+            background: rgba(228,87,79,.15);
+            text-decoration: underline wavy var(--red);
+            text-decoration-thickness: 2px;
+        }
+
+        .day7-keyboard {
+            position: absolute;
+            z-index: 50;
+            left: 50%;
+            bottom: 5%;
+            width: min(830px, 72vw);
+            height: 230px;
+            border: 9px solid var(--ink);
+            border-radius: 18px;
+            background: #d7d9dd;
+            box-shadow: 12px 13px 0 rgba(0,0,0,.13);
+            transform: translateX(-50%);
+        }
+
+        .day7-key-grid {
+            position: absolute;
+            inset: 20px;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 7px;
+        }
+
+        .day7-key {
+            border: 3px solid var(--ink);
+            border-radius: 6px;
+            background: #fff;
+            transition: background .08s, transform .08s;
+        }
+
+        .day7-key.hit {
+            background: var(--yellow);
+            transform: translateY(5px);
+        }
+
+        .day7-key.space {
+            grid-column: 4 / span 6;
+        }
+
+        .human-hands {
+            position: absolute;
+            z-index: 80;
+            left: 50%;
+            bottom: -2%;
+            width: min(1050px, 92vw);
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
+
+        #humanLeftHand,
+        #humanRightHand {
+            transform-box: fill-box;
+            transform-origin: center bottom;
+        }
+
+        .day7-thought {
+            position: absolute;
+            z-index: 200;
+            right: 4%;
+            top: 12%;
+            max-width: 330px;
+            padding: 15px 18px;
+            border: 5px solid var(--ink);
+            background: #fff;
+            box-shadow: 7px 7px 0 var(--ink);
+            font-size: clamp(1rem, 2vw, 1.4rem);
+            font-weight: 1000;
+            opacity: 0;
+            transform: rotate(3deg);
+        }
+
+        .cat-comparison {
+            position: absolute;
+            z-index: 220;
+            left: 4%;
+            bottom: 7%;
+            max-width: 410px;
+            padding: 17px 20px;
+            border: 5px solid var(--ink);
+            background: var(--yellow);
+            box-shadow: 7px 7px 0 var(--ink);
+            font-family: monospace;
+            font-size: clamp(1rem, 2vw, 1.8rem);
+            font-weight: 1000;
+            opacity: 0;
+            transform: rotate(-3deg);
+        }
+
+        /* =====================================================
+           ENDING — WIDE EXECUTIVE SHOT
+           ===================================================== */
+
+        #ending {
+            height: 600svh;
+        }
+
+        .executive-office {
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(
+                    to bottom,
+                    #bcdbea 0 62%,
+                    #8c5d3b 62% 100%
+                );
+        }
+
+        .executive-window {
+            position: absolute;
+            left: 6%;
+            top: 9%;
+            width: 52%;
+            height: 43%;
+            overflow: hidden;
+            border: 8px solid var(--ink);
+            background: #9bd0eb;
+        }
+
+        .city-building {
+            position: absolute;
+            bottom: 0;
+            border: 4px solid var(--ink);
+            border-bottom: 0;
+            background: #6d7e89;
+        }
+
+        .city-building:nth-child(1) {
+            left: 5%;
+            width: 18%;
+            height: 50%;
+        }
+
+        .city-building:nth-child(2) {
+            left: 28%;
+            width: 19%;
+            height: 72%;
+        }
+
+        .city-building:nth-child(3) {
+            left: 52%;
+            width: 15%;
+            height: 42%;
+        }
+
+        .city-building:nth-child(4) {
+            right: 5%;
+            width: 22%;
+            height: 62%;
+        }
+
+        .executive-desk {
+            position: absolute;
+            left: 10%;
+            right: 10%;
+            bottom: 7%;
+            height: 180px;
+            border: 9px solid var(--ink);
+            background: #67452f;
+        }
+
+        .executive-laptop {
+            position: absolute;
+            z-index: 15;
+            left: 50%;
+            bottom: 25%;
+            width: 320px;
+            height: 190px;
+            border: 8px solid var(--ink);
+            border-radius: 14px;
+            background: #4d535a;
+            transform: translateX(-50%);
+        }
+
+        .executive-cat {
+            position: absolute;
+            z-index: 30;
+            left: 50%;
+            bottom: 22%;
+            width: min(430px, 52vw);
+            transform: translateX(-50%);
+            opacity: 0;
+        }
+
+        .lower-third {
+            position: absolute;
+            z-index: 100;
+            left: 5%;
+            bottom: 7%;
+            min-width: min(620px, 90vw);
+            border: 5px solid var(--ink);
+            background: #fff;
+            box-shadow: 8px 8px 0 var(--ink);
+            transform: translateX(-120%);
+        }
+
+        .lower-name {
+            padding: 13px 20px 3px;
+            font-size: clamp(1.8rem, 4vw, 3.4rem);
+            font-weight: 1000;
+            letter-spacing: -.05em;
+        }
+
+        .lower-job {
+            padding: 0 20px 13px;
+            color: var(--blue);
+            font-size: clamp(.9rem, 2vw, 1.3rem);
+            font-weight: 1000;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+        }
+
+        .blackout {
+            position: absolute;
+            z-index: 300;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            background: #09090b;
+            color: #fff;
+            opacity: 0;
+        }
+
+        .end-card {
+            width: min(1000px, 90vw);
+            text-align: center;
+            opacity: 0;
+        }
+
+        .end-label {
+            margin-bottom: 18px;
+            color: var(--yellow);
+            font-size: .8rem;
+            font-weight: 1000;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+        }
+
+        .end-title {
+            font-size: clamp(3rem, 9vw, 9rem);
+            font-weight: 1000;
+            line-height: .8;
+            letter-spacing: -.075em;
+            text-transform: uppercase;
+        }
+
+        footer {
+            position: relative;
+            z-index: 500;
+            padding: 45px 20px;
+            background: #09090b;
+            color: #999;
+            text-align: center;
+            font-size: .82rem;
+        }
+
+        footer strong {
+            color: #fff;
+        }
+
+        /* =====================================================
+           MOBILE
+           ===================================================== */
+
+        @media (max-width: 800px) {
+            .monitor {
+                width: 89vw;
+                height: 57vh;
+            }
+
+            .mail-body {
+                grid-template-columns: 1fr;
+            }
+
+            .mail-sidebar {
+                display: none;
+            }
+
+            .keyboard {
+                width: 78vw;
+            }
+
+            .cat-foreground {
+                width: 80vw;
+            }
+
+            .poster {
+                display: none;
+            }
+
+            .low-monitor {
+                width: 86vw;
+                height: 54vh;
+                left: 50%;
+            }
+
+            .cat-side {
+                width: 65vw;
+                right: -12%;
+            }
+
+            .low-keyboard {
+                width: 68vw;
+                left: 38%;
+            }
+
+            .side-monitor {
+                width: 76vw;
+                right: 2%;
+            }
+
+            .profile-cat {
+                width: 61vw;
+                left: -10%;
+            }
+
+            .day7-laptop {
+                width: 90vw;
+            }
+
+            .day7-keyboard {
+                width: 87vw;
+            }
+
+            .human-hands {
+                width: 115vw;
+            }
+
+            .day7-note {
+                display: none;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            .caret,
+            .scroll-hint svg {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<site-navbar
+    cart-href="https://unlim8ted.com/sign-in/cart"
+    signin-href="https://unlim8ted.com/sign-in"
+    profile-href="https://unlim8ted.com/profile">
+</site-navbar>
+
+<div class="progress">
+    <div id="progressFill"></div>
+</div>
+
+<!-- =========================================================
+     INTRO
+     ========================================================= -->
+
+<section class="scene" id="intro">
+    <div class="sticky">
+
+        <div class="intro-bg">
+            <div class="intro-grid"></div>
+        </div>
+
+        <div class="intro-title" id="introTitle">
+            I LET<br>
+            MY <span>CAT</span><br>
+            ANSWER<br>
+            MY EMAILS
+        </div>
+
+        <div class="intro-copy" id="introCopy">
+            It started with one email.
+            <br><br>
+            Then I committed to the bit for a week.
+        </div>
+
+        <svg
+            class="intro-cat"
+            id="introCat"
+            viewBox="0 0 600 600"
+            aria-hidden="true">
+
+            <ellipse
+                cx="300"
+                cy="545"
+                rx="210"
+                ry="32"
+                fill="rgba(0,0,0,.13)">
+            </ellipse>
+
+            <path
+                d="M440 390 Q570 350 555 470 Q545 535 475 505"
+                fill="none"
+                stroke="#aaa59d"
+                stroke-width="55"
+                stroke-linecap="round">
+            </path>
+
+            <ellipse
+                cx="305"
+                cy="395"
+                rx="150"
+                ry="165"
+                fill="#aaa59d"
+                stroke="#171719"
+                stroke-width="12">
+            </ellipse>
+
+            <circle
+                cx="295"
+                cy="220"
+                r="130"
+                fill="#aaa59d"
+                stroke="#171719"
+                stroke-width="12">
+            </circle>
+
+            <path
+                d="M195 145 L205 40 L270 120Z"
+                fill="#aaa59d"
+                stroke="#171719"
+                stroke-width="12">
+            </path>
+
+            <path
+                d="M330 120 L400 40 L395 150Z"
+                fill="#aaa59d"
+                stroke="#171719"
+                stroke-width="12">
+            </path>
+
+            <path
+                d="M215 125 L220 75 L250 115Z"
+                fill="#d5a7a7">
+            </path>
+
+            <path
+                d="M350 112 L387 73 L382 127Z"
+                fill="#d5a7a7">
+            </path>
+
+            <ellipse
+                cx="250"
+                cy="220"
+                rx="15"
+                ry="24"
+                fill="#d8d268"
+                stroke="#171719"
+                stroke-width="6">
+            </ellipse>
+
+            <ellipse
+                cx="340"
+                cy="220"
+                rx="15"
+                ry="24"
+                fill="#d8d268"
+                stroke="#171719"
+                stroke-width="6">
+            </ellipse>
+
+            <path
+                d="M285 265 L305 265 L295 279Z"
+                fill="#d58d8d"
+                stroke="#171719"
+                stroke-width="5">
+            </path>
+
+            <path
+                d="M295 279 Q270 297 257 281"
+                fill="none"
+                stroke="#171719"
+                stroke-width="5"
+                stroke-linecap="round">
+            </path>
+
+            <path
+                d="M295 279 Q320 297 335 281"
+                fill="none"
+                stroke="#171719"
+                stroke-width="5"
+                stroke-linecap="round">
+            </path>
+
+            <g
+                stroke="#171719"
+                stroke-width="5"
+                stroke-linecap="round">
+
+                <line x1="205" y1="265" x2="90" y2="240"></line>
+                <line x1="205" y1="285" x2="75" y2="285"></line>
+                <line x1="210" y1="305" x2="90" y2="335"></line>
+
+                <line x1="385" y1="265" x2="500" y2="240"></line>
+                <line x1="385" y1="285" x2="515" y2="285"></line>
+                <line x1="380" y1="305" x2="500" y2="335"></line>
+
+            </g>
+
+        </svg>
+
+        <div class="scroll-hint" id="scrollHint">
+            Scroll
+
+            <svg viewBox="0 0 30 40" aria-hidden="true">
+                <path
+                    d="M15 3 V31 M5 22 L15 33 L25 22"
+                    fill="none"
+                    stroke="#171719"
+                    stroke-width="4"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+                </path>
+            </svg>
+        </div>
+
+    </div>
+</section>
+
+<!-- =========================================================
+     DAY 1 — OVER THE SHOULDER
+     ========================================================= -->
+
+<section class="scene" id="day1">
+    <div class="sticky">
+
+        <div class="office">
+            <div class="wall-line"></div>
+
+            <div class="poster">
+                PRODUCTIVITY TIP
+                <strong>DELEGATE</strong>
+            </div>
+        </div>
+
+        <div class="chapter-tag">
+            Day 1
+        </div>
+
+        <div class="ots-stage">
+
+            <div class="monitor">
+
+                <div class="monitor-screen">
+
+                    <div class="mail-ui">
+
+                        <div class="mail-topbar">
+                            <div class="mail-logo">
+                                Mail
+                            </div>
+
+                            <div class="mail-search">
+                                Search mail
+                            </div>
+                        </div>
+
+                        <div class="mail-body">
+
+                            <aside class="mail-sidebar">
+                                <div class="compose">
+                                    + Compose
+                                </div>
+
+                                <div class="mail-nav active">
+                                    Inbox &nbsp; 12
+                                </div>
+
+                                <div class="mail-nav">
+                                    Starred
+                                </div>
+
+                                <div class="mail-nav">
+                                    Sent
+                                </div>
+                            </aside>
+
+                            <main class="email-pane">
+
+                                <h2 class="email-subject">
+                                    Automatic Reply
+                                </h2>
+
+                                <div class="email-meta">
+                                    From: me@professionalperson.com
+                                    <br>
+                                    To: Client
+                                </div>
+
+                                <div class="email-copy">
+                                    Hello,
+                                    <br><br>
+                                    Thank you for your email. I am currently out of the office.
+
+                                    <div class="typed-line">
+                                        <span id="day1Typed"></span><span class="caret"></span>
+                                    </div>
+
+                                    <div
+                                        class="email-reply"
+                                        id="day1Reply">
+
+                                        <strong>Client</strong>
+                                        <br><br>
+                                        Is this a metaphor?
+
+                                    </div>
+                                </div>
+
+                            </main>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="monitor-stand"></div>
+            <div class="monitor-base"></div>
+            <div class="desk-front"></div>
+
+            <div class="keyboard">
+                <div class="keyboard-keys">
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key space"></div>
+                    <div class="keyboard-key"></div>
+                </div>
+            </div>
+
+            <svg
+                class="cat-foreground"
+                viewBox="0 0 700 600"
+                aria-hidden="true">
+
+                <ellipse
+                    cx="350"
+                    cy="520"
+                    rx="235"
+                    ry="190"
+                    fill="#aaa59d"
+                    stroke="#171719"
+                    stroke-width="13">
+                </ellipse>
+
+                <circle
+                    cx="350"
+                    cy="285"
+                    r="165"
+                    fill="#aaa59d"
+                    stroke="#171719"
+                    stroke-width="13">
+                </circle>
+
+                <path
+                    d="M220 190 L205 55 L315 145Z"
+                    fill="#aaa59d"
+                    stroke="#171719"
+                    stroke-width="13">
+                </path>
+
+                <path
+                    d="M385 145 L495 55 L480 195Z"
+                    fill="#aaa59d"
+                    stroke="#171719"
+                    stroke-width="13">
+                </path>
+
+                <path
+                    d="M230 165 L222 92 L282 145Z"
+                    fill="#d3a4a4">
+                </path>
+
+                <path
+                    d="M420 145 L480 92 L470 170Z"
+                    fill="#d3a4a4">
+                </path>
+
+                <g id="day1LeftPaw">
+                    <path
+                        d="M270 440 Q215 500 195 585"
+                        fill="none"
+                        stroke="#aaa59d"
+                        stroke-width="58"
+                        stroke-linecap="round">
+                    </path>
+                </g>
+
+                <g id="day1RightPaw">
+                    <path
+                        d="M430 440 Q490 500 510 585"
+                        fill="none"
+                        stroke="#aaa59d"
+                        stroke-width="58"
+                        stroke-linecap="round">
+                    </path>
+                </g>
+
+            </svg>
+
+        </div>
+
+        <div
+            class="reaction-card"
+            id="day1Reaction">
+            “Is this a metaphor?”
+        </div>
+
+    </div>
+</section>
+
+<!-- =========================================================
+     DAY 2 — LOW ANGLE
+     ========================================================= -->
+
+<section class="scene" id="day2">
+    <div class="sticky">
+
+        <div class="office">
+            <div class="wall-line"></div>
+        </div>
+
+        <div class="chapter-tag">
+            Day 2
+        </div>
+
+        <div class="low-angle-stage">
+
+            <div class="low-monitor">
+
+                <div class="monitor-screen">
+
+                    <div class="mail-ui">
+
+                        <div class="mail-topbar">
+                            <div class="mail-logo">
+                                Mail
+                            </div>
+
+                            <div class="mail-search">
+                                Search mail
+                            </div>
+                        </div>
+
+                        <div class="mail-body">
+
+                            <aside class="mail-sidebar">
+                                <div class="compose">
+                                    + Compose
+                                </div>
+
+                                <div class="mail-nav active">
+                                    Inbox &nbsp; 18
+                                </div>
+
+                                <div class="mail-nav">
+                                    Starred
+                                </div>
+
+                                <div class="mail-nav">
+                                    Sent
+                                </div>
+                            </aside>
+
+                            <main
+                                class="email-pane"
+                                id="day2Pane">
+
+                                <h2 class="email-subject">
+                                    Quarterly Planning
+                                </h2>
+
+                                <div class="email-meta">
+                                    From: Boss
+                                    <br>
+                                    To: Team
+                                </div>
+
+                                <div class="email-copy">
+                                    Hi everyone,
+                                    <br><br>
+
+                                    Attached are the revised notes for next quarter.
+                                    Please send any final thoughts before Friday.
+
+                                    <div class="reply-actions">
+
+                                        <button
+                                            class="reply-button"
+                                            id="replyButton">
+                                            Reply
+                                        </button>
+
+                                        <button
+                                            class="reply-button"
+                                            id="replyAllButton">
+                                            Reply All
+                                        </button>
+
+                                        <button class="reply-button">
+                                            Forward
+                                        </button>
+
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="reply-compose"
+                                    id="replyCompose">
+
+                                    <div class="compose-heading">
+                                        Re: Quarterly Planning
+                                    </div>
+
+                                    <div class="recipient-line">
+                                        <span>
+                                            To:
+                                        </span>
+
+                                        <div class="recipient-chips">
+                                            <span class="recipient-chip">Boss</span>
+                                            <span class="recipient-chip">Accounting</span>
+                                            <span class="recipient-chip">Marketing</span>
+                                            <span class="recipient-chip">Legal</span>
+                                            <span class="recipient-chip">Steve</span>
+                                            <span class="recipient-chip">HR</span>
+                                            <span class="recipient-chip">Intern</span>
+                                            <span class="recipient-chip">Client Services</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="compose-editor">
+                                        <span id="day2Typed"></span><span class="caret"></span>
+                                    </div>
+
+                                    <button class="send-button">
+                                        Send
+                                    </button>
+
+                                </div>
+
+                                <svg
+                                    class="cursor"
+                                    id="cursor"
+                                    viewBox="0 0 40 50"
+                                    aria-hidden="true">
+
+                                    <path
+                                        d="M4 3 L4 39 L14 30 L21 46 L29 42 L22 27 L36 26Z"
+                                        fill="#fff"
+                                        stroke="#171719"
+                                        stroke-width="4"
+                                        stroke-linejoin="round">
+                                    </path>
+
+                                </svg>
+
+                                <div
+                                    class="click-ring"
+                                    id="clickRing">
+                                </div>
+
+                            </main>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="low-desk"></div>
+
+            <div class="low-keyboard">
+                <div class="keyboard-keys">
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key space"></div>
+                    <div class="keyboard-key"></div>
+                </div>
+            </div>
+
+            <div class="mouse"></div>
+
+            <svg
+                class="cat-side"
+                viewBox="0 0 600 600"
+                aria-hidden="true">
+
+                <path
+                    d="M420 420 Q570 390 555 525"
+                    fill="none"
+                    stroke="#aaa59d"
+                    stroke-width="52"
+                    stroke-linecap="round">
+                </path>
+
+                <ellipse
+                    cx="330"
+                    cy="420"
+                    rx="165"
+                    ry="145"
+                    fill="#aaa59d"
+                    stroke="#171719"
+                    stroke-width="12">
+                </ellipse>
+
+                <circle
+                    cx="250"
+                    cy="250"
+                    r="120"
+                    fill="#aaa59d"
+                    stroke="#171719"
+                    stroke-width="12">
+                </circle>
+
+                <path
+                    d="M155 185 L170 75 L230 145Z"
+                    fill="#aaa59d"
+                    stroke="#171719"
+                    stroke-width="12">
+                </path>
+
+                <path
+                    d="M280 140 L360 80 L345 195Z"
+                    fill="#aaa59d"
+                    stroke="#171719"
+                    stroke-width="12">
+                </path>
+
+                <ellipse
+                    cx="205"
+                    cy="245"
+                    rx="14"
+                    ry="21"
+                    fill="#d8d268"
+                    stroke="#171719"
+                    stroke-width="5">
+                </ellipse>
+
+                <ellipse
+                    cx="275"
+                    cy="235"
+                    rx="14"
+                    ry="21"
+                    fill="#d8d268"
+                    stroke="#171719"
+                    stroke-width="5">
+                </ellipse>
+
+                <path
+                    d="M205 310 Q175 390 140 510"
+                    fill="none"
+                    stroke="#aaa59d"
+                    stroke-width="54"
+                    stroke-linecap="round">
+                </path>
+
+                <g id="day2MousePaw">
+                    <path
+                        d="M330 325 Q430 390 500 500"
+                        fill="none"
+                        stroke="#aaa59d"
+                        stroke-width="54"
+                        stroke-linecap="round">
+                    </path>
+                </g>
+
+            </svg>
+
+        </div>
+
+        <div
+            class="send-flash"
+            id="sendFlash">
+            SENT
+        </div>
+
+        <div
+            class="boss-reply"
+            id="bossReply">
+
+            <div class="boss-label">
+                Boss replied
+            </div>
+
+            <div class="boss-text">
+                “Bold strategy.”
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<!-- =========================================================
+     DAY 3 — CLIENT SCREEN POV
+     ========================================================= -->
+
+<section class="scene" id="day3">
+    <div class="sticky">
+
+        <div class="chapter-tag">
+            Day 3
+        </div>
+
+        <div class="client-pov">
+
+            <div
+                class="client-monitor"
+                id="clientMonitor">
+
+                <div class="client-screen">
+
+                    <div class="client-header">
+                        Client Review · Brand Direction
+                    </div>
+
+                    <div class="abstract-copy">
+                        asdfjjjjjjjjjjjjjjjjjj
+                    </div>
+
+                    <div
+                        class="client-feedback"
+                        id="clientFeedback">
+                        “We love the abstract tone.”
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<!-- =========================================================
+     MIDWEEK — SIDE PROFILE
+     ========================================================= -->
+
+<section class="scene" id="miracle">
+    <div class="sticky">
+
+        <div class="office green">
+            <div class="wall-line"></div>
+        </div>
+
+        <div class="chapter-tag">
+            Midweek
+        </div>
+
+        <div class="side-stage">
+
+            <div class="side-desk"></div>
+
+            <div class="side-monitor">
+
+                <div class="side-monitor-screen">
+
+                    <div class="mail-ui">
+
+                        <div class="mail-topbar">
+                            <div class="mail-logo">
+                                Mail
+                            </div>
+
+                            <div class="mail-search">
+                                Search mail
+                            </div>
+                        </div>
+
+                        <div class="mail-body">
+
+                            <aside class="mail-sidebar">
+                                <div class="compose">
+                                    + Compose
+                                </div>
+
+                                <div class="mail-nav active">
+                                    Inbox
+                                </div>
+
+                                <div class="mail-nav">
+                                    Sent
+                                </div>
+                            </aside>
+
+                            <main class="email-pane">
+
+                                <h2 class="email-subject">
+                                    Re: Timeline
+                                </h2>
+
+                                <div class="email-meta">
+                                    To: Project Team
+                                </div>
+
+                                <div class="miracle-text">
+                                    <span id="miracleTyped"></span><span class="caret"></span>
+                                </div>
+
+                            </main>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="side-keyboard">
+                <div class="keyboard-keys">
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key"></div>
+                    <div class="keyboard-key space"></div>
+                    <div class="keyboard-key"></div>
+                </div>
+            </div>
+
+            <svg
+                class="profile-cat"
+                viewBox="0 0 650 600"
+                aria-hidden="true">
+
+                <ellipse
+                    cx="260"
+                    cy="440"
+                    rx="170"
+                    ry="145"
+                    fill="#aaa59d"
+                    stroke="#171719"
+                    stroke-width="12">
+                </ellipse>
+
+                <g id="miracleHead">
+
+                    <circle
+                        cx="320"
+                        cy="245"
+                        r="125"
+                        fill="#aaa59d"
+                        stroke="#171719"
+                        stroke-width="12">
+                    </circle>
+
+                    <path
+                        d="M220 180 L235 65 L295 145Z"
+                        fill="#aaa59d"
+                        stroke="#171719"
+                        stroke-width="12">
+                    </path>
+
+                    <path
+                        d="M350 135 L430 80 L415 195Z"
+                        fill="#aaa59d"
+                        stroke="#171719"
+                        stroke-width="12">
+                    </path>
+
+                    <ellipse
+                        cx="355"
+                        cy="235"
+                        rx="15"
+                        ry="23"
+                        fill="#d8d268"
+                        stroke="#171719"
+                        stroke-width="5">
+                    </ellipse>
+
+                    <path
+                        d="M410 270 L435 278 L412 290Z"
+                        fill="#d58d8d"
+                        stroke="#171719"
+                        stroke-width="4">
+                    </path>
+
+                </g>
+
+                <g id="miracleLeftPaw">
+                    <path
+                        d="M320 400 Q410 455 480 555"
+                        fill="none"
+                        stroke="#aaa59d"
+                        stroke-width="55"
+                        stroke-linecap="round">
+                    </path>
+                </g>
+
+                <g id="miracleRightPaw">
+                    <path
+                        d="M390 385 Q480 440 555 535"
+                        fill="none"
+                        stroke="#aaa59d"
+                        stroke-width="55"
+                        stroke-linecap="round">
+                    </path>
+                </g>
+
+            </svg>
+
+        </div>
+
+        <div
+            class="reaction-bubble"
+            id="reaction1">
+            “Love the clarity.”
+        </div>
+
+        <div
+            class="reaction-bubble"
+            id="reaction2">
+            “Much more decisive.”
+        </div>
+
+        <div
+            class="reaction-bubble"
+            id="reaction3">
+            “This feels like growth.”
+        </div>
+
+    </div>
+</section>
+
+<!-- =========================================================
+     DAY 7 — HUMAN RECLAIMS KEYBOARD
+     ========================================================= -->
+
+<section class="scene" id="day7">
+    <div class="sticky">
+
+        <div class="day7-stage">
+
+            <div class="day7-desk"></div>
+
+            <div class="chapter-tag">
+                Day 7
+            </div>
+
+            <div class="day7-coffee"></div>
+
+            <div class="day7-note">
+                I can write my own emails again.
+            </div>
+
+            <div class="day7-laptop">
+
+                <div class="day7-screen">
+
+                    <div class="human-compose">
+
+                        <div class="human-compose-title">
+                            New Message
+                        </div>
+
+                        <div class="human-to">
+                            To: Client
+                        </div>
+
+                        <div class="human-subject">
+                            Following Up
+                        </div>
+
+                        <div class="human-message">
+                            <span id="humanTyped"></span><span class="caret"></span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="day7-keyboard">
+                <div
+                    class="day7-key-grid"
+                    id="day7Keys">
+
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key space"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+                    <div class="day7-key"></div>
+
+                </div>
+            </div>
+
+            <svg
+                class="human-hands"
+                viewBox="0 0 1200 430"
+                aria-hidden="true">
+
+                <!-- forearms -->
+                <path
+                    d="M50 430 Q180 340 360 285"
+                    fill="none"
+                    stroke="#d7a47f"
+                    stroke-width="105"
+                    stroke-linecap="round">
+                </path>
+
+                <path
+                    d="M1150 430 Q1020 340 840 285"
+                    fill="none"
+                    stroke="#d7a47f"
+                    stroke-width="105"
+                    stroke-linecap="round">
+                </path>
+
+                <!-- sleeves -->
+                <path
+                    d="M0 430 Q125 325 240 315"
+                    fill="none"
+                    stroke="#456be6"
+                    stroke-width="130"
+                    stroke-linecap="round">
+                </path>
+
+                <path
+                    d="M1200 430 Q1075 325 960 315"
+                    fill="none"
+                    stroke="#456be6"
+                    stroke-width="130"
+                    stroke-linecap="round">
+                </path>
+
+                <!-- left hand -->
+                <g id="humanLeftHand">
+
+                    <ellipse
+                        cx="410"
+                        cy="275"
+                        rx="100"
+                        ry="70"
+                        fill="#d7a47f"
+                        stroke="#171719"
+                        stroke-width="9">
+                    </ellipse>
+
+                    <path
+                        d="M365 250 Q330 180 350 150"
+                        fill="none"
+                        stroke="#d7a47f"
+                        stroke-width="34"
+                        stroke-linecap="round">
+                    </path>
+
+                    <path
+                        d="M400 235 Q385 160 410 130"
+                        fill="none"
+                        stroke="#d7a47f"
+                        stroke-width="34"
+                        stroke-linecap="round">
+                    </path>
+
+                    <path
+                        d="M435 240 Q445 165 470 145"
+                        fill="none"
+                        stroke="#d7a47f"
+                        stroke-width="34"
+                        stroke-linecap="round">
+                    </path>
+
+                    <path
+                        d="M465 255 Q500 195 525 185"
+                        fill="none"
+                        stroke="#d7a47f"
+                        stroke-width="34"
+                        stroke-linecap="round">
+                    </path>
+
+                </g>
+
+                <!-- right hand -->
+                <g id="humanRightHand">
+
+                    <ellipse
+                        cx="790"
+                        cy="275"
+                        rx="100"
+                        ry="70"
+                        fill="#d7a47f"
+                        stroke="#171719"
+                        stroke-width="9">
+                    </ellipse>
+
+                    <path
+                        d="M835 250 Q870 180 850 150"
+                        fill="none"
+                        stroke="#d7a47f"
+                        stroke-width="34"
+                        stroke-linecap="round">
+                    </path>
+
+                    <path
+                        d="M800 235 Q815 160 790 130"
+                        fill="none"
+                        stroke="#d7a47f"
+                        stroke-width="34"
+                        stroke-linecap="round">
+                    </path>
+
+                    <path
+                        d="M765 240 Q755 165 730 145"
+                        fill="none"
+                        stroke="#d7a47f"
+                        stroke-width="34"
+                        stroke-linecap="round">
+                    </path>
+
+                    <path
+                        d="M735 255 Q700 195 675 185"
+                        fill="none"
+                        stroke="#d7a47f"
+                        stroke-width="34"
+                        stroke-linecap="round">
+                    </path>
+
+                </g>
+
+            </svg>
+
+            <div
+                class="day7-thought"
+                id="day7Thought">
+                ...
+            </div>
+
+            <div
+                class="cat-comparison"
+                id="catComparison">
+                Let’s circle back next week.
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<!-- =========================================================
+     ENDING
+     ========================================================= -->
+
+<section class="scene" id="ending">
+    <div class="sticky">
+
+        <div class="executive-office">
+
+            <div class="executive-window">
+                <div class="city-building"></div>
+                <div class="city-building"></div>
+                <div class="city-building"></div>
+                <div class="city-building"></div>
+            </div>
+
+            <div class="executive-desk"></div>
+            <div class="executive-laptop"></div>
+
+            <svg
+                class="executive-cat"
+                id="executiveCat"
+                viewBox="0 0 600 600"
+                aria-hidden="true">
+
+                <ellipse
+                    cx="300"
+                    cy="540"
+                    rx="200"
+                    ry="30"
+                    fill="rgba(0,0,0,.14)">
+                </ellipse>
+
+                <ellipse
+                    cx="300"
+                    cy="390"
+                    rx="145"
+                    ry="165"
+                    fill="#aaa59d"
+                    stroke="#171719"
+                    stroke-width="12">
+                </ellipse>
+
+                <circle
+                    cx="300"
+                    cy="220"
+                    r="125"
+                    fill="#aaa59d"
+                    stroke="#171719"
+                    stroke-width="12">
+                </circle>
+
+                <path
+                    d="M205 145 L215 45 L270 120Z"
+                    fill="#aaa59d"
+                    stroke="#171719"
+                    stroke-width="12">
+                </path>
+
+                <path
+                    d="M330 120 L400 45 L395 150Z"
+                    fill="#aaa59d"
+                    stroke="#171719"
+                    stroke-width="12">
+                </path>
+
+                <ellipse
+                    cx="255"
+                    cy="220"
+                    rx="15"
+                    ry="23"
+                    fill="#d8d268"
+                    stroke="#171719"
+                    stroke-width="6">
+                </ellipse>
+
+                <ellipse
+                    cx="345"
+                    cy="220"
+                    rx="15"
+                    ry="23"
+                    fill="#d8d268"
+                    stroke="#171719"
+                    stroke-width="6">
+                </ellipse>
+
+                <path
+                    d="M290 265 L310 265 L300 278Z"
+                    fill="#d58d8d"
+                    stroke="#171719"
+                    stroke-width="5">
+                </path>
+
+                <!-- corporate tie -->
+                <path
+                    d="M275 330
+                       L325 330
+                       L315 370
+                       L335 475
+                       L300 510
+                       L265 475
+                       L285 370Z"
+                    fill="#456be6"
+                    stroke="#171719"
+                    stroke-width="8">
+                </path>
+
+            </svg>
+
+            <div
+                class="lower-third"
+                id="lowerThird">
+
+                <div class="lower-name">
+                    THE CAT
+                </div>
+
+                <div class="lower-job">
+                    Senior Communications Director
+                </div>
+
+            </div>
+
+        </div>
+
+        <div
+            class="blackout"
+            id="blackout">
+
+            <div
+                class="end-card"
+                id="endCard">
+
+                <div class="end-label">
+                    UNLIM8TED SCROLLY
+                </div>
+
+                <div class="end-title">
+                    I LET MY CAT<br>
+                    ANSWER MY EMAILS
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<footer>
+    <strong>Unlim8ted Studio Productions</strong>
+    <br><br>
+    <span id="copyright"></span>
+</footer>
+
+<script>
+    const clamp = (value, min = 0, max = 1) => {
+        return Math.min(max, Math.max(min, value));
+    };
+
+    const lerp = (a, b, t) => {
+        return a + (b - a) * t;
+    };
+
+    const map = (
+        value,
+        inMin,
+        inMax,
+        outMin = 0,
+        outMax = 1
+    ) => {
+        if (inMax === inMin) {
+            return outMin;
+        }
+
+        const t = clamp(
+            (value - inMin) /
+            (inMax - inMin)
+        );
+
+        return lerp(
+            outMin,
+            outMax,
+            t
+        );
+    };
+
+    const easeOut = t => {
+        t = clamp(t);
+        return 1 - Math.pow(1 - t, 3);
+    };
+
+    const easeInOut = t => {
+        t = clamp(t);
+
+        return t < .5
+            ? 4 * t * t * t
+            : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    };
+
+    const progressOf = element => {
+        const rect =
+            element.getBoundingClientRect();
+
+        const distance =
+            element.offsetHeight -
+            window.innerHeight;
+
+        if (distance <= 0) {
+            return 0;
+        }
+
+        return clamp(
+            -rect.top /
+            distance
+        );
+    };
+
+    const setOpacity = (
+        element,
+        value
+    ) => {
+        if (!element) {
+            return;
+        }
+
+        element.style.opacity =
+            clamp(value);
+    };
+
+    const setTransform = (
+        element,
+        value
+    ) => {
+        if (!element) {
+            return;
+        }
+
+        element.style.transform =
+            value;
+    };
+
+    const typeByProgress = (
+        element,
+        text,
+        progress
+    ) => {
+        if (!element) {
+            return;
+        }
+
+        const count =
+            Math.floor(
+                clamp(progress) *
+                text.length
+            );
+
+        element.textContent =
+            text.slice(
+                0,
+                count
+            );
+    };
+
+    const progressFill =
+        document.getElementById("progressFill");
+
+    const intro =
+        document.getElementById("intro");
+
+    const introTitle =
+        document.getElementById("introTitle");
+
+    const introCopy =
+        document.getElementById("introCopy");
+
+    const introCat =
+        document.getElementById("introCat");
+
+    const scrollHint =
+        document.getElementById("scrollHint");
+
+    const day1 =
+        document.getElementById("day1");
+
+    const day1Typed =
+        document.getElementById("day1Typed");
+
+    const day1Reply =
+        document.getElementById("day1Reply");
+
+    const day1Reaction =
+        document.getElementById("day1Reaction");
+
+    const day1LeftPaw =
+        document.getElementById("day1LeftPaw");
+
+    const day1RightPaw =
+        document.getElementById("day1RightPaw");
+
+    const day2 =
+        document.getElementById("day2");
+
+    const day2Pane =
+        document.getElementById("day2Pane");
+
+    const replyButton =
+        document.getElementById("replyButton");
+
+    const replyAllButton =
+        document.getElementById("replyAllButton");
+
+    const replyCompose =
+        document.getElementById("replyCompose");
+
+    const cursor =
+        document.getElementById("cursor");
+
+    const clickRing =
+        document.getElementById("clickRing");
+
+    const day2Typed =
+        document.getElementById("day2Typed");
+
+    const day2MousePaw =
+        document.getElementById("day2MousePaw");
+
+    const recipientChips =
+        Array.from(
+            document.querySelectorAll(
+                ".recipient-chip"
+            )
+        );
+
+    const sendFlash =
+        document.getElementById("sendFlash");
+
+    const bossReply =
+        document.getElementById("bossReply");
+
+    const day3 =
+        document.getElementById("day3");
+
+    const clientMonitor =
+        document.getElementById("clientMonitor");
+
+    const clientFeedback =
+        document.getElementById("clientFeedback");
+
+    const miracle =
+        document.getElementById("miracle");
+
+    const miracleTyped =
+        document.getElementById("miracleTyped");
+
+    const miracleHead =
+        document.getElementById("miracleHead");
+
+    const miracleLeftPaw =
+        document.getElementById("miracleLeftPaw");
+
+    const miracleRightPaw =
+        document.getElementById("miracleRightPaw");
+
+    const reaction1 =
+        document.getElementById("reaction1");
+
+    const reaction2 =
+        document.getElementById("reaction2");
+
+    const reaction3 =
+        document.getElementById("reaction3");
+
+    const day7 =
+        document.getElementById("day7");
+
+    const humanTyped =
+        document.getElementById("humanTyped");
+
+    const humanLeftHand =
+        document.getElementById("humanLeftHand");
+
+    const humanRightHand =
+        document.getElementById("humanRightHand");
+
+    const day7Thought =
+        document.getElementById("day7Thought");
+
+    const catComparison =
+        document.getElementById("catComparison");
+
+    const day7Keys =
+        Array.from(
+            document.querySelectorAll(
+                ".day7-key"
+            )
+        );
+
+    const ending =
+        document.getElementById("ending");
+
+    const executiveCat =
+        document.getElementById("executiveCat");
+
+    const lowerThird =
+        document.getElementById("lowerThird");
+
+    const blackout =
+        document.getElementById("blackout");
+
+    const endCard =
+        document.getElementById("endCard");
+
+    function animateIntro() {
+        const p =
+            progressOf(intro);
+
+        const exit =
+            easeOut(
+                map(
+                    p,
+                    .55,
+                    .9
+                )
+            );
+
+        setOpacity(
+            introTitle,
+            1 - exit
+        );
+
+        setTransform(
+            introTitle,
+            `translateY(${-exit * 120}px)`
+        );
+
+        setOpacity(
+            introCopy,
+            1 - exit
+        );
+
+        setTransform(
+            introCopy,
+            `translateY(${-exit * 70}px)`
+        );
+
+        setTransform(
+            introCat,
+            `translateX(${-p * 65}px) rotate(${-p * 3}deg)`
+        );
+
+        setOpacity(
+            scrollHint,
+            1 -
+            map(
+                p,
+                .08,
+                .25
+            )
+        );
+    }
+
+    function animateDay1() {
+        const p =
+            progressOf(day1);
+
+        const typing =
+            map(
+                p,
+                .12,
+                .55
+            );
+
+        const tap =
+            Math.sin(
+                typing *
+                Math.PI *
+                25
+            );
+
+        setTransform(
+            day1LeftPaw,
+            `rotate(${tap * 8}deg) translateY(${Math.abs(tap) * 8}px)`
+        );
+
+        setTransform(
+            day1RightPaw,
+            `rotate(${-tap * 8}deg) translateY(${Math.abs(tap) * 8}px)`
+        );
+
+        typeByProgress(
+            day1Typed,
+            ";;;;;;;;;mmmmMMMMMMmow",
+            typing
+        );
+
+        const reply =
+            easeOut(
+                map(
+                    p,
+                    .66,
+                    .76
+                )
+            );
+
+        setOpacity(
+            day1Reply,
+            reply
+        );
+
+        setTransform(
+            day1Reply,
+            `translateY(${lerp(35, 0, reply)}px)`
+        );
+
+        const reaction =
+            easeOut(
+                map(
+                    p,
+                    .82,
+                    .91
+                )
+            );
+
+        setOpacity(
+            day1Reaction,
+            reaction
+        );
+
+        setTransform(
+            day1Reaction,
+            `translateY(${lerp(80, 0, reaction)}px) rotate(2deg)`
+        );
+    }
+
+    function animateDay2() {
+        const p =
+            progressOf(day2);
+
+        const pawReach =
+            easeInOut(
+                map(
+                    p,
+                    .06,
+                    .23
+                )
+            );
+
+        setTransform(
+            day2MousePaw,
+            `translate(${pawReach * 30}px, ${pawReach * 14}px) rotate(${-pawReach * 9}deg)`
+        );
+
+        setOpacity(
+            cursor,
+            map(
+                p,
+                .12,
+                .18
+            )
+        );
+
+        const paneRect =
+            day2Pane.getBoundingClientRect();
+
+        const replyRect =
+            replyButton.getBoundingClientRect();
+
+        const replyAllRect =
+            replyAllButton.getBoundingClientRect();
+
+        const startX =
+            paneRect.width * .72;
+
+        const startY =
+            paneRect.height * .32;
+
+        const replyX =
+            replyRect.left -
+            paneRect.left +
+            replyRect.width * .5;
+
+        const replyY =
+            replyRect.top -
+            paneRect.top +
+            replyRect.height * .5;
+
+        const allX =
+            replyAllRect.left -
+            paneRect.left +
+            replyAllRect.width * .5;
+
+        const allY =
+            replyAllRect.top -
+            paneRect.top +
+            replyAllRect.height * .5;
+
+        const toReply =
+            easeInOut(
+                map(
+                    p,
+                    .18,
+                    .31
+                )
+            );
+
+        let x =
+            lerp(
+                startX,
+                replyX,
+                toReply
+            );
+
+        let y =
+            lerp(
+                startY,
+                replyY,
+                toReply
+            );
+
+        if (p >= .31) {
+            x =
+                replyX;
+
+            y =
+                replyY;
+        }
+
+        const toAll =
+            easeInOut(
+                map(
+                    p,
+                    .36,
+                    .48
+                )
+            );
+
+        if (p >= .36) {
+            x =
+                lerp(
+                    replyX,
+                    allX,
+                    toAll
+                );
+
+            y =
+                lerp(
+                    replyY,
+                    allY,
+                    toAll
+                );
+        }
+
+        cursor.style.left =
+            `${x}px`;
+
+        cursor.style.top =
+            `${y}px`;
+
+        if (
+            p >= .43 &&
+            p < .57
+        ) {
+            replyAllButton.style.background =
+                "#dfe7ff";
+
+            replyAllButton.style.borderColor =
+                "#456be6";
+        } else {
+            replyAllButton.style.background =
+                "#fff";
+
+            replyAllButton.style.borderColor =
+                "#aaa";
+        }
+
+        const click =
+            map(
+                p,
+                .50,
+                .55
+            );
+
+        if (
+            p >= .50 &&
+            p <= .57
+        ) {
+            const pulse =
+                Math.sin(
+                    click *
+                    Math.PI
+                );
+
+            clickRing.style.left =
+                `${allX - 18}px`;
+
+            clickRing.style.top =
+                `${allY - 18}px`;
+
+            setOpacity(
+                clickRing,
+                pulse
+            );
+
+            setTransform(
+                clickRing,
+                "translate(0, 0)"
+            );
+
+            setTransform(
+                cursor,
+                "translate(0, 0)"
+            );
+        } else {
+            setOpacity(
+                clickRing,
+                0
+            );
+
+            setTransform(
+                cursor,
+                "translate(0, 0)"
+            );
+        }
+
+        const composeProgress =
+            easeOut(
+                map(
+                    p,
+                    .57,
+                    .66
+                )
+            );
+
+        setOpacity(
+            replyCompose,
+            composeProgress
+        );
+
+        setTransform(
+            replyCompose,
+            `translateY(${lerp(100, 0, composeProgress)}%)`
+        );
+
+        recipientChips.forEach(
+            (chip, index) => {
+                const chipProgress =
+                    easeOut(
+                        map(
+                            p,
+                            .64 + index * .012,
+                            .69 + index * .012
+                        )
+                    );
+
+                setOpacity(
+                    chip,
+                    chipProgress
+                );
+
+                setTransform(
+                    chip,
+                    "translate(0, 0)"
+                );
+            }
+        );
+
+        const typing =
+            map(
+                p,
+                .71,
+                .82
+            );
+
+        typeByProgress(
+            day2Typed,
+            "asdfjjjjjjjjjjjjjjjjjj",
+            typing
+        );
+
+        const smash =
+            Math.sin(
+                typing *
+                Math.PI *
+                24
+            );
+
+        if (p >= .70) {
+            setTransform(
+                day2MousePaw,
+                `translateY(${Math.abs(smash) * 7}px) rotate(${smash * 7}deg)`
+            );
+        }
+
+        const flashIn =
+            map(
+                p,
+                .85,
+                .87
+            );
+
+        const flashOut =
+            1 -
+            map(
+                p,
+                .89,
+                .92
+            );
+
+        setOpacity(
+            sendFlash,
+            Math.min(
+                flashIn,
+                flashOut
+            )
+        );
+
+        const boss =
+            easeOut(
+                map(
+                    p,
+                    .93,
+                    .985
+                )
+            );
+
+        setOpacity(
+            bossReply,
+            boss
+        );
+
+        setTransform(
+            bossReply,
+            `translate(-50%, -50%) rotate(${lerp(-5, -2, boss)}deg)`
+        );
+    }
+
+    function animateDay3() {
+        const p =
+            progressOf(day3);
+
+        /*
+         * Very slight push-in makes this feel like a different
+         * shot instead of another stationary computer setup.
+         */
+
+        const push =
+            easeInOut(
+                map(
+                    p,
+                    .05,
+                    .75
+                )
+            );
+
+        setTransform(
+            clientMonitor,
+            `translate(-50%, -50%) rotate(${lerp(-1, .4, push)}deg)`
+        );
+
+        const feedback =
+            easeOut(
+                map(
+                    p,
+                    .47,
+                    .64
+                )
+            );
+
+        setOpacity(
+            clientFeedback,
+            feedback
+        );
+
+        setTransform(
+            clientFeedback,
+            `translateY(${lerp(80, 0, feedback)}px) rotate(-2deg)`
+        );
+    }
+
+    function animateMiracle() {
+        const p =
+            progressOf(miracle);
+
+        const typing =
+            map(
+                p,
+                .08,
+                .52
+            );
+
+        typeByProgress(
+            miracleTyped,
+            "Let’s circle back next week.",
+            typing
+        );
+
+        const tap =
+            Math.sin(
+                typing *
+                Math.PI *
+                30
+            );
+
+        setTransform(
+            miracleLeftPaw,
+            `rotate(${tap * 7}deg) translateY(${Math.abs(tap) * 7}px)`
+        );
+
+        setTransform(
+            miracleRightPaw,
+            `rotate(${-tap * 7}deg) translateY(${Math.abs(tap) * 7}px)`
+        );
+
+        /*
+         * The cat stops typing and slowly turns toward camera.
+         */
+
+        const look =
+            easeInOut(
+                map(
+                    p,
+                    .60,
+                    .69
+                )
+            );
+
+        setTransform(
+            miracleHead,
+            `translate(${look * -15}px, ${look * 4}px) rotate(${look * -8}deg)`
+        );
+
+        const r1 =
+            easeOut(
+                map(
+                    p,
+                    .72,
+                    .78
+                )
+            );
+
+        const r2 =
+            easeOut(
+                map(
+                    p,
+                    .80,
+                    .86
+                )
+            );
+
+        const r3 =
+            easeOut(
+                map(
+                    p,
+                    .88,
+                    .94
+                )
+            );
+
+        setOpacity(
+            reaction1,
+            r1
+        );
+
+        setTransform(
+            reaction1,
+            `translateY(${lerp(45, 0, r1)}px) rotate(-4deg)`
+        );
+
+        setOpacity(
+            reaction2,
+            r2
+        );
+
+        setTransform(
+            reaction2,
+            `translateY(${lerp(45, 0, r2)}px) rotate(4deg)`
+        );
+
+        setOpacity(
+            reaction3,
+            r3
+        );
+
+        setTransform(
+            reaction3,
+            `translateY(${lerp(45, 0, r3)}px) rotate(-3deg)`
+        );
+    }
+
+    const humanEmail =
+        "Hi, I just wanted to reach out and touch base regarding our previous conversation and see if perhaps we might be able to find some time to connect at some point in the near future, if that works on your end. Please let me know your thoughts when you have a chance, but absolutely no rush. Best, Me";
+
+    function animateDay7() {
+        const p =
+            progressOf(day7);
+
+        /*
+         * First establish that the human has physically taken
+         * the keyboard back.
+         *
+         * Then the hands start absolutely hammering it.
+         */
+
+        const typing =
+            map(
+                p,
+                .10,
+                .62
+            );
+
+        typeByProgress(
+            humanTyped,
+            humanEmail,
+            typing
+        );
+
+        const leftSmash =
+            Math.sin(
+                typing *
+                Math.PI *
+                42
+            );
+
+        const rightSmash =
+            Math.sin(
+                typing *
+                Math.PI *
+                42 +
+                1.7
+            );
+
+        if (
+            p >= .09 &&
+            p <= .65
+        ) {
+            setTransform(
+                humanLeftHand,
+                `translate(${leftSmash * 12}px, ${Math.abs(leftSmash) * 16}px) rotate(${leftSmash * 7}deg)`
+            );
+
+            setTransform(
+                humanRightHand,
+                `translate(${rightSmash * 12}px, ${Math.abs(rightSmash) * 16}px) rotate(${rightSmash * 7}deg)`
+            );
+
+            /*
+             * Individual keys visibly depress while the hands mash.
+             */
+
+            const activeIndex =
+                Math.abs(
+                    Math.floor(
+                        typing *
+                        day7Keys.length *
+                        37
+                    )
+                ) %
+                day7Keys.length;
+
+            const secondIndex =
+                (
+                    activeIndex +
+                    7
+                ) %
+                day7Keys.length;
+
+            day7Keys.forEach(
+                (key, index) => {
+                    key.classList.toggle(
+                        "hit",
+                        index === activeIndex ||
+                        index === secondIndex
+                    );
+                }
+            );
+        } else {
+            setTransform(
+                humanLeftHand,
+                "translate(0, 0) rotate(0deg)"
+            );
+
+            setTransform(
+                humanRightHand,
+                "translate(0, 0) rotate(0deg)"
+            );
+
+            day7Keys.forEach(
+                key => {
+                    key.classList.remove(
+                        "hit"
+                    );
+                }
+            );
+        }
+
+        /*
+         * Hands freeze.
+         *
+         * The person looks at what they wrote.
+         *
+         * No explanatory sentence.
+         */
+
+        const thought =
+            easeOut(
+                map(
+                    p,
+                    .68,
+                    .75
+                )
+            );
+
+        setOpacity(
+            day7Thought,
+            thought
+        );
+
+        setTransform(
+            day7Thought,
+            `translateY(${lerp(35, 0, thought)}px) rotate(3deg)`
+        );
+
+        /*
+         * Then simply compare it to the cat's email.
+         */
+
+        const comparison =
+            easeOut(
+                map(
+                    p,
+                    .80,
+                    .91
+                )
+            );
+
+        setOpacity(
+            catComparison,
+            comparison
+        );
+
+        setTransform(
+            catComparison,
+            "rotate(-3deg)"
+        );
+    }
+
+    function animateEnding() {
+        const p =
+            progressOf(ending);
+
+        const cat =
+            easeOut(
+                map(
+                    p,
+                    .08,
+                    .23
+                )
+            );
+
+        setOpacity(
+            executiveCat,
+            cat
+        );
+
+        setTransform(
+            executiveCat,
+            `translateX(-50%) translateY(${lerp(90, 0, cat)}px)`
+        );
+
+        const lower =
+            easeOut(
+                map(
+                    p,
+                    .42,
+                    .57
+                )
+            );
+
+        setTransform(
+            lowerThird,
+            `translateX(${lerp(-120, 0, lower)}%)`
+        );
+
+        const black =
+            map(
+                p,
+                .79,
+                .86
+            );
+
+        setOpacity(
+            blackout,
+            black
+        );
+
+        const card =
+            easeOut(
+                map(
+                    p,
+                    .89,
+                    .97
+                )
+            );
+
+        setOpacity(
+            endCard,
+            card
+        );
+
+        setTransform(
+            endCard,
+            `translateY(${lerp(35, 0, card)}px)`
+        );
+    }
+
+    function animateProgress() {
+        const max =
+            document.documentElement.scrollHeight -
+            window.innerHeight;
+
+        const p =
+            max > 0
+                ? window.scrollY / max
+                : 0;
+
+        progressFill.style.width =
+            `${clamp(p) * 100}%`;
+    }
+
+    let ticking =
+        false;
+
+    function render() {
+        ticking =
+            false;
+
+        animateProgress();
+        animateIntro();
+        animateDay1();
+        animateDay2();
+        animateDay3();
+        animateMiracle();
+        animateDay7();
+        animateEnding();
+    }
+
+    function requestRender() {
+        if (ticking) {
+            return;
+        }
+
+        ticking =
+            true;
+
+        requestAnimationFrame(
+            render
+        );
+    }
+
+    window.addEventListener(
+        "scroll",
+        requestRender,
+        {
+            passive: true
+        }
+    );
+
+    window.addEventListener(
+        "resize",
+        requestRender
+    );
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        () => {
+            const year =
+                new Date().getFullYear();
+
+            document.getElementById(
+                "copyright"
+            ).textContent =
+                `© 2019-${year} Unlim8ted Studio Productions. All rights reserved.`;
+
+            render();
+        }
+    );
+</script>
+
+</body>
+</html>

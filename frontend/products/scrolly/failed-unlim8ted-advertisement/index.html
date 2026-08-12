@@ -1,0 +1,2702 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#08090b">
+
+    <title>Failed Unlim8ted Advertisement - Unlim8ted Studios</title>
+
+    <meta name="description"
+        content="A chaotic comedy sketch in which an increasingly disastrous commercial shoot completely fails to explain what Unlim8ted does.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Failed Unlim8ted Advertisement">
+    <meta property="og:description"
+        content="A commercial shoot. A missing sandwich. Seven takes. Absolutely no explanation of what Unlim8ted actually does.">
+
+    <script type="module" src="https://unlim8ted.com/components/site-navbar.js"></script>
+
+    <script type="module">
+        import { onAuthStateChanged }
+            from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+        import {
+            collection,
+            doc,
+            setDoc,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+        import { getFirebase } from "/components/firebase-init.js";
+
+        const { auth, db } = getFirebase();
+
+        onAuthStateChanged(auth, user => {
+            document.documentElement.dataset.authenticated =
+                user ? "true" : "false";
+        });
+    </script>
+
+    <style>
+        :root {
+            --black: #08090b;
+            --dark: #111318;
+            --dark2: #1b1e24;
+            --paper: #f3efe6;
+            --ink: #111318;
+            --green: #36df7d;
+            --red: #f13b32;
+            --yellow: #ffe16b;
+            --blue: #dcecff;
+            --panel: 1420px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            background: var(--black);
+        }
+
+        body {
+            margin: 0;
+            overflow-x: hidden;
+            background: var(--black);
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        site-navbar {
+            position: relative;
+            z-index: 10000;
+        }
+
+        .progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 3px;
+            z-index: 20000;
+            background: white;
+        }
+
+        /* =========================================================
+           GENERAL SCROLL COMIC
+        ========================================================= */
+
+        .hero {
+            min-height: 100svh;
+            position: relative;
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            padding: 100px 25px 70px;
+            background:
+                radial-gradient(circle at 50% 30%, #252b32, #0b0c0f 48%, #060708);
+        }
+
+        .hero-grid {
+            position: absolute;
+            inset: 0;
+            opacity: .1;
+            background-image:
+                linear-gradient(rgba(255,255,255,.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.15) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        .hero-inner {
+            position: relative;
+            text-align: center;
+            max-width: 1100px;
+        }
+
+        .eyebrow {
+            margin-bottom: 28px;
+            color: #a9afb6;
+            font: 700 .78rem "Courier New", monospace;
+            letter-spacing: .25em;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: clamp(4rem, 11vw, 10rem);
+            line-height: .8;
+            letter-spacing: -.085em;
+            text-transform: uppercase;
+        }
+
+        .hero h1 span {
+            display: block;
+            color: transparent;
+            -webkit-text-stroke: 2px white;
+        }
+
+        .hero p {
+            max-width: 650px;
+            margin: 42px auto 0;
+            color: #9fa4aa;
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            line-height: 1.6;
+        }
+
+        .scroll {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #6f747b;
+            font: 700 .7rem "Courier New", monospace;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+        }
+
+        .scroll svg {
+            display: block;
+            width: 26px;
+            margin: 10px auto 0;
+            animation: bob 2.4s ease-in-out infinite;
+        }
+
+        @keyframes bob {
+            50% {
+                transform: translateY(8px);
+            }
+        }
+
+        .scene {
+            min-height: 100vh;
+            padding: 90px 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .scene-inner {
+            width: min(var(--panel), 100%);
+        }
+
+        .take {
+            margin: 0 0 18px 10px;
+            color: #464a51;
+            font-size: clamp(2.8rem, 7vw, 6rem);
+            line-height: .8;
+            letter-spacing: -.07em;
+            font-weight: 1000;
+        }
+
+        .caption {
+            margin: 0 0 22px 10px;
+            color: #858b93;
+            font: 700 .78rem "Courier New", monospace;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .panel {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            min-height: 520px;
+            max-height: 850px;
+            overflow: hidden;
+            border-radius: 8px;
+            background: var(--paper);
+            color: var(--ink);
+            box-shadow: 0 35px 100px rgba(0,0,0,.55);
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(35px);
+            transition: opacity 1.2s ease, transform 1.2s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* =========================================================
+           STUDIO SET
+        ========================================================= */
+
+        .studio {
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(
+                    to bottom,
+                    #30333a 0%,
+                    #24272d 15%,
+                    #191b20 15%,
+                    #191b20 76%,
+                    #101216 76%,
+                    #0c0d10 100%
+                );
+        }
+
+        .ceiling-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 15%;
+            height: 3px;
+            background: #41454d;
+        }
+
+        .greenscreen {
+            position: absolute;
+            left: 27%;
+            top: 10%;
+            width: 46%;
+            height: 58%;
+            border: 7px solid #08090a;
+            background:
+                radial-gradient(circle at 50% 45%, #44ee8a, #1ca95a 75%);
+            box-shadow: 0 18px 45px rgba(0,0,0,.45);
+        }
+
+        .greenscreen::after {
+            content: "UNLIM8TED";
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            color: rgba(0,0,0,.14);
+            font-size: clamp(3rem, 8vw, 8rem);
+            font-weight: 1000;
+            letter-spacing: -.08em;
+        }
+
+        .floor-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 24%;
+            height: 3px;
+            background: #34373d;
+        }
+
+        /* =========================================================
+           LIGHTS
+        ========================================================= */
+
+        .light {
+            position: absolute;
+            top: 5%;
+            width: 75px;
+            height: 95px;
+            background: #ece8da;
+            clip-path: polygon(13% 0, 87% 0, 100% 100%, 0 100%);
+            box-shadow: 0 0 55px rgba(255,255,230,.28);
+        }
+
+        .light::after {
+            content: "";
+            position: absolute;
+            width: 7px;
+            height: 260px;
+            top: 88px;
+            left: 34px;
+            background: #0b0c0e;
+        }
+
+        .light-left {
+            left: 9%;
+            transform: rotate(10deg);
+        }
+
+        .light-right {
+            right: 9%;
+            transform: rotate(-10deg);
+        }
+
+        /* =========================================================
+           TABLE + LAPTOP + SANDWICH
+        ========================================================= */
+
+        .table {
+            position: absolute;
+            left: 36%;
+            bottom: 21%;
+            width: 28%;
+            height: 12px;
+            background: #a97b50;
+            z-index: 5;
+        }
+
+        .table::before,
+        .table::after {
+            content: "";
+            position: absolute;
+            top: 10px;
+            width: 10px;
+            height: 120px;
+            background: #67492e;
+        }
+
+        .table::before {
+            left: 8%;
+        }
+
+        .table::after {
+            right: 8%;
+        }
+
+        .laptop {
+            position: absolute;
+            left: 50%;
+            bottom: calc(21% + 12px);
+            width: 125px;
+            height: 80px;
+            transform: translateX(-50%);
+            border: 5px solid #08090a;
+            border-radius: 6px 6px 2px 2px;
+            background: #181a1e;
+            z-index: 8;
+        }
+
+        .laptop-screen {
+            position: absolute;
+            inset: 5px;
+            background: #31db78;
+        }
+
+        .windows .laptop-screen {
+            background:
+                linear-gradient(145deg, #136ab5, #55ace4 52%, #bde9ff);
+        }
+
+        .windows .laptop-screen::after {
+            content: "";
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(255,255,255,.85);
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%,-50%);
+        }
+
+        .sandwich {
+            position: absolute;
+            width: 68px;
+            height: 32px;
+            left: calc(50% + 55px);
+            bottom: calc(21% + 13px);
+            z-index: 6;
+            transform: rotate(-4deg);
+        }
+
+        .missing-sandwich {
+            display: none;
+        }
+
+        .sandwich-top {
+            position: absolute;
+            width: 68px;
+            height: 14px;
+            border: 2px solid #70491f;
+            border-radius: 35px 35px 4px 4px;
+            background: #d9a15a;
+        }
+
+        .sandwich-green {
+            position: absolute;
+            left: 3px;
+            right: 3px;
+            top: 14px;
+            height: 7px;
+            background: #68ad45;
+        }
+
+        .sandwich-red {
+            position: absolute;
+            left: 8px;
+            right: 6px;
+            top: 20px;
+            height: 5px;
+            background: #d94b3d;
+        }
+
+        .sandwich-bottom {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 68px;
+            height: 10px;
+            border: 2px solid #70491f;
+            background: #c88f4c;
+        }
+
+        /* =========================================================
+           CAMERA + CAMERA OPERATOR
+        ========================================================= */
+
+        .camera-rig {
+            position: absolute;
+            left: 5%;
+            bottom: 11%;
+            width: 180px;
+            height: 280px;
+            z-index: 12;
+        }
+
+        .camera-body {
+            position: absolute;
+            left: 25px;
+            top: 25px;
+            width: 100px;
+            height: 67px;
+            border-radius: 8px;
+            background: #050607;
+        }
+
+        .camera-lens {
+            position: absolute;
+            left: 120px;
+            top: 36px;
+            width: 48px;
+            height: 44px;
+            background: #101216;
+            clip-path: polygon(0 13%,100% 0,100% 100%,0 87%);
+        }
+
+        .tripod-neck {
+            position: absolute;
+            left: 72px;
+            top: 85px;
+            width: 7px;
+            height: 105px;
+            background: #08090b;
+        }
+
+        .tripod-leg {
+            position: absolute;
+            top: 180px;
+            width: 7px;
+            height: 105px;
+            background: #08090b;
+            transform-origin: top;
+        }
+
+        .leg1 {
+            left: 74px;
+            transform: rotate(21deg);
+        }
+
+        .leg2 {
+            left: 74px;
+            transform: rotate(-21deg);
+        }
+
+        .operator {
+            position: absolute;
+            left: 12px;
+            top: 70px;
+            width: 55px;
+            height: 165px;
+        }
+
+        /* =========================================================
+           PEOPLE
+        ========================================================= */
+
+        .person {
+            position: absolute;
+            width: 90px;
+            height: 235px;
+            z-index: 10;
+        }
+
+        .head {
+            position: absolute;
+            left: 25px;
+            top: 0;
+            width: 43px;
+            height: 50px;
+            border-radius: 50%;
+            background: #c78c67;
+        }
+
+        .hair {
+            position: absolute;
+            left: 22px;
+            top: -2px;
+            width: 49px;
+            height: 23px;
+            border-radius: 50% 50% 30% 30%;
+            background: #332720;
+        }
+
+        .body {
+            position: absolute;
+            left: 11px;
+            top: 44px;
+            width: 70px;
+            height: 118px;
+            border-radius: 26px 26px 8px 8px;
+            background: #303544;
+        }
+
+        .leg {
+            position: absolute;
+            top: 155px;
+            width: 17px;
+            height: 80px;
+            background: #20232a;
+        }
+
+        .leg-left {
+            left: 24px;
+        }
+
+        .leg-right {
+            right: 23px;
+        }
+
+        .director-person {
+            left: 73%;
+            bottom: 8%;
+        }
+
+        .director-person .body {
+            background: #3b4355;
+        }
+
+        .voice-person {
+            left: 21%;
+            bottom: 8%;
+        }
+
+        .voice-person .body {
+            background: #4e3e52;
+        }
+
+        .sandwich-guy {
+            right: 3%;
+            bottom: 7%;
+        }
+
+        .sandwich-guy .body {
+            background: #5a4739;
+        }
+
+        /* =========================================================
+           BOOM
+        ========================================================= */
+
+        .boom {
+            position: absolute;
+            right: 14%;
+            top: 8%;
+            width: 280px;
+            height: 5px;
+            background: #070809;
+            transform: rotate(-8deg);
+            z-index: 20;
+        }
+
+        .boom::before {
+            content: "";
+            position: absolute;
+            left: -28px;
+            top: -9px;
+            width: 43px;
+            height: 22px;
+            border-radius: 50%;
+            background: #15171a;
+        }
+
+        /* =========================================================
+           SPEECH
+        ========================================================= */
+
+        .bubble {
+            position: absolute;
+            max-width: 290px;
+            padding: 13px 16px;
+            border: 3px solid #111;
+            border-radius: 16px;
+            background: white;
+            color: #111;
+            font-size: clamp(.75rem, 1.25vw, 1.08rem);
+            line-height: 1.25;
+            font-weight: 800;
+            box-shadow: 5px 5px 0 #111;
+            z-index: 50;
+            opacity: 0;
+        }
+
+        .bubble::after {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: inherit;
+            border-right: 3px solid #111;
+            border-bottom: 3px solid #111;
+            transform: rotate(45deg);
+            bottom: -10px;
+        }
+
+        .tail-left::after {
+            left: 25px;
+        }
+
+        .tail-right::after {
+            right: 25px;
+        }
+
+        .vo-bubble {
+            left: 16%;
+            top: 12%;
+        }
+
+        .sandwich-bubble {
+            right: 3%;
+            top: 12%;
+            background: #fff2aa;
+        }
+
+        .director-bubble {
+            right: 14%;
+            bottom: 7%;
+            background: #ffdede;
+        }
+
+        .visible .bubble {
+            animation: bubbleFade 5.2s ease forwards;
+        }
+
+        .visible .vo-bubble {
+            animation-delay: .45s;
+        }
+
+        .visible .sandwich-bubble,
+        .visible .blocking-bubble {
+            animation-delay: 1.35s;
+        }
+
+        .visible .director-bubble {
+            animation-delay: 2.55s;
+        }
+
+        .visible .sorry-bubble {
+            animation-delay: 3.8s;
+        }
+
+        @keyframes bubbleFade {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            14%,
+            72% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+        }
+
+        /* =========================================================
+           TAKE THREE
+        ========================================================= */
+
+        .walker {
+            position: absolute;
+            left: -13%;
+            bottom: 8%;
+            width: 90px;
+            height: 235px;
+            z-index: 30;
+            transition: left 3s ease;
+        }
+
+        .visible .walker {
+            left: 46%;
+        }
+
+        .phone {
+            position: absolute;
+            left: 61px;
+            top: 78px;
+            width: 46px;
+            height: 82px;
+            border: 5px solid #111;
+            border-radius: 10px;
+            background: white;
+            z-index: 40;
+            transform: rotate(-10deg);
+        }
+
+        .phone::before {
+            content: "Google";
+            position: absolute;
+            left: 7px;
+            top: 9px;
+            font-weight: 900;
+            font-size: .48rem;
+        }
+
+        .phone::after {
+            content: "what is Unlim8ted?";
+            position: absolute;
+            left: 5px;
+            right: 5px;
+            top: 27px;
+            padding: 3px;
+            border: 1px solid #aaa;
+            border-radius: 10px;
+            font-size: .34rem;
+            font-weight: 800;
+        }
+
+        .blocking-bubble {
+            left: 38%;
+            top: 10%;
+            background: #e4efff;
+        }
+
+        /* =========================================================
+           TAKE FOUR - FULL WIDE FRAME TILT
+        ========================================================= */
+
+        .take-four {
+            position: relative;
+            height: 650vh;
+            background: #08090b;
+        }
+
+        .take-four-sticky {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+        }
+
+        .take-four-label {
+            position: absolute;
+            left: max(24px, 7vw);
+            top: 78px;
+            z-index: 180;
+        }
+
+        .take-four-label .take {
+            margin: 0;
+            color: #f3efe6;
+            font-size: clamp(2.2rem, 5vw, 4.8rem);
+        }
+
+        .take-four-label .caption {
+            margin: 10px 0 0;
+            color: #8d939b;
+        }
+
+        .tilt-wrapper {
+            width: min(1180px, 86vw);
+            aspect-ratio: 16 / 9;
+            position: relative;
+            will-change: transform;
+            transition: transform .2s linear;
+        }
+
+        .tilt-panel {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            border-radius: 7px;
+            background: #191b20;
+            box-shadow: 0 35px 100px black;
+        }
+
+        .corporate-subtitles {
+            position: absolute;
+            left: 50%;
+            bottom: 4%;
+            width: 75%;
+            transform: translateX(-50%);
+            z-index: 100;
+            padding: 10px 16px;
+            border-radius: 6px;
+            background: rgba(0,0,0,.72);
+            color: white;
+            text-align: center;
+            font-size: clamp(.85rem, 1.6vw, 1.35rem);
+            line-height: 1.4;
+            font-weight: 700;
+        }
+
+        .angle {
+            position: absolute;
+            top: 12px;
+            right: 15px;
+            z-index: 120;
+            color: rgba(255,255,255,.55);
+            font: 700 .7rem "Courier New", monospace;
+        }
+
+        .director-face {
+            position: absolute;
+            right: 19%;
+            bottom: 18%;
+            width: 90px;
+            height: 230px;
+            z-index: 20;
+        }
+
+        .director-face .head {
+            width: 46px;
+            height: 52px;
+        }
+
+        .director-face .body {
+            width: 72px;
+        }
+
+        .horror {
+            position: absolute;
+            right: 13%;
+            top: 16%;
+            z-index: 100;
+            max-width: 230px;
+            padding: 13px;
+            border: 3px solid #111;
+            border-radius: 15px;
+            background: white;
+            color: #111;
+            font-weight: 900;
+            opacity: 0;
+        }
+
+        .final-reset {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            z-index: 200;
+            transform: translate(-50%,-50%);
+            color: #ff3b30;
+            font-size: clamp(4rem, 12vw, 10rem);
+            font-weight: 1000;
+            text-shadow: 7px 7px black;
+            opacity: 0;
+        }
+
+        /* =========================================================
+           CRASH
+        ========================================================= */
+
+        .crash-scene {
+            min-height: 75vh;
+            display: grid;
+            place-items: center;
+            padding: 60px 20px;
+            background: #07080a;
+        }
+
+        .crash-card {
+            width: min(900px, 100%);
+            text-align: center;
+        }
+
+        .crash-drawing {
+            height: 270px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .fallen-camera {
+            position: absolute;
+            left: 50%;
+            bottom: 25px;
+            width: 160px;
+            height: 90px;
+            transform: translateX(-50%) rotate(68deg);
+            background: #15171b;
+        }
+
+        .fallen-camera::before {
+            content: "";
+            position: absolute;
+            right: -60px;
+            top: 17px;
+            width: 65px;
+            height: 48px;
+            background: #25282e;
+            clip-path: polygon(0 15%,100% 0,100% 100%,0 85%);
+        }
+
+        .fallen-camera::after {
+            content: "";
+            position: absolute;
+            left: 70px;
+            top: 75px;
+            width: 7px;
+            height: 150px;
+            background: #181a1e;
+            transform: rotate(40deg);
+            transform-origin: top;
+        }
+
+        .crash-card small {
+            color: #70757c;
+            font: 700 .75rem "Courier New", monospace;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+        }
+
+        .crash-card h2 {
+            margin: 14px 0;
+            font-size: clamp(3rem, 8vw, 7rem);
+            letter-spacing: -.07em;
+        }
+
+        /* =========================================================
+           TAKE FIVE
+        ========================================================= */
+
+        .take-five-panel {
+            background: #dedad0;
+        }
+
+        .take-five-panel .studio {
+            opacity: .25;
+        }
+
+        .argument {
+            position: absolute;
+            padding: 16px 20px;
+            border: 4px solid #111;
+            background: white;
+            color: #111;
+            font-weight: 1000;
+            line-height: 1.15;
+            box-shadow: 7px 7px #111;
+            z-index: 50;
+        }
+
+        .arg1 {
+            left: 7%;
+            top: 10%;
+            transform: rotate(-3deg);
+        }
+
+        .arg2 {
+            right: 5%;
+            top: 20%;
+            width: 39%;
+            background: #fff0a3;
+            transform: rotate(3deg);
+            font-size: clamp(1rem, 2vw, 1.7rem);
+        }
+
+        .arg3 {
+            left: 14%;
+            bottom: 10%;
+            width: 40%;
+            background: #ffd8d8;
+            transform: rotate(-2deg);
+            font-size: clamp(1rem, 2vw, 1.6rem);
+        }
+
+        .bleep {
+            padding: 1px 5px;
+            background: #111;
+            color: white;
+        }
+
+        /* =========================================================
+           TAKE SIX - ACTUAL ACTION IS VISIBLE
+        ========================================================= */
+
+        .take-six .sandwich-guy {
+            right: 6%;
+        }
+
+        .take-six .sandwich {
+            transition:
+                left 2.4s ease,
+                bottom 2.4s ease,
+                transform 2.4s ease;
+        }
+
+        .take-six.visible .sandwich {
+            left: 84%;
+            bottom: 46%;
+            transform: rotate(12deg) scale(1.2);
+        }
+
+        .reach-arm {
+            position: absolute;
+            right: 12%;
+            bottom: 39%;
+            width: 175px;
+            height: 16px;
+            background: #c78c67;
+            transform: rotate(10deg);
+            transform-origin: right;
+            z-index: 15;
+        }
+
+        /* =========================================================
+           DIRECTOR MELTDOWN
+        ========================================================= */
+
+        .meltdown {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 80px 20px;
+            background: #f1eee5;
+            color: #111;
+            text-align: center;
+        }
+
+        .meltdown small {
+            color: #777;
+            font: 700 .75rem "Courier New", monospace;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .meltdown h2 {
+            margin: 24px 0;
+            font-size: clamp(3.2rem, 9vw, 8rem);
+            line-height: .82;
+            letter-spacing: -.075em;
+        }
+
+        .meltdown .wait {
+            font-size: clamp(1.4rem, 3vw, 2.5rem);
+            font-weight: 900;
+        }
+
+        .voices {
+            max-width: 850px;
+            margin: 50px auto 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .voices span {
+            padding: 10px 14px;
+            border: 3px solid #111;
+            background: white;
+            font-weight: 800;
+        }
+
+        /* =========================================================
+           TAKE SEVEN
+        ========================================================= */
+
+        .chaos {
+            background: #17191e;
+        }
+
+        .director-center {
+            position: absolute;
+            left: 50%;
+            bottom: 4%;
+            width: 100px;
+            height: 250px;
+            transform: translateX(-50%);
+        }
+
+        .guess {
+            position: absolute;
+            width: 24%;
+            max-width: 310px;
+            padding: 14px 16px;
+            border: 3px solid #111;
+            background: white;
+            color: #111;
+            font-size: clamp(.7rem, 1.25vw, 1.05rem);
+            font-weight: 900;
+            line-height: 1.25;
+            box-shadow: 5px 5px rgba(0,0,0,.45);
+            opacity: 0;
+            transform: scale(.7) rotate(var(--r));
+            transition: opacity .8s ease, transform .8s ease;
+        }
+
+        .visible .guess {
+            opacity: 1;
+            transform: scale(1) rotate(var(--r));
+        }
+
+        .g1 {
+            --r: -3deg;
+            left: 4%;
+            top: 8%;
+            transition-delay: .1s;
+        }
+
+        .g2 {
+            --r: 3deg;
+            right: 4%;
+            top: 8%;
+            background: #e1ffea;
+            transition-delay: .25s;
+        }
+
+        .g3 {
+            --r: 2deg;
+            left: 5%;
+            top: 38%;
+            background: #fff3b4;
+            transition-delay: .4s;
+        }
+
+        .g4 {
+            --r: -4deg;
+            right: 5%;
+            top: 38%;
+            background: #deecff;
+            transition-delay: .55s;
+        }
+
+        .g5 {
+            --r: -2deg;
+            left: 10%;
+            bottom: 8%;
+            background: #ffdddd;
+            transition-delay: .7s;
+        }
+
+        .g6 {
+            --r: 4deg;
+            right: 10%;
+            bottom: 8%;
+            background: #eadfff;
+            transition-delay: .85s;
+        }
+
+        .g7 {
+            --r: 1deg;
+            left: 38%;
+            top: 8%;
+            background: #fff;
+            transition-delay: 1s;
+        }
+
+        /* =========================================================
+           FIRED
+        ========================================================= */
+
+        .fired {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 70px 20px;
+            text-align: center;
+            background: #08090b;
+        }
+
+        .fired small {
+            color: #777;
+            font: 700 .75rem "Courier New", monospace;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+        }
+
+        .fired h2 {
+            margin: 30px 0;
+            font-size: clamp(3.5rem, 10vw, 9rem);
+            line-height: .82;
+            letter-spacing: -.08em;
+        }
+
+        /* =========================================================
+           FINAL CARD
+        ========================================================= */
+
+        .final {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 80px 20px;
+            background: white;
+            color: black;
+            text-align: center;
+        }
+
+        .final-inner {
+            width: min(1000px, 100%);
+        }
+
+        .final-logo {
+            font-size: clamp(4rem, 13vw, 11rem);
+            line-height: .8;
+            letter-spacing: -.09em;
+            font-weight: 1000;
+        }
+
+        .final h3 {
+            margin: 45px 0 20px;
+            font-size: clamp(1.5rem, 4vw, 3rem);
+        }
+
+        .final p {
+            color: #666;
+            line-height: 1.7;
+        }
+
+        .final a {
+            color: black;
+            font-weight: 900;
+        }
+
+        /* =========================================================
+           SANDWICH RANT
+        ========================================================= */
+
+        .rant {
+            padding: 120px 20px;
+            min-height: 220vh;
+            background: white;
+            color: black;
+            text-align: center;
+        }
+
+        .rant-inner {
+            width: min(1000px, 100%);
+            margin: auto;
+        }
+
+        .rant-line {
+            margin: 95px 0;
+            font-size: clamp(1.8rem, 5vw, 4.7rem);
+            line-height: .95;
+            letter-spacing: -.05em;
+            font-weight: 1000;
+        }
+
+        .rant-small {
+            color: #777;
+            font-size: clamp(1rem, 2.5vw, 1.8rem);
+        }
+
+        .rant-huge {
+            font-size: clamp(5rem, 17vw, 14rem);
+            line-height: .7;
+        }
+
+        .rant-red {
+            color: #d72d25;
+        }
+
+        /* =========================================================
+           CCTV
+        ========================================================= */
+
+        .security {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 90px 20px;
+            background: #08090b;
+        }
+
+        .security-inner {
+            width: min(1150px, 100%);
+        }
+
+        .security h2 {
+            margin: 0 0 25px;
+            color: #888;
+            font: 700 .8rem "Courier New", monospace;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+        }
+
+        .cctv {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            border: 8px solid #24272b;
+            background:
+                repeating-linear-gradient(
+                    to bottom,
+                    rgba(255,255,255,.025) 0,
+                    rgba(255,255,255,.025) 2px,
+                    transparent 2px,
+                    transparent 5px
+                ),
+                #89928b;
+            filter: grayscale(1) contrast(1.15);
+            box-shadow: 0 30px 100px black;
+        }
+
+        .cctv-label {
+            position: absolute;
+            top: 20px;
+            left: 22px;
+            z-index: 30;
+            color: white;
+            font: 700 clamp(.65rem,1.2vw,1rem) "Courier New", monospace;
+            text-shadow: 2px 2px black;
+        }
+
+        .cctv-camera {
+            position: absolute;
+            top: 20px;
+            right: 22px;
+            z-index: 30;
+            color: white;
+            font: 700 clamp(.65rem,1.2vw,1rem) "Courier New", monospace;
+        }
+
+        .cctv-table {
+            position: absolute;
+            left: 30%;
+            bottom: 24%;
+            width: 40%;
+            height: 3%;
+            background: #575757;
+        }
+
+        .cctv-laptop {
+            position: absolute;
+            left: 45%;
+            bottom: 27%;
+            width: 12%;
+            height: 23%;
+            background: #292929;
+        }
+
+        .cctv-sandwich {
+            position: absolute;
+            left: 57%;
+            bottom: 28%;
+            width: 8%;
+            height: 4%;
+            background: #d4d4d4;
+        }
+
+        .dave {
+            position: absolute;
+            left: 4%;
+            bottom: 0;
+            width: 10%;
+            height: 47%;
+            transition: left 4s ease;
+        }
+
+        .dave .head {
+            width: 45%;
+            height: 18%;
+            left: 27%;
+            background: #777;
+        }
+
+        .dave .body {
+            width: 100%;
+            height: 75%;
+            left: 0;
+            top: 18%;
+            background: #4b4b4b;
+        }
+
+        .visible .dave {
+            left: 57%;
+        }
+
+        .wink {
+            position: absolute;
+            left: 58%;
+            top: 29%;
+            z-index: 50;
+            color: white;
+            font-size: clamp(2rem,5vw,5rem);
+            font-weight: 1000;
+            opacity: 0;
+        }
+
+        .visible .wink {
+            animation: wink .8s 3.4s forwards;
+        }
+
+        @keyframes wink {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* =========================================================
+           COMMENTS
+        ========================================================= */
+
+        .comments {
+            padding: 100px 20px;
+            background: #f2f2f2;
+            color: #111;
+        }
+
+        .comments-inner {
+            width: min(850px,100%);
+            margin: auto;
+        }
+
+        .comments h2 {
+            margin: 0 0 45px;
+            font-size: clamp(2.8rem,6vw,5rem);
+            letter-spacing: -.06em;
+        }
+
+        .comment {
+            margin-bottom: 14px;
+            padding: 23px;
+            border: 1px solid #ddd;
+            border-radius: 13px;
+            background: white;
+        }
+
+        .comment-user {
+            margin-bottom: 9px;
+            font-weight: 900;
+        }
+
+        .comment-text {
+            color: #4d4d4d;
+            line-height: 1.5;
+        }
+
+        .reply {
+            margin-left: 45px;
+            border-left: 5px solid #111;
+        }
+
+        .creator {
+            display: inline-block;
+            margin-left: 7px;
+            padding: 3px 5px;
+            border-radius: 3px;
+            background: #111;
+            color: white;
+            font-size: .6rem;
+            vertical-align: middle;
+        }
+
+        footer {
+            padding: 65px 20px;
+            background: #08090b;
+            color: #777;
+            text-align: center;
+            font-size: .9rem;
+        }
+
+        footer strong {
+            color: white;
+        }
+
+        /* =========================================================
+           MOBILE
+        ========================================================= */
+
+        @media (max-width: 700px) {
+            .scene {
+                min-height: auto;
+                padding: 70px 10px;
+            }
+
+            .panel {
+                min-height: 390px;
+                aspect-ratio: 16 / 10;
+            }
+
+            .greenscreen {
+                left: 24%;
+                width: 52%;
+            }
+
+            .camera-rig {
+                transform: scale(.65);
+                transform-origin: left bottom;
+            }
+
+            .person {
+                transform: scale(.7);
+                transform-origin: bottom center;
+            }
+
+            .director-person {
+                left: 70%;
+            }
+
+            .voice-person {
+                left: 18%;
+            }
+
+            .light {
+                transform: scale(.7);
+                transform-origin: top center;
+            }
+
+            .bubble {
+                max-width: 37%;
+                padding: 8px 10px;
+                border-width: 2px;
+                font-size: .57rem;
+                box-shadow: 3px 3px #111;
+            }
+
+            .bubble::after {
+                width: 10px;
+                height: 10px;
+                bottom: -7px;
+                border-width: 2px;
+            }
+
+            .table {
+                width: 32%;
+                left: 34%;
+            }
+
+            .laptop {
+                width: 80px;
+                height: 52px;
+            }
+
+            .sandwich {
+                transform: scale(.7);
+                transform-origin: bottom left;
+            }
+
+            .guess {
+                width: 28%;
+                padding: 8px;
+                border-width: 2px;
+                font-size: .5rem;
+            }
+
+            .tilt-wrapper {
+                width: 86vw;
+            }
+
+            .reply {
+                margin-left: 18px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: .01ms !important;
+                transition-duration: .01ms !important;
+            }
+
+            html {
+                scroll-behavior: auto;
+            }
+
+            .tilt-wrapper {
+                transform: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="progress" id="progress"></div>
+
+<site-navbar
+    cart-href="https://unlim8ted.com/sign-in/cart"
+    signin-href="https://unlim8ted.com/sign-in"
+    profile-href="https://unlim8ted.com/profile">
+</site-navbar>
+
+<!-- ============================================================
+     HERO
+============================================================ -->
+
+<header class="hero">
+    <div class="hero-grid"></div>
+
+    <div class="hero-inner">
+        <div class="eyebrow">Unlim8ted Studios presents</div>
+
+        <h1>
+            Failed
+            <span>Advertisement</span>
+        </h1>
+
+        <p>
+            We hired an entire production crew to explain what Unlim8ted is.
+        </p>
+    </div>
+
+    <div class="scroll">
+        Roll camera
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2">
+            <path d="M12 4v15M6 13l6 6 6-6"/>
+        </svg>
+    </div>
+</header>
+
+
+<!-- ============================================================
+     TAKE 1
+============================================================ -->
+
+<section class="scene">
+    <div class="scene-inner reveal">
+        <div class="take">TAKE 01</div>
+        <div class="caption">Studio A - everything is going extremely well</div>
+
+        <div class="panel">
+
+            <div class="studio">
+                <div class="ceiling-line"></div>
+                <div class="floor-line"></div>
+                <div class="greenscreen"></div>
+
+                <div class="light light-left"></div>
+                <div class="light light-right"></div>
+
+                <div class="boom"></div>
+
+                <div class="table"></div>
+
+                <div class="sandwich missing-sandwich">
+                    <div class="sandwich-top"></div>
+                    <div class="sandwich-green"></div>
+                    <div class="sandwich-red"></div>
+                    <div class="sandwich-bottom"></div>
+                </div>
+
+                <div class="laptop">
+                    <div class="laptop-screen"></div>
+                </div>
+
+                <div class="camera-rig">
+                    <div class="camera-body"></div>
+                    <div class="camera-lens"></div>
+                    <div class="tripod-neck"></div>
+                    <div class="tripod-leg leg1"></div>
+                    <div class="tripod-leg leg2"></div>
+                </div>
+
+                <div class="person voice-person">
+                    <div class="body"></div>
+                    <div class="head"></div>
+                    <div class="hair"></div>
+                    <div class="leg leg-left"></div>
+                    <div class="leg leg-right"></div>
+                </div>
+
+                <div class="person director-person">
+                    <div class="body"></div>
+                    <div class="head"></div>
+                    <div class="hair"></div>
+                    <div class="leg leg-left"></div>
+                    <div class="leg leg-right"></div>
+                </div>
+
+                <div class="person sandwich-guy">
+                    <div class="body"></div>
+                    <div class="head"></div>
+                    <div class="hair"></div>
+                    <div class="leg leg-left"></div>
+                    <div class="leg leg-right"></div>
+                </div>
+
+                <div class="bubble vo-bubble tail-left">
+                    Today we're excited to introduce-
+                </div>
+
+                <div class="bubble sandwich-bubble tail-right">
+                    My lunch was supposed to be on this table.
+                    <br>
+                    Where is my sandwich?
+                </div>
+
+                <div class="bubble director-bubble tail-right">
+                    We'll reset in a second. Also I told you not to add
+                    "we're excited to introduce." Okay?
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================================
+     TAKE 2
+============================================================ -->
+
+<section class="scene">
+    <div class="scene-inner reveal">
+        <div class="take">TAKE 02</div>
+        <div class="caption">Twenty-three seconds later</div>
+
+        <div class="panel">
+
+            <div class="studio">
+                <div class="ceiling-line"></div>
+                <div class="floor-line"></div>
+                <div class="greenscreen"></div>
+
+                <div class="light light-left"></div>
+                <div class="light light-right"></div>
+
+                <div class="boom"></div>
+                <div class="table"></div>
+
+                <div class="sandwich missing-sandwich">
+                    <div class="sandwich-top"></div>
+                    <div class="sandwich-green"></div>
+                    <div class="sandwich-red"></div>
+                    <div class="sandwich-bottom"></div>
+                </div>
+
+                <div class="laptop">
+                    <div class="laptop-screen"></div>
+                </div>
+
+                <div class="camera-rig">
+                    <div class="camera-body"></div>
+                    <div class="camera-lens"></div>
+                    <div class="tripod-neck"></div>
+                    <div class="tripod-leg leg1"></div>
+                    <div class="tripod-leg leg2"></div>
+                </div>
+
+                <div class="person voice-person">
+                    <div class="body"></div>
+                    <div class="head"></div>
+                    <div class="hair"></div>
+                    <div class="leg leg-left"></div>
+                    <div class="leg leg-right"></div>
+                </div>
+
+                <div class="person director-person">
+                    <div class="body"></div>
+                    <div class="head"></div>
+                    <div class="hair"></div>
+                    <div class="leg leg-left"></div>
+                    <div class="leg leg-right"></div>
+                </div>
+
+                <div class="person sandwich-guy"
+                     style="right:8%;">
+                    <div class="body"></div>
+                    <div class="head"></div>
+                    <div class="hair"></div>
+                    <div class="leg leg-left"></div>
+                    <div class="leg leg-right"></div>
+                </div>
+
+                <div class="bubble vo-bubble tail-left">
+                    Unlim8ted is a-
+                </div>
+
+                <div class="bubble sandwich-bubble tail-right"
+                     style="right:6%;top:19%;">
+                    Dave, I am not accusing anyone yet.
+                    <br>
+                    I am asking why the only empty spot on this table is lunch-shaped.
+                </div>
+
+                <div class="bubble director-bubble tail-right">
+                    Pause. Nobody touch the lunch.
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================================
+     TAKE 3
+============================================================ -->
+
+<section class="scene">
+    <div class="scene-inner reveal">
+        <div class="take">TAKE 03</div>
+        <div class="caption">Someone has changed the laptop wallpaper</div>
+
+        <div class="panel">
+
+            <div class="studio">
+                <div class="ceiling-line"></div>
+                <div class="floor-line"></div>
+                <div class="greenscreen"></div>
+
+                <div class="light light-left"></div>
+                <div class="light light-right"></div>
+
+                <div class="table"></div>
+
+                <div class="sandwich missing-sandwich">
+                    <div class="sandwich-top"></div>
+                    <div class="sandwich-green"></div>
+                    <div class="sandwich-red"></div>
+                    <div class="sandwich-bottom"></div>
+                </div>
+
+                <div class="laptop windows">
+                    <div class="laptop-screen"></div>
+                </div>
+
+                <div class="camera-rig">
+                    <div class="camera-body"></div>
+                    <div class="camera-lens"></div>
+                    <div class="tripod-neck"></div>
+                    <div class="tripod-leg leg1"></div>
+                    <div class="tripod-leg leg2"></div>
+                </div>
+
+                <div class="person voice-person">
+                    <div class="body"></div>
+                    <div class="head"></div>
+                    <div class="hair"></div>
+                    <div class="leg leg-left"></div>
+                    <div class="leg leg-right"></div>
+                </div>
+
+                <div class="person director-person">
+                    <div class="body"></div>
+                    <div class="head"></div>
+                    <div class="hair"></div>
+                    <div class="leg leg-left"></div>
+                    <div class="leg leg-right"></div>
+                </div>
+
+                <div class="walker">
+                    <div class="body"></div>
+                    <div class="head"></div>
+                    <div class="hair"></div>
+                    <div class="leg leg-left"></div>
+                    <div class="leg leg-right"></div>
+                    <div class="phone"></div>
+                </div>
+
+                <div class="bubble vo-bubble tail-left">
+                    Unlim8ted helps-
+                </div>
+
+                <div class="bubble blocking-bubble tail-left">
+                    Hm.
+                </div>
+
+                <div class="bubble director-bubble tail-right">
+                    You're blocking the camera.
+                </div>
+
+                <div class="bubble tail-right sorry-bubble"
+                     style="right:37%;bottom:10%;background:#e6f0ff;">
+                    Oh- sorry.
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================================
+     TAKE 4
+============================================================ -->
+
+<section class="take-four" id="takeFour">
+
+    <div class="take-four-sticky">
+
+        <div class="take-four-label">
+            <div class="take">TAKE 04</div>
+            <div class="caption">The camera operator tries to fix the framing during the line</div>
+        </div>
+
+        <div class="tilt-wrapper" id="tiltWrapper">
+
+            <div class="tilt-panel">
+
+                <div class="studio">
+                    <div class="ceiling-line"></div>
+                    <div class="floor-line"></div>
+                    <div class="greenscreen"></div>
+
+                    <div class="light light-left"></div>
+                    <div class="light light-right"></div>
+
+                    <div class="boom"></div>
+
+                    <div class="table"></div>
+
+                    <div class="sandwich missing-sandwich">
+                        <div class="sandwich-top"></div>
+                        <div class="sandwich-green"></div>
+                        <div class="sandwich-red"></div>
+                        <div class="sandwich-bottom"></div>
+                    </div>
+
+                    <div class="laptop">
+                        <div class="laptop-screen"></div>
+                    </div>
+
+                    <div class="camera-rig">
+                        <div class="camera-body"></div>
+                        <div class="camera-lens"></div>
+                        <div class="tripod-neck"></div>
+                        <div class="tripod-leg leg1"></div>
+                        <div class="tripod-leg leg2"></div>
+                    </div>
+
+                    <div class="person voice-person">
+                        <div class="body"></div>
+                        <div class="head"></div>
+                        <div class="hair"></div>
+                        <div class="leg leg-left"></div>
+                        <div class="leg leg-right"></div>
+                    </div>
+
+                    <div class="person director-person">
+                        <div class="body"></div>
+                        <div class="head"></div>
+                        <div class="hair"></div>
+                        <div class="leg leg-left"></div>
+                        <div class="leg leg-right"></div>
+                    </div>
+
+                    <div class="horror" id="horror">
+                        ...
+                    </div>
+
+                    <div class="corporate-subtitles"
+                         id="corporateSubtitles">
+                        Unlim8ted is a streamlined platform designed to simplify complex workflows across industries-
+                    </div>
+
+                    <div class="angle" id="angle">
+                        CAM A - FRAMING 0% OFF
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+<!-- ============================================================
+     CAMERA CRASH
+============================================================ -->
+
+<section class="crash-scene">
+    <div class="crash-card reveal">
+
+        <div class="crash-drawing">
+            <div class="fallen-camera"></div>
+        </div>
+
+        <small>
+            The tripod immediately collapses.
+        </small>
+
+        <h2>
+            CRASH.
+        </h2>
+
+        <div style="
+            margin-top:35px;
+            color:#aaa;
+            font-size:clamp(1.3rem,3vw,2.4rem);
+            font-weight:800;
+        ">
+            VOICEOVER GUY:
+            <br>
+            "Well sawr-ee."
+        </div>
+
+    </div>
+</section>
+
+
+<!-- ============================================================
+     TAKE 5
+============================================================ -->
+
+<section class="scene">
+    <div class="scene-inner reveal">
+        <div class="take">TAKE 05</div>
+        <div class="caption">The sandwich investigation continues</div>
+
+        <div class="panel take-five-panel">
+
+            <div class="studio"></div>
+
+            <div class="argument arg1">
+                Unlim8ted is-
+            </div>
+
+            <div class="argument arg2">
+                My sandwich was not just lunch, Dave.
+                <br><br>
+                IT WAS ARTISANAL SOURDOUGH.
+                <br><br>
+                YOU NOTICE THAT.
+            </div>
+
+            <div class="argument arg3">
+                I THOUGHT IT WAS THE CREW SANDWICH.
+                <br><br>
+                WHY WOULD A PERSONAL SANDWICH BE NEXT TO THE PROP LAPTOP?
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================================
+     TAKE 6
+============================================================ -->
+
+<section class="scene">
+    <div class="scene-inner reveal take-six">
+        <div class="take">TAKE 06</div>
+        <div class="caption">The missing sandwich re-enters the shot</div>
+
+        <div class="panel">
+
+            <div class="studio">
+                <div class="ceiling-line"></div>
+                <div class="floor-line"></div>
+                <div class="greenscreen"></div>
+
+                <div class="light light-left"></div>
+                <div class="light light-right"></div>
+
+                <div class="table"></div>
+
+                <div class="laptop">
+                    <div class="laptop-screen"></div>
+                </div>
+
+                <div class="sandwich">
+                    <div class="sandwich-top"></div>
+                    <div class="sandwich-green"></div>
+                    <div class="sandwich-red"></div>
+                    <div class="sandwich-bottom"></div>
+                </div>
+
+                <div class="camera-rig">
+                    <div class="camera-body"></div>
+                    <div class="camera-lens"></div>
+                    <div class="tripod-neck"></div>
+                    <div class="tripod-leg leg1"></div>
+                    <div class="tripod-leg leg2"></div>
+                </div>
+
+                <div class="person voice-person">
+                    <div class="body"></div>
+                    <div class="head"></div>
+                    <div class="hair"></div>
+                    <div class="leg leg-left"></div>
+                    <div class="leg leg-right"></div>
+                </div>
+
+                <div class="person director-person">
+                    <div class="body"></div>
+                    <div class="head"></div>
+                    <div class="hair"></div>
+                    <div class="leg leg-left"></div>
+                    <div class="leg leg-right"></div>
+                </div>
+
+                <div class="person sandwich-guy">
+                    <div class="body"></div>
+                    <div class="head"></div>
+                    <div class="hair"></div>
+                    <div class="leg leg-left"></div>
+                    <div class="leg leg-right"></div>
+                </div>
+
+                <div class="reach-arm"></div>
+
+                <div class="bubble sandwich-bubble tail-right"
+                     style="right:5%;top:9%;">
+                    Oh...
+                    <br><br>
+                    I'm sorry Dave.
+                    <br>
+                    I moved your sandwich behind the laptop.
+                    <br>
+                    I was making a point.
+                </div>
+
+                <div class="bubble director-bubble tail-right"
+                     style="right:17%;bottom:6%;">
+                    WE ARE LITERALLY FILMING?
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================================
+     DIRECTOR MELTDOWN
+============================================================ -->
+
+<section class="meltdown">
+
+    <div class="reveal">
+
+        <small>
+            The sandwich guy walks away.
+        </small>
+
+        <h2>
+            WE ARE<br>
+            LITERALLY<br>
+            FILMING?
+        </h2>
+
+        <div class="wait">
+            Nobody knows what the ad is anymore.
+            <br><br>
+            Also the sandwich argument now has a motive.
+            <br><br>
+            Everyone keeps talking over the voiceover.
+            <br>
+            OKAY?
+        </div>
+
+        <div class="voices">
+            <span>Wait what?</span>
+            <span>Are you sure?</span>
+            <span>I'm pretty sure Abby said we weren't yet.</span>
+            <span>Nobody told me.</span>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ============================================================
+     TAKE 7
+============================================================ -->
+
+<section class="scene">
+    <div class="scene-inner reveal">
+        <div class="take">TAKE 07</div>
+        <div class="caption">The crew attempts research</div>
+
+        <div class="panel chaos">
+
+            <div class="director-center person">
+                <div class="body"></div>
+                <div class="head"></div>
+                <div class="hair"></div>
+                <div class="leg leg-left"></div>
+                <div class="leg leg-right"></div>
+            </div>
+
+            <div class="guess g1">
+                Okay but what does Unlim8ted do?
+                <br><br>
+                Like, do they make games?
+            </div>
+
+            <div class="guess g2">
+                I ALWAYS HAVE TO DO THE RESEARCH.
+            </div>
+
+            <div class="guess g3">
+                I DID THE RESEARCH.
+                <br><br>
+                It's a cloud-based logistics aggregator for-
+                <br><br>
+                Wait. No.
+            </div>
+
+            <div class="guess g4">
+                So it's...
+                <br><br>
+                a lifestyle brand?
+            </div>
+
+            <div class="guess g5">
+                IT'S A FILM COMPANY.
+                <br><br>
+                I think.
+            </div>
+
+            <div class="guess g6">
+                Didn't they make some AI thing too?
+            </div>
+
+            <div class="guess g7">
+                Wait.
+                <br><br>
+                Are WE Unlim8ted?
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================================
+     DIRECTOR GIVES UP
+============================================================ -->
+
+<section class="fired">
+
+    <div class="reveal">
+
+        <small>
+            The director closes his eyes.
+            <br>
+            Opens them.
+            <br>
+            Looks directly into the camera.
+        </small>
+
+        <h2>
+            JUST POST IT.
+            <br><br>
+            EVERYONE'S FIRED.
+        </h2>
+
+    </div>
+
+</section>
+
+
+<!-- ============================================================
+     FINAL CARD
+============================================================ -->
+
+<section class="final">
+
+    <div class="final-inner reveal">
+
+        <div class="final-logo">
+            UNLIM8TED
+        </div>
+
+        <h3>
+            Possibly all of those things.
+        </h3>
+
+        <p>
+            I am not totally clear on that though.
+            <br><br>
+            Figure it out yourself at
+            <a href="https://unlim8ted.com">
+                unlim8ted.com
+            </a>
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- ============================================================
+     SANDWICH GUY HIJACKS THE CARD
+============================================================ -->
+
+<section class="rant">
+
+    <div class="rant-inner">
+
+        <div class="rant-line rant-small reveal">
+            Here is the part the ad left out.
+        </div>
+
+        <div class="rant-line reveal">
+            Dave's sandwich did not disappear first.
+        </div>
+
+        <div class="rant-line rant-small reveal">
+            Earlier that day,
+        </div>
+
+        <div class="rant-line reveal">
+            Dave ate
+        </div>
+
+        <div class="rant-line reveal">
+            my
+        </div>
+
+        <div class="rant-line rant-huge reveal">
+            ARTISANAL
+        </div>
+
+        <div class="rant-line reveal">
+            SOURDOUGH
+        </div>
+
+        <div class="rant-line reveal">
+            SANDWICH.
+        </div>
+
+        <div class="rant-line rant-small reveal">
+            So yes,
+        </div>
+
+        <div class="rant-line rant-huge rant-red reveal">
+            I hid
+        </div>
+
+        <div class="rant-line rant-huge reveal">
+            DAVE'S
+        </div>
+
+        <div class="rant-line rant-huge reveal">
+            NORMAL
+        </div>
+
+        <div class="rant-line rant-huge rant-red reveal">
+            SANDWICH.
+        </div>
+
+        <div class="rant-line rant-small reveal">
+            This was not useful to the advertisement.
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ============================================================
+     SECURITY FOOTAGE
+============================================================ -->
+
+<section class="security">
+
+    <div class="security-inner">
+
+        <h2>
+            Security footage recovered from Studio B
+        </h2>
+
+        <div class="cctv reveal">
+
+            <div class="cctv-label">
+                08/11/2026 14:32:08
+            </div>
+
+            <div class="cctv-camera">
+                CAM 04
+            </div>
+
+            <div class="cctv-table"></div>
+            <div class="cctv-laptop"></div>
+            <div class="cctv-sandwich"></div>
+
+            <div class="dave">
+                <div class="body"></div>
+                <div class="head"></div>
+            </div>
+
+            <div class="wink">
+                ;)
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ============================================================
+     COMMENTS
+============================================================ -->
+
+<section class="comments">
+
+    <div class="comments-inner">
+
+        <h2>Comments</h2>
+
+        <div class="comment">
+            <div class="comment-user">
+                Anonymous
+            </div>
+
+            <div class="comment-text">
+                I swear the production quality of this channel is actually improving exponentially..
+            </div>
+        </div>
+
+        <div class="comment reply">
+            <div class="comment-user">
+                Unlim8ted Studios
+                <span class="creator">CREATOR</span>
+            </div>
+
+            <div class="comment-text">
+                That's because we keep having to hire new editors.
+            </div>
+        </div>
+
+        <div class="comment">
+            <div class="comment-user">
+                Dave
+            </div>
+
+            <div class="comment-text">
+                This presents an extremely one-sided account of the sandwich situation.
+            </div>
+        </div>
+
+        <div class="comment reply">
+            <div class="comment-user">
+                Unlim8ted Studios
+                <span class="creator">CREATOR</span>
+            </div>
+
+            <div class="comment-text">
+                Dave we literally have security footage.
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ============================================================
+     FOOTER
+============================================================ -->
+
+<footer>
+    <strong>Unlim8ted Studio Productions</strong>
+    <br><br>
+    <span id="copyright"></span>
+</footer>
+
+
+<script>
+(() => {
+    "use strict";
+
+    const progress = document.getElementById("progress");
+
+    const takeFour = document.getElementById("takeFour");
+    const tiltWrapper = document.getElementById("tiltWrapper");
+    const corporateSubtitles =
+        document.getElementById("corporateSubtitles");
+    const angleLabel = document.getElementById("angle");
+    const horror = document.getElementById("horror");
+
+    const reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    const lines = [
+        "Unlim8ted makes films, games, software, hardware, music, books and AI projects.",
+        "The line is clean. The frame is not.",
+        "Please keep the product in the shot.",
+        "Unlim8ted."
+    ];
+
+    function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    function updateProgress() {
+        const maxScroll =
+            document.documentElement.scrollHeight -
+            window.innerHeight;
+
+        const p =
+            maxScroll > 0
+                ? window.scrollY / maxScroll
+                : 0;
+
+        progress.style.width =
+            `${clamp(p, 0, 1) * 100}%`;
+    }
+
+    function updateTakeFour() {
+        if (!takeFour || reducedMotion) {
+            return;
+        }
+
+        const rect =
+            takeFour.getBoundingClientRect();
+
+        const travel =
+            takeFour.offsetHeight -
+            window.innerHeight;
+
+        if (travel <= 0) {
+            return;
+        }
+
+        const travelled =
+            clamp(-rect.top, 0, travel);
+
+        const p =
+            travelled / travel;
+
+        /*
+         * The ad fails for a clear reason:
+         * the camera operator slowly loses the frame during the read.
+         * No full-scene rotation.
+         */
+
+        let drift = 0;
+
+        if (p > 0.12) {
+            const local =
+                clamp(
+                    (p - 0.12) / 0.76,
+                    0,
+                    1
+                );
+
+            const eased =
+                local < 0.5
+                    ? 2 * local * local
+                    : 1 -
+                      Math.pow(-2 * local + 2, 2) / 2;
+
+            drift = eased;
+        }
+
+        const driftX =
+            drift * -18;
+
+        const scale =
+            1 +
+            drift * 0.045;
+
+        tiltWrapper.style.transform =
+            `translate(${driftX}vw, ${drift * 4}vh) scale(${scale})`;
+
+        angleLabel.textContent =
+            `CAM A - FRAMING ${Math.round(drift * 100)}% OFF`;
+
+        if (p < 0.25) {
+            corporateSubtitles.textContent =
+                lines[0];
+        } else if (p < 0.48) {
+            corporateSubtitles.textContent =
+                lines[1];
+        } else if (p < 0.68) {
+            corporateSubtitles.textContent =
+                lines[2];
+        } else {
+            corporateSubtitles.textContent =
+                lines[3];
+        }
+
+        /*
+         * Director gradually notices that something is wrong.
+         */
+        if (p < 0.43) {
+            horror.style.opacity = "0";
+        } else if (p < 0.56) {
+            horror.style.opacity = "1";
+            horror.textContent = "...";
+        } else if (p < 0.72) {
+            horror.style.opacity = "1";
+            horror.textContent = "Why are we leaving the shot?";
+        } else {
+            horror.style.opacity = "1";
+            horror.textContent = "Let's stop before the camera fully leaves.";
+        }
+    }
+
+    const observer =
+        new IntersectionObserver(
+            entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add(
+                            "visible"
+                        );
+                    }
+                });
+            },
+            {
+                threshold: 0.15,
+                rootMargin: "0px 0px -4% 0px"
+            }
+        );
+
+    document
+        .querySelectorAll(".reveal")
+        .forEach(element => {
+            observer.observe(element);
+        });
+
+    let ticking = false;
+
+    function requestUpdate() {
+        if (ticking) {
+            return;
+        }
+
+        ticking = true;
+
+        requestAnimationFrame(() => {
+            updateProgress();
+            updateTakeFour();
+            ticking = false;
+        });
+    }
+
+    window.addEventListener(
+        "scroll",
+        requestUpdate,
+        { passive: true }
+    );
+
+    window.addEventListener(
+        "resize",
+        requestUpdate,
+        { passive: true }
+    );
+
+    const year =
+        new Date().getFullYear();
+
+    document.getElementById(
+        "copyright"
+    ).textContent =
+        `Copyright 2019-${year} Unlim8ted Studio Productions. All rights reserved.`;
+
+    requestUpdate();
+})();
+</script>
+
+</body>
+</html>
+
+
