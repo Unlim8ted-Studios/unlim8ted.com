@@ -1064,6 +1064,15 @@
                                 <p>Explore some of our best images.</p>
                             </div>
                         </a>
+
+                        <a href="scrolly" class="card">
+                            <div class="thumb"><img src="/products/scrolly/icon.svg" alt="Scrollys"></div>
+                            <div class="cardBody">
+                                <span class="cardTag">Motion</span>
+                                <h2>Scrollys</h2>
+                                <p>Browse scroll-controlled animated shorts.</p>
+                            </div>
+                        </a>
                     </div>
                 </div>
 
@@ -1309,6 +1318,7 @@
             if (type === "physical" || type === "instant" || type === "clothes" || type === "merch" || type === "apparel") return "/products/physical-items/";
             if (type === "hardware" || type === "device" || type === "embedded") return "/products/hardware/";
             if (type === "software") return "/products/software/";
+            if (type === "scrolly" || type === "scrollys") return "/products/scrolly/";
             if (type === "video-game" || type === "card-game" || type === "videogame" || type === "game" || type === "games") return "/products/games/";
             if (type === "book" || type === "books") return "/products/books/";
             if (type === "podcast" || type === "podcasts") return "/products/podcasts/";
@@ -1320,6 +1330,7 @@
             const type = normalizeType(product?.["product-type"] || product?.productType || product?.type);
             if (type === "music") return "/products/music/";
             if (type === "podcast" || type === "podcasts") return "/products/podcasts/";
+            if (type === "scrolly" || type === "scrollys") return "/products/scrolly/";
             const slug = slugifyProduct(product?.slug || product?.handle || product?.id || product?.name);
             return `${productRoute(product)}${slug}/`;
         }
@@ -1343,6 +1354,7 @@
                 return { key: "hardware", label: "Hardware", link: "/products/hardware" };
             }
             if (type === "software") return { key: "software", label: "Software", link: "/products/software" };
+            if (type === "scrolly" || type === "scrollys") return { key: "scrolly", label: "Scrollys", link: "/products/scrolly" };
             if (type === "video-game" || type === "videogame" || type === "game" || type === "games") {
                 return { key: "games", label: "Games", link: "/products/games" };
             }
@@ -1403,6 +1415,13 @@
                 return {
                     title: `You should go try “${name}”.`,
                     desc: `Your wheel pick landed on Software — check out the software section${name ? ` and open “${name}”.` : "."}`,
+                };
+            }
+
+            if (type === "scrolly" || type === "scrollys") {
+                return {
+                    title: `You should go watch “${name}”.`,
+                    desc: `Your wheel pick landed on Scrollys - browse the animated shorts.`,
                 };
             }
 

@@ -150,11 +150,59 @@
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
   </url>
-    <url>
+  <url>
     <loc>https://unlim8ted.com/products/ai/meatball/about</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://unlim8ted.com/products/scrolly/</loc>
+    <lastmod>2026-08-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://unlim8ted.com/products/scrolly/if-stealth-games-were-realistic/</loc>
+    <lastmod>2026-08-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.60</priority>
+  </url>
+  <url>
+    <loc>https://unlim8ted.com/products/scrolly/if-video-games-had-realistic-physics/</loc>
+    <lastmod>2026-08-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.60</priority>
+  </url>
+  <url>
+    <loc>https://unlim8ted.com/products/scrolly/i-unwillfully-let-my-cat-answer-my-emails-for-one-week/</loc>
+    <lastmod>2026-08-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.60</priority>
+  </url>
+  <url>
+    <loc>https://unlim8ted.com/products/scrolly/natural-water/</loc>
+    <lastmod>2026-08-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.60</priority>
+  </url>
+  <url>
+    <loc>https://unlim8ted.com/products/scrolly/the-chicken-crosses-the-road-why/</loc>
+    <lastmod>2026-08-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.60</priority>
+  </url>
+  <url>
+    <loc>https://unlim8ted.com/products/scrolly/the-hole/</loc>
+    <lastmod>2026-08-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.60</priority>
+  </url>
+  <url>
+    <loc>https://unlim8ted.com/products/scrolly/trailers-be-like/</loc>
+    <lastmod>2026-08-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.60</priority>
   </url>
   <url>
     <loc>https://unlim8ted.com/privacy/</loc>

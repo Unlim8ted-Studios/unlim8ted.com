@@ -815,8 +815,10 @@ site-navbar {
 .discovery .b1 { right:9%; top:10%; }
 .discovery .b2 { left:8%; top:27%; }
 .discovery .b3 { right:8%; bottom:12%; }
-.discovery .b4 { left:9%; top:10%; }
-.discovery .b5 { right:8%; top:20%; }
+.discovery .b4 {left: 66%;
+  top: 34%; }
+.discovery .b5 { right: 58%;
+  top: 30%;}
 
 /* ============================================================
    STORY 2
@@ -853,10 +855,10 @@ site-navbar {
 }
 
 .investigation .b1 { right:8%; top:10%; }
-.investigation .b2 { left:7%; top:11%; font-size:1.35rem; }
+.investigation .b2 { left:12%; top:14%; font-size:1.35rem; }
 .investigation .b3 { left:27%; bottom:8%; }
-.investigation .b4 { left:8%; top:10%; }
-.investigation .b5 { right:8%; top:17%; }
+.investigation .b4 { right:8%; top:10%; }
+.investigation .b5 { left:8%; top:17%; }
 
 .gear {
     position:absolute;
@@ -928,7 +930,7 @@ site-navbar {
 .string {
     position:absolute;
     z-index:15;
-    left:43%;
+    left:48%;
     bottom:20%;
     width:160px;
     height:190px;
@@ -941,7 +943,7 @@ site-navbar {
 .cheese {
     position:absolute;
     z-index:17;
-    left:calc(50% + 17px);
+    left:calc(47% + 17px);
     bottom:20%;
     width:47px;
     height:39px;
@@ -1194,8 +1196,8 @@ site-navbar {
 .ambush { right:6%; bottom:12%; color:var(--red); transform:rotate(6deg); }
 .canada { left:8%; bottom:4%; font-size:1.5rem; transform:rotate(-9deg); }
 
-.map-scene .b1 { left:3%; top:8%; }
-.map-scene .b2 { right:3%; top:9%; }
+.map-scene .b1 { left:13%; top:18%; }
+.map-scene .b2 { right:13%; top:19%; }
 
 /* ============================================================
    KITCHEN
@@ -1313,13 +1315,13 @@ site-navbar {
 
 .kitchen .b1 { left:4%; top:8%; }
 .kitchen .b2 { left:36%; top:12%; }
-.kitchen .b3 { right:4%; top:29%; }
+.kitchen .b3 { right:14%; top:29%; }
 .kitchen .b4 { left:7%; bottom:11%; }
 .kitchen .b5 { left:7%; top:9%; }
 .kitchen .b6 { right:7%; bottom:12%; }
-.kitchen .b7 { left:6%; top:10%; }
+.kitchen .b7 { left:16%; top:10%; }
 .kitchen .b8 { right:6%; top:17%; }
-.kitchen .b9 { left:12%; top:12%; font-size:1.35rem; }
+.kitchen .b9 { left:22%; top:12%; font-size:1.35rem; }
 
 .supply {
     position:absolute;
@@ -1457,9 +1459,9 @@ site-navbar {
 
 .night .b1 { left:24%; top:9%; color:var(--ink); }
 .night .b2 { right:24%; top:24%; color:var(--ink); }
-.night .b3 { left:10%; top:12%; color:var(--ink); }
+.night .b3 { left:24%; top:20%; color:var(--ink); }
 .night .b4 { left:38%; bottom:13%; color:var(--ink); }
-.night .b5 { right:5%; top:12%; color:var(--ink); }
+.night .b5 { right:15%; top:16%; color:var(--ink); }
 
 .rustle {
     left:50%;
@@ -1569,6 +1571,7 @@ site-navbar {
     font-size:clamp(1.4rem,4vw,3rem);
     font-weight:900;
     line-height:1.45;
+    color:var(--ink);
 }
 
 .notebook-text strong {
@@ -1579,6 +1582,7 @@ site-navbar {
 }
 
 .notebook .speech {
+    color:var(--ink);
     right:-5%;
     bottom:-5%;
 }
@@ -1687,7 +1691,7 @@ site-navbar {
 .ending .b2 { left:17%; top:10%; }
 .ending .b3 { right:18%; top:24%; }
 .ending .b4 { left:37%; bottom:8%; }
-.ending .b5 { right:8%; bottom:10%; font-size:1.35rem; }
+.ending .b5 { right:18%; bottom:10%; font-size:1.35rem; }
 
 .final-overlay {
     position:absolute;
@@ -2155,22 +2159,23 @@ site-navbar {
 
             <div class="hole"></div>
 
-            <div class="speech right beat b1" data-at=".08">What are you doing?</div>
-            <div class="speech beat b2" data-at=".20">Don't come any closer.</div>
-            <div class="speech right beat b3" data-at=".31">Why?</div>
+            <div class="speech right beat b1" data-at=".08" data-until=".19">What are you doing?</div>
+            <div class="speech beat b2" data-at=".20" data-until=".30">Don't come any closer.</div>
+            <div class="speech right beat b3" data-at=".31" data-until=".46">Why?</div>
 
-            <div class="speech beat b4" data-at=".58">What is it?</div>
-            <div class="speech right beat b5" data-at=".72">That's what I'm trying to figure out.</div>
+            <div class="speech beat b4" data-at=".58" data-until=".71">What is it?</div>
+            <div class="speech right beat b5" data-at=".72" data-until=".86">That's what I'm trying to figure out.</div>
 
             <div class="speech beat"
                  data-at=".87"
-                 style="left:8%;bottom:9%;">
+                 data-until=".93"
+                 style="left:60%;top:30%;">
                 Looks like a hole.
             </div>
 
             <div class="speech right beat"
                  data-at=".94"
-                 style="right:7%;bottom:9%;">
+                 style="right:63%;top:22%;">
                 That's exactly what it wants you to think.
             </div>
         </div>
@@ -2339,7 +2344,7 @@ site-navbar {
 
             <div class="speech beat b3" data-at=".53">Did you do that?</div>
             <div class="speech right beat b4" data-at=".64">
-                Why would I be holding the string if I wanted the cheese gone?
+                Why would I want the cheese gone?
             </div>
 
             <div class="underground" data-layer-at=".78">
@@ -2464,7 +2469,7 @@ site-navbar {
             <div class="speech beat b4" data-at=".32">MILES.</div>
 
             <div class="speech beat b5" data-at=".46">Evacuating from what?</div>
-            <div class="speech right beat b6" data-at=".56">That's a chipmunk hole.</div>
+            <div class="speech right beat b6" data-at=".56">There's a chipmunk hole.</div>
 
             <div class="speech beat b7" data-at=".68">How do you know?</div>
             <div class="speech right beat b8" data-at=".78">
@@ -2768,10 +2773,22 @@ function setBeatVisibility(story, progress) {
 
     for (const beat of beats) {
         const at = Number(beat.dataset.at);
+        const until =
+            beat.dataset.until === undefined
+                ? Math.min(
+                    1,
+                    at + (
+                        beat.classList.contains("caption")
+                            ? .16
+                            : .14
+                    )
+                )
+                : Number(beat.dataset.until);
 
         beat.classList.toggle(
             "on",
-            progress >= at
+            progress >= at &&
+            progress < until
         );
     }
 
