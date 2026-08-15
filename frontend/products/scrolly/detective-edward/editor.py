@@ -37,7 +37,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, quote, unquote, urlparse
 
-APP_VERSION = "1.4.8"
+APP_VERSION = "1.5.1"
 PROJECT_FORMAT = "unlim8ted-movie-project"
 ROOT = Path(__file__).resolve().parent
 APP_ICON = ROOT / "editor-icon.svg"
@@ -558,6 +558,7 @@ def flatten_nodes(node, result=None):
 
 
 ASSET_NODES = {asset_id: flatten_nodes(asset.get("node", {})) for asset_id, asset in PROJECT.get("assets", {}).items()}
+ASSET_ANIMATIONS = {asset_id: list(asset.get("animations", [])) for asset_id, asset in PROJECT.get("assets", {}).items()}
 
 
 def visual_parts(asset_id):
@@ -963,6 +964,55 @@ def native_part_state(asset_id, layer, path, t, seconds):
     return evaluate_animation(ANIMATION_LIBRARY[actual_name], progress, timing)
 
 
+def structured_part_state(asset_id, layer, path, t, seconds):
+    result = None
+    node_style = ASSET_NODES.get(asset_id, {}).get(path, {}).get("style", {})
+    animations = ASSET_ANIMATIONS.get(asset_id, [])
+    for clip in layer.get("clips", []):
+        if clip.get("enabled", True) is False or not bool_track_at(clip.get("activeKeyframes"), t, True):
+            continue
+        anim = next((candidate for candidate in animations if candidate.get("id") == clip.get("clipId") or candidate.get("name") == clip.get("name")), None)
+        if not isinstance(anim, dict):
+            continue
+        raw_group = anim.get("partTracks", {}).get(path)
+        if not isinstance(raw_group, dict):
+            continue
+        start = clip.get("start")
+        end = clip.get("end")
+        if start is not None and end is not None and number(end) > number(start):
+            progress = max(0.0, min(1.0, (t - number(start)) / max(1e-9, number(end) - number(start))))
+        else:
+            duration = max(0.001, number(anim.get("duration"), 1.0))
+            raw = seconds * number(clip.get("speed"), 1.0) + number(clip.get("offset"), 0.0)
+            if clip.get("loop", True) is False:
+                progress = max(0.0, min(1.0, raw / duration))
+            else:
+                progress = (raw % duration) / duration
+        group = raw_group.get("tracks", raw_group)
+        result = {
+            "x": number(eval_track(group.get("x"), progress, 0.0)),
+            "y": number(eval_track(group.get("y"), progress, 0.0)),
+            "z": number(eval_track(group.get("z"), progress, 0.0)),
+            "rotation": number(eval_track(group.get("rotation"), progress, 0.0)),
+            "scaleX": number(eval_track(group.get("scaleX"), progress, 1.0), 1.0),
+            "scaleY": number(eval_track(group.get("scaleY"), progress, 1.0), 1.0),
+            "opacity": number(eval_track(group.get("opacity"), progress, 1.0), 1.0),
+        }
+        style_tracks = raw_group.get("styleTracks", {})
+        for prop, axis in (("left", "x"), ("top", "y")):
+            track_def = style_tracks.get(prop, {})
+            keys = track_def.get("keyframes", track_def) if isinstance(track_def, dict) else track_def
+            if isinstance(keys, list) and keys:
+                result[axis] += number(eval_track(keys, progress, number(node_style.get(prop)))) - number(node_style.get(prop))
+        for prop, axis in (("width", "scaleX"), ("height", "scaleY")):
+            track_def = style_tracks.get(prop, {})
+            keys = track_def.get("keyframes", track_def) if isinstance(track_def, dict) else track_def
+            baseline = number(node_style.get(prop), 0.0)
+            if isinstance(keys, list) and keys and abs(baseline) > 1e-9:
+                result[axis] *= number(eval_track(keys, progress, baseline), baseline) / baseline
+    return result
+
+
 def animation_layers_for(scene, target_id, path):
     result = []
     target = next((layer for layer in scene.get("layers", []) if layer.get("id") == target_id), None)
@@ -993,6 +1043,7 @@ def scene_part_state(scene, target_id, path, t):
             ordinary = {
                 "x": number(eval_track(group.get("x"), t, 0.0)),
                 "y": number(eval_track(group.get("y"), t, 0.0)),
+                "z": number(eval_track(group.get("z"), t, 0.0)),
                 "rotation": number(eval_track(group.get("rotation"), t, 0.0)),
                 "scaleX": number(eval_track(group.get("scaleX"), t, 1.0), 1.0),
                 "scaleY": number(eval_track(group.get("scaleY"), t, 1.0), 1.0),
@@ -1013,7 +1064,7 @@ def scene_part_state(scene, target_id, path, t):
     return ordinary, (lip_scale_x, lip_scale_y, lip_opacity)
 
 
-IDENTITY_STATE = {"x": 0.0, "y": 0.0, "rotation": 0.0, "scaleX": 1.0, "scaleY": 1.0, "opacity": 1.0}
+IDENTITY_STATE = {"x": 0.0, "y": 0.0, "z": 0.0, "rotation": 0.0, "scaleX": 1.0, "scaleY": 1.0, "opacity": 1.0}
 
 
 def path_has_animation(asset_id, layer, scene, path):
@@ -1023,13 +1074,16 @@ def path_has_animation(asset_id, layer, scene, path):
         return True
     if path in layer.get("partTracks", {}) or path in layer.get("lipSyncPartTracks", {}):
         return True
+    if any(path in animation.get("partTracks", {}) for animation in ASSET_ANIMATIONS.get(asset_id, [])):
+        return True
     return bool(animation_layers_for(scene, layer.get("id"), path))
 
 
 def combined_part_state(asset_id, layer, scene, path, t, seconds):
     native = native_part_state(asset_id, layer, path, t, seconds)
+    structured = structured_part_state(asset_id, layer, path, t, seconds)
     ordinary, lip = scene_part_state(scene, layer.get("id"), path, t)
-    state = dict(ordinary or native or IDENTITY_STATE)
+    state = dict(ordinary or structured or native or IDENTITY_STATE)
     state["scaleX"] *= lip[0]
     state["scaleY"] *= lip[1]
     state["opacity"] *= lip[2]
@@ -1082,7 +1136,7 @@ def bake_visual_animation(asset_id, layer, scene, part_objects, part_planes, par
     paths = list(part_objects)
     duration = max(0.001, number(scene.get("duration"), frame_count / FPS))
     # Full-rate evaluation preserves the source motion; only the resulting curves are simplified.
-    samples_by_path = {path: {"x": [], "y": [], "r": [], "sx": [], "sy": [], "a": []} for path in paths}
+    samples_by_path = {path: {"x": [], "y": [], "z": [], "r": [], "sx": [], "sy": [], "a": []} for path in paths}
 
     for local_frame in range(frame_count + 1):
         t = local_frame / max(1, frame_count)
@@ -1100,6 +1154,7 @@ def bake_visual_animation(asset_id, layer, scene, part_objects, part_planes, par
                 channels = samples_by_path[path]
                 channels["x"].append((frame, meta["rest_location"][0] + number(state.get("x")) * meta["x_scale"]))
                 channels["y"].append((frame, meta["rest_location"][1] - number(state.get("y")) * meta["y_scale"]))
+                channels["z"].append((frame, meta["rest_location"][2] + number(state.get("z"), 0.0) * 0.02))
                 channels["r"].append((frame, meta["rest_rotation"] - math.radians(number(state.get("rotation")))))
                 channels["sx"].append((frame, meta["rest_scale"][0] * number(state.get("scaleX"), 1.0)))
                 channels["sy"].append((frame, meta["rest_scale"][1] * number(state.get("scaleY"), 1.0)))
@@ -1116,6 +1171,7 @@ def bake_visual_animation(asset_id, layer, scene, part_objects, part_planes, par
             obj = part_objects[path]
             _write_sparse_channel(obj, "location", 0, channels["x"], position_tolerance)
             _write_sparse_channel(obj, "location", 1, channels["y"], position_tolerance)
+            _write_sparse_channel(obj, "location", 2, channels["z"], 0.002)
             _write_sparse_channel(obj, "rotation_euler", 2, channels["r"], rotation_tolerance)
             _write_sparse_channel(obj, "scale", 0, channels["sx"], scale_tolerance)
             _write_sparse_channel(obj, "scale", 1, channels["sy"], scale_tolerance)
@@ -1468,7 +1524,7 @@ EDITOR_HTML = r"""<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="/app-icon.svg" type="image/svg+xml">
-<title>Unlim8ted Movie Editor 1.5.0</title>
+<title>Unlim8ted Movie Editor 1.5.1</title>
 <style>
 :root {
     --bg:#16181d;
@@ -1678,13 +1734,39 @@ hr{border:0;border-top:1px solid var(--line);margin:10px 0}
 .subtitleBox{
     pointer-events:none;
 }
+
+#assetEditor{position:fixed;inset:0;z-index:9500;background:#0d0f13;display:grid;grid-template-rows:48px minmax(0,1fr) 260px}
+#assetEditor.hidden{display:none!important}
+#assetEditorTop{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#191c22;border-bottom:1px solid var(--line)}
+#assetEditorTitle{font-weight:850;min-width:150px}
+#assetEditorWorkspace{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 330px}
+#assetEditorCanvasWrap{position:relative;overflow:hidden;background:#0b0d11}
+#assetEditorCanvas{position:absolute;left:50%;top:50%;width:900px;height:650px;transform:translate(-50%,-50%);background:linear-gradient(45deg,#171a20 25%,#1b1e25 25%,#1b1e25 50%,#171a20 50%,#171a20 75%,#1b1e25 75%);background-size:28px 28px;box-shadow:0 0 0 1px #3e444f,0 25px 80px #0009;overflow:visible}
+#assetEditorObject{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);transform-origin:50% 50%}
+#assetEditorObject [data-node-path]{cursor:pointer}
+#assetEditorObject [data-node-path].assetPartSelected{outline:2px solid var(--accent2)!important;outline-offset:2px}
+#assetEditorInspector{border-left:1px solid var(--line);background:var(--panel);overflow:auto;padding:10px}
+#assetEditorTimeline{min-height:0;border-top:1px solid var(--line);background:#17191f;display:grid;grid-template-rows:34px minmax(0,1fr)}
+#assetEditorTimelineHead{display:flex;align-items:center;gap:8px;padding:5px 9px;background:#1d2026;border-bottom:1px solid var(--line)}
+#assetEditorTimeSlider{flex:1}
+#assetEditorRows{overflow:auto;position:relative}
+.assetAnimRow{height:32px;display:grid;grid-template-columns:220px minmax(0,1fr);border-bottom:1px solid #292d35}
+.assetAnimRowLabel{padding:7px 9px;border-right:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;font-size:11px}
+.assetAnimRowLabel.selected{background:#2f3540;color:#fff}
+.assetAnimLane{position:relative;background-image:linear-gradient(to right,#ffffff08 1px,transparent 1px);background-size:10% 100%}
+.assetAnimLane::after{content:'';position:absolute;left:var(--asset-playhead,0%);top:0;bottom:0;width:1px;background:#ef6f6fcc;pointer-events:none}
+.assetAnimDiamond{position:absolute;top:50%;width:10px;height:10px;transform:translate(-50%,-50%) rotate(45deg);background:var(--accent);border:1px solid #111;cursor:ew-resize;z-index:3}
+.assetAnimDiamond:hover,.assetAnimDiamond.selected{background:var(--accent2)}
+.assetEditorButtonRow{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0}
+.assetPartPath{font:11px ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--muted);word-break:break-all}
+
 @media(max-width:1000px){#workspace{grid-template-columns:210px minmax(340px,1fr) 260px}:root{--timeline-label:190px}}
 </style>
 </head>
 <body>
 <div id="app">
     <div id="toolbar">
-        <div class="brand">Unlim8ted Movie Editor <span class="buildBadge">v1.4.6</span></div>
+        <div class="brand">Unlim8ted Movie Editor <span class="buildBadge">v1.5.2</span></div>
         <div class="toolbarGroup"><span class="toolbarGroupLabel">Project</span><button id="newProjectBtn">New</button><button id="loadHtmlBtn" class="primary">Import HTML</button><button id="mergeReferenceBtn">Merge Ref Animations</button><button id="loadProjectBtn">Open</button><button id="saveBtn">Save</button><button id="saveAsBtn">Save As...</button><button id="exportBlenderBtn" title="Create a Blender project with Assets and Movie scenes">Export Blender</button></div>
         <div class="toolbarGroup"><span class="toolbarGroupLabel">Edit</span><button id="undoBtn" title="Undo (Ctrl+Z)">Undo</button><button id="redoBtn" title="Redo (Ctrl+Y / Ctrl+Shift+Z)">Redo</button><button id="lipSyncBtn">Lip Sync</button><label class="muted" style="display:flex;align-items:center;gap:5px;font-size:11px;padding:0 5px"><input id="autoKeyframeToggle" type="checkbox" checked> Auto keyframe</label></div>
         <div class="toolbarGroup"><span class="toolbarGroupLabel">View</span><button id="projectViewerBtn">Full Project</button></div>
@@ -1695,7 +1777,7 @@ hr{border:0;border-top:1px solid var(--line);margin:10px 0}
 <div class="toolbarGroup">
     <span class="toolbarGroupLabel">Scene</span>
     <button id="addSceneBtn">+ Scene</button>
-    <button id="mergeNextSceneBtn" title="Append the next scene onto this scene">Merge Next</button><button id="sceneLengthBtn" title="Set or add time to any scene">Scene Length</button>
+    <button id="mergeNextSceneBtn" title="Append the next scene onto this scene">Merge Next</button><button id="sceneLengthBtn" title="Set, extend, or trim any scene">Scene Length</button>
     <button id="deleteSceneBtn" class="danger">Delete Scene</button>
 </div>        <div class="toolbarGroup"><span class="toolbarGroupLabel">Layer</span><button id="copyLayerSceneBtn" title="Copy selected clip; paste into any scene at the playhead with Ctrl+V">Copy Clip (Ctrl+C)</button><button id="offsetKeyframesBtn" title="Offset transform keyframe values in bulk">Offset Keys...</button><button id="deleteLayerBtn" class="danger" title="Delete selected layer (Delete / Backspace)">Delete Layer</button></div>
     </div>
@@ -1750,6 +1832,32 @@ hr{border:0;border-top:1px solid var(--line);margin:10px 0}
 <input id="referenceFileInput" type="file" accept="text/html,.html,.htm" class="hidden">
 <input id="audioFileInput" type="file" accept="audio/*" class="hidden">
 
+<section id="assetEditor" class="hidden">
+    <div id="assetEditorTop">
+        <button id="assetEditorCloseBtn">← Back to Movie</button>
+        <div id="assetEditorTitle">Asset Editor</div>
+        <span class="badge" id="assetEditorKind"></span>
+        <div class="spacer"></div>
+        <label class="muted">Animation <select id="assetEditorAnimationSelect"></select></label>
+        <button id="assetEditorNewAnimationBtn" class="primary">+ Animation</button>
+        <button id="assetEditorDuplicateAnimationBtn">Duplicate</button>
+        <button id="assetEditorRenameAnimationBtn">Rename</button>
+        <button id="assetEditorDeleteAnimationBtn" class="danger">Delete</button>
+    </div>
+    <div id="assetEditorWorkspace">
+        <div id="assetEditorCanvasWrap"><div id="assetEditorCanvas"><div id="assetEditorObject"></div></div></div>
+        <aside id="assetEditorInspector"></aside>
+    </div>
+    <div id="assetEditorTimeline">
+        <div id="assetEditorTimelineHead">
+            <button id="assetEditorPlayBtn">Play</button>
+            <input id="assetEditorTimeSlider" type="range" min="0" max="1000" value="0">
+            <span id="assetEditorTimeReadout" class="badge">0.00 / 0.00 s</span>
+        </div>
+        <div id="assetEditorRows"></div>
+    </div>
+</section>
+
 <section id="projectViewer" class="hidden">
     <div id="viewerTop"><div id="viewerTitle">Project Viewer</div><div id="viewerSceneName"></div><div class="spacer"></div><button id="viewerCloseBtn">Close</button></div>
     <div id="viewerFrameWrap"><div id="viewerStage">
@@ -1788,6 +1896,8 @@ const state = {
     selectedKeyframes: [],
     keyframeClipboard: [],
     selectedPartPath: null,
+    selectedAnimationId: null,
+    assetEditor: {open:false,assetId:null,partPath:'0',animationId:null,t:0,playing:false,lastFrameTime:0,selectedKey:null},
     playhead: 0,
     autoKeyframe: true,
     playing: false,
@@ -2566,7 +2676,7 @@ async function importFromHtml(fileName,sourceText,settings){
             }
             scenes.push(scene);await idleTick();
         }
-        project.assets=assets;project.scenes=scenes;
+        project.assets=assets;project.scenes=scenes;migrateProject(project);
         for(const scene of project.scenes)for(const layer of scene.layers)if(layer.type==='asset')ensureLayerHasAssetClips(layer,project.assets[layer.assetId]);
         project.meta.modifiedAt=new Date().toISOString();pm.set(98,'Finalizing project...',`${Object.keys(assets).length} reusable assets - ${scenes.length} scenes`);
         state.project=project;state.fileName='';state.filePath='';state.currentSceneIndex=0;state.selectedLayerId=project.scenes[0]?.layers[0]?.id||null;state.selectedAssetId=null;state.selectedKeyframe=null;state.selectedKeyframes=[];state.playhead=0;state.renderCache.clear();resetHistory(false);renderAll();
@@ -2837,6 +2947,7 @@ function applyAnimationLayers(
                 scene,
                 animationCache
             );
+            applyStructuredAssetAnimations(target,layer,t,scene.duration);
         }
     }
 
@@ -3110,6 +3221,19 @@ function applyNativeClipLayer(target,anim,t,sceneDuration,scene=currentScene(),a
         const speed=clipCfg.speed||1,raw=t*sceneDuration*1000*speed+(clipCfg.offset||0)*1000-nodeDelay;wa.currentTime=clipCfg.loop===false?clamp(raw,0,duration):((raw%duration)+duration)%duration;
     });
 }
+function applyStructuredAssetAnimations(target,layer,t,sceneDuration){
+    const asset=state.project?.assets?.[layer.assetId];if(!asset)return;
+    for(const clip of layer.clips||[]){
+        if(!clipActiveAt(clip,t))continue;const anim=(asset.animations||[]).find(a=>a.id===clip.clipId||a.name===clip.name);if(!anim?.partTracks||!Object.keys(anim.partTracks).length)continue;
+        let u;if(Number.isFinite(+clip.start)&&Number.isFinite(+clip.end)&&+clip.end>+clip.start)u=clamp((t-(+clip.start))/(+clip.end-(+clip.start)),0,1);else{const duration=Math.max(.001,+anim.duration||1),raw=t*sceneDuration*(+clip.speed||1)+(+clip.offset||0);u=clip.loop===false?clamp(raw/duration,0,1):((raw%duration)+duration)%duration/duration}
+        for(const [path,rawGroup] of Object.entries(anim.partTracks)){
+            const el=target.querySelector(`[data-node-path="${CSS.escape(path)}"]`);if(!el)continue;const group=rawGroup.tracks||rawGroup||{},styleTracks=rawGroup.styleTracks||{},customTracks=rawGroup.customTracks||{};
+            const x=evalTrack(group.x,u,0),y=evalTrack(group.y,u,0),z=evalTrack(group.z,u,0),r=evalTrack(group.rotation,u,0),sx=evalTrack(group.scaleX,u,1),sy=evalTrack(group.scaleY,u,1);el.style.zIndex=String(Math.round((parseFloat(el.style.zIndex)||0)+z));el.style.transform=`translate(${x}px,${y}px) rotate(${r}deg) scale(${sx},${sy})`;if(group.opacity)el.style.opacity=String(evalTrack(group.opacity,u,1));
+            for(const [prop,trackDef] of Object.entries(styleTracks)){const keys=trackDef.keyframes||trackDef,unit=trackDef.unit||'';el.style[prop]=`${evalTrack(keys,u,parseFloat(el.style[prop])||0)}${unit}`}
+            for(const [prop,trackDef] of Object.entries(customTracks)){const keys=trackDef.keyframes||trackDef,unit=trackDef.unit||'';el.style.setProperty(prop,`${evalTrack(keys,u,0)}${unit}`)}
+        }
+    }
+}
 function cssStyleToJs(style){const o={};for(const[k,v]of Object.entries(style||{})){o[k.replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]=v}return o}
 function findAssetNode(node,path){if(node.path===path)return node;for(const c of node.children||[]){const f=findAssetNode(c,path);if(f)return f}return null}
 
@@ -3343,8 +3467,8 @@ function renderAssets(){
     stopAssetPreviewAnimations();const list=$('#assetList');list.innerHTML='';if(!state.project)return;const q=$('#assetSearch').value.trim().toLowerCase();
     for(const asset of Object.values(state.project.assets).sort((a,b)=>a.name.localeCompare(b.name))){
         const anims=asset.animations||[];if(q&&!`${asset.name} ${asset.kind} ${(asset.tags||[]).join(' ')} ${anims.map(a=>a.name).join(' ')}`.toLowerCase().includes(q))continue;
-        const el=document.createElement('div');el.className='assetCard'+(asset.id===state.selectedAssetId?' selected':'');el.innerHTML=`<div class="assetThumb"></div><div><div class="assetName">${escapeHtml(asset.name)}</div><div class="assetMeta">${escapeHtml(asset.kind)}${anims.length?` - ${anims.length} clip${anims.length===1?'':'s'}`:''}</div></div><button class="icon addAsset" title="Add to scene">+</button>`;
-        mountAssetPreview(asset,el.querySelector('.assetThumb'));el.onclick=e=>{if(e.target.closest('.addAsset')){addAssetToScene(asset.id);return}state.selectedAssetId=asset.id;state.selectedLayerId=null;renderAssets();renderInspector()};list.appendChild(el);
+        const el=document.createElement('div');el.className='assetCard'+(asset.id===state.selectedAssetId?' selected':'');el.innerHTML=`<div class="assetThumb"></div><div><div class="assetName">${escapeHtml(asset.name)}</div><div class="assetMeta">${escapeHtml(asset.kind)}${anims.length?` - ${anims.length} clip${anims.length===1?'':'s'}`:''}</div></div><div style="display:flex;gap:4px"><button class="icon editAsset" title="Edit asset">✎</button><button class="icon addAsset" title="Add to scene">+</button></div>`;
+        mountAssetPreview(asset,el.querySelector('.assetThumb'));el.onclick=e=>{if(e.target.closest('.editAsset')){openAssetEditor(asset.id);return}if(e.target.closest('.addAsset')){addAssetToScene(asset.id);return}state.selectedAssetId=asset.id;state.selectedLayerId=null;renderAssets();renderInspector()};list.appendChild(el);
     }
 }
 
@@ -3405,14 +3529,34 @@ function subtitleInspector(layer){
     return `<div class="sectionTitle">Subtitle Cues</div><div class="animHelp">Edit subtitle text, timing, and speaker assignment here. Lip Sync uses Speaker first, then side/order as a fallback.</div><datalist id="subtitleSpeakerOptions">${speakers.map(s=>`<option value="${escapeHtml(s)}"></option>`).join('')}</datalist><div class="subtitleCueEditor">${rows||'<div class="muted">No subtitle cues.</div>'}</div><div style="display:flex;gap:6px;margin-top:8px"><button id="addSubtitleCueBtn">Add Cue</button><button id="sortSubtitleCuesBtn">Sort</button></div><div class="sectionTitle">Raw Cues JSON</div><textarea id="subtitleCueJson" rows="8" style="width:100%;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px">${escapeHtml(JSON.stringify(layer.cues||[],null,2))}</textarea>`;
 }
 function allAssetNodePaths(asset){const out=[];const walk=node=>{if(!node)return;out.push({path:String(node.path??'0'),label:(node.classes||[]).find(Boolean)||node.tag||String(node.path??'0')});for(const child of node.children||[])walk(child)};walk(asset?.node);return out}
+function selectedStructuredAnimation(layer){
+    const asset=state.project?.assets?.[layer?.assetId];if(!asset)return null;
+    let anim=(asset.animations||[]).find(a=>a.id===state.selectedAnimationId);
+    if(!anim)anim=(asset.animations||[]).find(a=>a.partTracks&&Object.keys(a.partTracks).length)||(asset.animations||[])[0]||null;
+    if(anim)state.selectedAnimationId=anim.id;return anim;
+}
+function animationLocalT(layer,anim,sceneT=state.playhead){
+    const scene=currentScene();if(!scene||!anim)return clamp(sceneT,0,1);
+    const clip=(layer.clips||[]).find(c=>c.clipId===anim.id||c.name===anim.name);
+    if(clip&&Number.isFinite(+clip.start)&&Number.isFinite(+clip.end)&&+clip.end>+clip.start)return clamp((sceneT-(+clip.start))/(+clip.end-(+clip.start)),0,1);
+    const seconds=sceneT*Math.max(.001,+scene.duration||1),duration=Math.max(.001,+anim.duration||1),speed=Math.max(.0001,Math.abs(+clip?.speed||1)),offset=+clip?.offset||0;
+    const raw=seconds*speed+offset;return clip?.loop===false?clamp(raw/duration,0,1):((raw%duration)+duration)%duration/duration;
+}
+function ensureStructuredAnimation(layer,name='Animation'){
+    const asset=state.project?.assets?.[layer.assetId];if(!asset)return null;asset.animations??=[];
+    const unique=base=>{let n=base,i=2;while(asset.animations.some(a=>a.name===n))n=`${base} ${i++}`;return n};
+    const finalName=unique(name),anim={id:`clip_${simpleHash(`${asset.id}:${finalName}:${Date.now()}`)}`,name:finalName,duration:Math.max(.1,currentScene()?.duration||1),delay:0,iterations:'1',direction:'normal',timing:'linear',source:'editor',partTracks:{}};
+    asset.animations.push(anim);asset.nativeAnimations=asset.animations.map(a=>a.name);ensureLayerHasAssetClips(layer,asset);const clip=(layer.clips||[]).find(c=>c.clipId===anim.id||c.name===anim.name);if(clip){clip.loop=false;clip.enabled=true;clip.start=layer.start??0;clip.end=layer.end??1;clip.activeKeyframes=[{t:clip.start,value:true,ease:'hold'},{t:Math.min(1,clip.end+.000001),value:false,ease:'hold'}]}
+    state.selectedAnimationId=anim.id;return anim;
+}
 function objectPartAnimationInspector(layer){
-    const asset=state.project?.assets?.[layer.assetId],all=allAssetNodePaths(asset),existing=new Set([...Object.keys(layer.partTracks||{}),...Object.keys(layer.lipSyncPartTracks||{})]);
-    const available=all.length?all:[...existing].map(path=>({path,label:layer.partLabels?.[path]||path}));if(!available.length)return `<div class="sectionTitle">Object Animation</div><div class="animHelp">This object has no addressable child parts.</div>`;
-    const selected=available.some(x=>x.path===state.selectedPartPath)?state.selectedPartPath:(available.find(x=>existing.has(x.path))?.path||available[0].path);state.selectedPartPath=selected;
-    const isLip=!!layer.lipSyncPartTracks?.[selected]&&!layer.partTracks?.[selected],raw=layer.partTracks?.[selected]||layer.lipSyncPartTracks?.[selected]||{tracks:{},styleTracks:{},customTracks:{}},group=raw.tracks||raw,styleTracks=raw.styleTracks||{},customTracks=raw.customTracks||{};
-    const defaults={x:0,y:0,rotation:0,scaleX:1,scaleY:1,opacity:1};let channels='';for(const prop of ['x','y','rotation','scaleX','scaleY','opacity'])channels+=`<label>${escapeHtml(prop)}</label><input class="partPropInput" data-kind="transform" data-prop="${prop}" type="number" step=".01" value="${fmt(evalTrack(group[prop],state.playhead,defaults[prop]))}">`;
-    for(const [prop,def] of Object.entries(styleTracks))channels+=`<label>${escapeHtml(prop)}</label><input class="partPropInput" data-kind="style" data-prop="${escapeHtml(prop)}" type="number" step=".1" value="${fmt(evalTrack(def.keyframes||def,state.playhead,0))}">`;for(const [prop,def] of Object.entries(customTracks))channels+=`<label>${escapeHtml(prop)}</label><input class="partPropInput" data-kind="custom" data-prop="${escapeHtml(prop)}" type="number" step=".01" value="${fmt(evalTrack(def.keyframes||def,state.playhead,0))}">`;
-    return `<div class="sectionTitle">Object Animation</div><div class="animHelp">Root motion and part animation are stored directly on <b>${escapeHtml(layer.name)}</b>. Choose any part below and keyframe it. ${isLip?'Generated lip sync is also driving this part.':''}</div><div class="propGrid"><label>Part</label><select id="partSelect">${available.map(x=>`<option value="${escapeHtml(x.path)}" ${x.path===selected?'selected':''}>${escapeHtml(layer.partLabels?.[x.path]||x.label||x.path)}${existing.has(x.path)?' *':''}</option>`).join('')}</select></div><div class="sectionTitle">Part Transform at Playhead</div><div class="propGrid">${channels}</div><button id="partKeyframeBtn" class="primary" style="margin-top:8px">* Keyframe Part Values</button>`;
+    const asset=state.project?.assets?.[layer.assetId],animations=asset?.animations||[],all=allAssetNodePaths(asset);if(!asset)return '';
+    const anim=selectedStructuredAnimation(layer);const existing=new Set(Object.keys(anim?.partTracks||{}));
+    const available=all.length?all:[...existing].map(path=>({path,label:path}));
+    const selected=available.some(x=>x.path===state.selectedPartPath)?state.selectedPartPath:(available.find(x=>existing.has(x.path))?.path||available[0]?.path||'0');state.selectedPartPath=selected;
+    const raw=anim?.partTracks?.[selected]||{tracks:{},styleTracks:{},customTracks:{}},group=raw.tracks||raw,localT=animationLocalT(layer,anim),defaults={x:0,y:0,rotation:0,scaleX:1,scaleY:1,opacity:1};let channels='';
+    for(const prop of ['x','y','z','rotation','scaleX','scaleY','opacity'])channels+=`<label>${escapeHtml(prop)}</label><input class="partPropInput" data-kind="transform" data-prop="${prop}" type="number" step=".01" value="${fmt(evalTrack(group[prop],localT,defaults[prop]))}">`;
+    return `<div class="sectionTitle">Animations</div><div class="animHelp">Every named animation uses the same structure and may animate any number of parts. Scene placement remains on the object; internal motion belongs here.</div><div class="propGrid"><label>Animation</label><select id="objectAnimationSelect">${animations.map(a=>`<option value="${escapeHtml(a.id)}" ${a.id===anim?.id?'selected':''}>${escapeHtml(a.name)}</option>`).join('')}</select></div><button id="newObjectAnimationBtn" style="margin-top:6px">+ New Animation</button>${anim&&available.length?`<div class="sectionTitle">${escapeHtml(anim.name)} — Part</div><div class="propGrid"><label>Part</label><select id="partSelect">${available.map(x=>`<option value="${escapeHtml(x.path)}" ${x.path===selected?'selected':''}>${escapeHtml(x.label||x.path)}${existing.has(x.path)?' *':''}</option>`).join('')}</select></div><div class="sectionTitle">Part Transform at Animation Time ${Math.round(localT*100)}%</div><div class="propGrid">${channels}</div><button id="partKeyframeBtn" class="primary" style="margin-top:8px">* Keyframe Part Values</button>`:'<div class="muted" style="margin-top:8px">Create an animation to animate object parts.</div>'}`;
 }
 
 function animationInspector(layer){
@@ -3432,12 +3576,41 @@ function keyframeInspector(layer,scene){
     const times=keyframeTimes(layer);return `<div class="sectionTitle">Keyframes</div><div id="keyframeList">${times.map(t=>`<div class="kfRow"><button class="kfJump" data-t="${t}">${(t*scene.duration).toFixed(2)}s</button><span>${keyframePropsAt(layer,t).join(', ')||'parts'}</span><span>${Math.round(t*100)}%</span><button class="kfDelete danger" data-t="${t}">x</button></div>`).join('')||'<div class="muted">No keyframes.</div>'}</div>`;
 }
 function keyframePropsAt(layer,t){const result=[];for(const[p,a]of Object.entries(layer.tracks||{}))if(Array.isArray(a)&&a.some(k=>Math.abs(k.t-t)<1e-6))result.push(p);const clipHit=(layer.clips||[]).some(c=>(c.activeKeyframes||[]).some(k=>Math.abs(k.t-t)<1e-6));const attached=attachedClipLayer(layer),attachedHit=attached&&attached!==layer&&(attached.clips||[]).some(c=>(c.activeKeyframes||[]).some(k=>Math.abs(k.t-t)<1e-6));if(clipHit||attachedHit)result.push('animation active');if(!result.length&&layer.partTracks&&keyframeTimes({tracks:{},partTracks:layer.partTracks}).some(x=>Math.abs(x-t)<1e-6))result.push('part motion');return result}
+
+function assetEditorAsset(){return state.project?.assets?.[state.assetEditor.assetId]||null}
+function assetEditorAnimation(){const asset=assetEditorAsset();return asset?.animations?.find(a=>a.id===state.assetEditor.animationId)||asset?.animations?.[0]||null}
+function nodeStyleNumber(node,prop,def=0){const raw=node?.style?.[prop];const n=parseFloat(raw);return Number.isFinite(n)?n:def}
+function nodeScalePair(node){const raw=String(node?.style?.scale||'').trim(),nums=raw.split(/\s+/).map(Number).filter(Number.isFinite);return{x:nums[0]??1,y:nums[1]??nums[0]??1}}
+function assetPartDefaults(asset,path){const node=findAssetNode(asset.node,path)||asset.node,sc=nodeScalePair(node);return{x:nodeStyleNumber(node,'left',0),y:nodeStyleNumber(node,'top',0),z:nodeStyleNumber(node,'zIndex',0),rotation:nodeStyleNumber(node,'rotate',0),scaleX:sc.x,scaleY:sc.y,opacity:nodeStyleNumber(node,'opacity',1),width:nodeStyleNumber(node,'width',0),height:nodeStyleNumber(node,'height',0)}}
+function setAssetPartDefault(asset,path,prop,value){const node=findAssetNode(asset.node,path)||asset.node;node.style??={};if(prop==='x')node.style.left=`${value}px`;else if(prop==='y')node.style.top=`${value}px`;else if(prop==='z')node.style.zIndex=String(value);else if(prop==='rotation')node.style.rotate=`${value}deg`;else if(prop==='scaleX'||prop==='scaleY'){const sc=nodeScalePair(node);if(prop==='scaleX')sc.x=value;else sc.y=value;node.style.scale=`${sc.x} ${sc.y}`}else if(prop==='opacity')node.style.opacity=String(value);else if(prop==='width'||prop==='height')node.style[prop]=`${Math.max(0,value)}px`;markDirty();renderAssetEditor();renderAssets();renderScene()}
+function ensureAssetEditorAnimation(asset,name='Animation'){asset.animations??=[];let final=String(name||'Animation').trim()||'Animation',i=2;while(asset.animations.some(a=>a.name===final))final=`${name} ${i++}`;const anim={id:`clip_${simpleHash(`${asset.id}:${final}:${Date.now()}`)}`,name:final,duration:1,delay:0,iterations:'1',direction:'normal',timing:'linear',source:'editor',partTracks:{}};asset.animations.push(anim);asset.nativeAnimations=asset.animations.map(a=>a.name);for(const scene of state.project.scenes||[])for(const layer of scene.layers||[])if(layer.assetId===asset.id)ensureLayerHasAssetClips(layer,asset);state.assetEditor.animationId=anim.id;state.selectedAnimationId=anim.id;markDirty();return anim}
+function openAssetEditor(assetId){const asset=state.project?.assets?.[assetId];if(!asset)return;state.assetEditor.open=true;state.assetEditor.assetId=assetId;state.assetEditor.partPath='0';state.assetEditor.t=0;state.assetEditor.playing=false;state.assetEditor.selectedKey=null;const first=(asset.animations||[])[0];state.assetEditor.animationId=state.selectedAnimationId&&asset.animations?.some(a=>a.id===state.selectedAnimationId)?state.selectedAnimationId:first?.id||null;$('#assetEditor').classList.remove('hidden');renderAssetEditor()}
+function closeAssetEditor(){state.assetEditor.open=false;state.assetEditor.playing=false;$('#assetEditor').classList.add('hidden');renderAssets();renderInspector();renderScene()}
+function assetEditorPaths(asset){return allAssetNodePaths(asset)}
+function applyAssetEditorAnimation(root,asset,anim,t){if(!anim)return;for(const [path,raw] of Object.entries(anim.partTracks||{})){const el=root.querySelector(`[data-node-path="${CSS.escape(path)}"]`);if(!el)continue;const g=raw.tracks||raw||{},x=evalTrack(g.x,t,0),y=evalTrack(g.y,t,0),z=evalTrack(g.z,t,0),r=evalTrack(g.rotation,t,0),sx=evalTrack(g.scaleX,t,1),sy=evalTrack(g.scaleY,t,1);el.style.transform=`translate(${x}px,${y}px) rotate(${r}deg) scale(${sx},${sy})`;if(g.z)el.style.zIndex=String(Math.round((parseFloat(el.style.zIndex)||0)+z));if(g.opacity)el.style.opacity=String(evalTrack(g.opacity,t,1));for(const [prop,def] of Object.entries(raw.styleTracks||{})){const keys=def.keyframes||def;el.style[prop]=`${evalTrack(keys,t,parseFloat(el.style[prop])||0)}${def.unit||''}`}}
+}
+function renderAssetEditor(){if(!state.assetEditor.open)return;const asset=assetEditorAsset();if(!asset){closeAssetEditor();return}const animations=asset.animations||[];if(!animations.some(a=>a.id===state.assetEditor.animationId))state.assetEditor.animationId=animations[0]?.id||null;const anim=assetEditorAnimation();$('#assetEditorTitle').textContent=`Asset Editor — ${asset.name}`;$('#assetEditorKind').textContent=asset.kind||'asset';const sel=$('#assetEditorAnimationSelect');sel.innerHTML=animations.map(a=>`<option value="${escapeHtml(a.id)}" ${a.id===anim?.id?'selected':''}>${escapeHtml(a.name)}</option>`).join('');sel.disabled=!animations.length;const root=$('#assetEditorObject');root.innerHTML='';const node=buildNode(asset.node);root.appendChild(node);const all=[node,...node.querySelectorAll('[data-node-path]')];for(const el of all){const path=el.dataset.nodePath;if(!path)continue;el.addEventListener('mousedown',e=>{e.stopPropagation();state.assetEditor.partPath=path;renderAssetEditor()})}applyAssetEditorAnimation(root,asset,anim,state.assetEditor.t);const chosen=[...root.querySelectorAll('[data-node-path]')].find(x=>x.dataset.nodePath===state.assetEditor.partPath)||node;if(chosen)chosen.classList.add('assetPartSelected');fitAssetEditorObject(root,node);renderAssetEditorInspector(asset,anim);renderAssetEditorTimeline(asset,anim);document.documentElement.style.setProperty('--asset-playhead',`${state.assetEditor.t*100}%`);$('#assetEditorTimeSlider').value=Math.round(state.assetEditor.t*1000);const dur=Math.max(.001,+anim?.duration||1);$('#assetEditorTimeReadout').textContent=`${(state.assetEditor.t*dur).toFixed(2)} / ${dur.toFixed(2)} s`;$('#assetEditorPlayBtn').textContent=state.assetEditor.playing?'Pause':'Play'}
+function fitAssetEditorObject(root,node){requestAnimationFrame(()=>{const canvas=$('#assetEditorCanvas'),r=node.getBoundingClientRect(),cw=canvas.clientWidth,ch=canvas.clientHeight;if(!r.width||!r.height)return;const scale=Math.min((cw*.72)/r.width,(ch*.72)/r.height,3);root.style.transform=`translate(-50%,-50%) scale(${Math.max(.08,scale)})`})}
+function assetEditorTrackGroup(anim,path,create=false){if(!anim)return null;anim.partTracks??={};if(create&& !anim.partTracks[path])anim.partTracks[path]={tracks:{},styleTracks:{},customTracks:{}};const raw=anim.partTracks[path];if(!raw)return null;if(!raw.tracks)anim.partTracks[path]={tracks:raw,styleTracks:{},customTracks:{}};return anim.partTracks[path]}
+function assetEditorValue(anim,path,prop,t){const group=assetEditorTrackGroup(anim,path,false)?.tracks||{};return evalTrack(group[prop],t,prop==='scaleX'||prop==='scaleY'||prop==='opacity'?1:0)}
+function setAssetEditorKey(anim,path,prop,t,value){const group=assetEditorTrackGroup(anim,path,true);group.tracks[prop]??=[];setKeyframeArray(group.tracks[prop],clamp(t,0,1),value);markDirty()}
+function assetEditorKeyTimes(anim,path){const set=new Set();const raw=anim?.partTracks?.[path];collectKeyframeTimes(raw||{},set);return[...set].filter(Number.isFinite).sort((a,b)=>a-b)}
+function renderAssetEditorInspector(asset,anim){const path=state.assetEditor.partPath||'0',node=findAssetNode(asset.node,path)||asset.node,defaults=assetPartDefaults(asset,path),animDefaults={x:0,y:0,z:0,rotation:0,scaleX:1,scaleY:1,opacity:1};let html=`<div><b>${escapeHtml(friendlyNodeLabel(node,path))}</b></div><div class="assetPartPath">${escapeHtml(path)}</div><div class="sectionTitle">Default Part Transform</div><div class="animHelp">These values change the asset itself in every scene. Z controls depth/order inside the asset.</div><div class="propGrid">`;for(const p of ['x','y','z','rotation','scaleX','scaleY','opacity','width','height'])html+=`<label>${p}</label><input class="assetDefaultProp" data-prop="${p}" type="number" step="${p==='z'?1:.01}" value="${fmt(defaults[p])}">`;html+=`</div>`;if(anim){html+=`<div class="sectionTitle">${escapeHtml(anim.name)} — Part Animation</div><div class="propGrid"><label>Duration</label><input id="assetAnimDuration" type="number" min=".01" step=".05" value="${fmt(anim.duration||1)}">`;for(const p of ['x','y','z','rotation','scaleX','scaleY','opacity'])html+=`<label>${p}</label><input class="assetAnimProp" data-prop="${p}" type="number" step="${p==='z'?1:.01}" value="${fmt(assetEditorValue(anim,path,p,state.assetEditor.t))}">`;html+=`</div><div class="assetEditorButtonRow"><button id="assetKeyAllBtn" class="primary">◆ Keyframe All</button><button id="assetKeyChangedBtn">Keyframe Values</button><button id="assetRemovePartAnimationBtn" class="danger">Remove Part From Animation</button></div><div class="animHelp">Select any body part directly on the canvas. Keyframing automatically adds that part to ${escapeHtml(anim.name)}. One animation can drive as many parts as you want.</div>`}else html+=`<div class="sectionTitle">Animation</div><div class="muted">Create an animation above to keyframe this part.</div>`;$('#assetEditorInspector').innerHTML=html;$$('.assetDefaultProp').forEach(inp=>inp.onchange=()=>setAssetPartDefault(asset,path,inp.dataset.prop,+inp.value));if($('#assetAnimDuration'))$('#assetAnimDuration').onchange=e=>{anim.duration=Math.max(.01,+e.target.value||1);markDirty();renderAssetEditor()};$$('.assetAnimProp').forEach(inp=>inp.onchange=()=>{setAssetEditorKey(anim,path,inp.dataset.prop,state.assetEditor.t,+inp.value);renderAssetEditor()});if($('#assetKeyAllBtn'))$('#assetKeyAllBtn').onclick=()=>{beginHistoryBatch();for(const inp of $$('.assetAnimProp'))setAssetEditorKey(anim,path,inp.dataset.prop,state.assetEditor.t,+inp.value);endHistoryBatch();renderAssetEditor()};if($('#assetKeyChangedBtn'))$('#assetKeyChangedBtn').onclick=()=>{for(const inp of $$('.assetAnimProp'))setAssetEditorKey(anim,path,inp.dataset.prop,state.assetEditor.t,+inp.value);renderAssetEditor()};if($('#assetRemovePartAnimationBtn'))$('#assetRemovePartAnimationBtn').onclick=()=>{if(anim.partTracks?.[path]&&confirm(`Remove ${friendlyNodeLabel(node,path)} from ${anim.name}?`)){delete anim.partTracks[path];markDirty();renderAssetEditor()}}}
+function friendlyNodeLabel(node,path){return node?.classes?.find(c=>!['editorNode','person','layer'].includes(c))||node?.tag||path}
+function renderAssetEditorTimeline(asset,anim){const box=$('#assetEditorRows');box.innerHTML='';const paths=assetEditorPaths(asset);for(const item of paths){const row=document.createElement('div');row.className='assetAnimRow';const label=document.createElement('div');label.className='assetAnimRowLabel'+(item.path===state.assetEditor.partPath?' selected':'');label.textContent=item.label||item.path;label.title=item.path;label.onclick=()=>{state.assetEditor.partPath=item.path;renderAssetEditor()};const lane=document.createElement('div');lane.className='assetAnimLane';lane.onclick=e=>{if(e.target!==lane)return;const r=lane.getBoundingClientRect();state.assetEditor.t=clamp((e.clientX-r.left)/Math.max(1,r.width),0,1);renderAssetEditor()};if(anim)for(const t of assetEditorKeyTimes(anim,item.path)){const d=document.createElement('div');d.className='assetAnimDiamond'+(state.assetEditor.selectedKey&&state.assetEditor.selectedKey.path===item.path&&Math.abs(state.assetEditor.selectedKey.t-t)<.0005?' selected':'');d.style.left=`${t*100}%`;d.title=`${(t*(anim.duration||1)).toFixed(2)}s`;d.onmousedown=e=>beginAssetKeyDrag(e,anim,item.path,t,lane);lane.appendChild(d)}row.append(label,lane);box.appendChild(row)}}
+function beginAssetKeyDrag(e,anim,path,t,lane){if(e.button!==0)return;e.preventDefault();e.stopPropagation();state.assetEditor.partPath=path;state.assetEditor.selectedKey={path,t};const rect=lane.getBoundingClientRect(),startX=e.clientX;let applied=0;beginHistoryBatch();const move=ev=>{let delta=(ev.clientX-startX)/Math.max(1,rect.width);delta=clamp(delta,-t,1-t);const inc=delta-applied;if(Math.abs(inc)<1e-9)return;const raw=anim.partTracks?.[path];if(raw){const walk=v=>{if(Array.isArray(v)&&v.every(k=>k&&typeof k==='object'&&'t'in k)){for(const k of v)if(Math.abs(k.t-(t+applied))<.0006)k.t=clamp(k.t+inc,0,1);v.sort((a,b)=>a.t-b.t)}else if(v&&typeof v==='object')Object.values(v).forEach(walk)};walk(raw)}applied=delta;state.assetEditor.t=t+delta;state.assetEditor.selectedKey={path,t:t+delta};markDirty();renderAssetEditor()};const up=()=>{window.removeEventListener('mousemove',move);endHistoryBatch();renderAssetEditor()};window.addEventListener('mousemove',move);window.addEventListener('mouseup',up,{once:true})}
+function assetEditorTick(now){if(!state.assetEditor.open||!state.assetEditor.playing)return;if(!state.assetEditor.lastFrameTime)state.assetEditor.lastFrameTime=now;const anim=assetEditorAnimation(),dur=Math.max(.01,+anim?.duration||1),dt=(now-state.assetEditor.lastFrameTime)/1000;state.assetEditor.lastFrameTime=now;state.assetEditor.t=(state.assetEditor.t+dt/dur)%1;renderAssetEditor();requestAnimationFrame(assetEditorTick)}
+function newAssetEditorAnimation(){const asset=assetEditorAsset();if(!asset)return;const name=prompt('Animation name','Animation');if(!name)return;ensureAssetEditorAnimation(asset,name);state.assetEditor.t=0;renderAssetEditor()}
+function duplicateAssetEditorAnimation(){const asset=assetEditorAsset(),anim=assetEditorAnimation();if(!asset||!anim)return;const copy=deepClone(anim);copy.id=`clip_${simpleHash(`${asset.id}:${anim.name}:copy:${Date.now()}`)}`;let base=`${anim.name} Copy`,name=base,i=2;while(asset.animations.some(a=>a.name===name))name=`${base} ${i++}`;copy.name=name;copy.source='editor-copy';asset.animations.push(copy);asset.nativeAnimations=asset.animations.map(a=>a.name);for(const scene of state.project.scenes||[])for(const layer of scene.layers||[])if(layer.assetId===asset.id)ensureLayerHasAssetClips(layer,asset);state.assetEditor.animationId=copy.id;markDirty();renderAssetEditor()}
+function renameAssetEditorAnimation(){const anim=assetEditorAnimation();if(!anim)return;const old=anim.name,name=prompt('Animation name',old);if(!name||name===old)return;anim.name=name.trim()||old;const asset=assetEditorAsset();for(const scene of state.project.scenes||[])for(const layer of scene.layers||[])if(layer.assetId===asset.id)for(const clip of layer.clips||[])if(clip.clipId===anim.id||clip.name===old)clip.name=anim.name;asset.nativeAnimations=asset.animations.map(a=>a.name);markDirty();renderAssetEditor();renderAssets()}
+function deleteAssetEditorAnimation(){const asset=assetEditorAsset(),anim=assetEditorAnimation();if(!asset||!anim||!confirm(`Delete animation ${anim.name}?`))return;asset.animations=asset.animations.filter(a=>a.id!==anim.id);for(const scene of state.project.scenes||[])for(const layer of scene.layers||[])if(layer.assetId===asset.id)layer.clips=(layer.clips||[]).filter(c=>c.clipId!==anim.id&&c.name!==anim.name);asset.nativeAnimations=asset.animations.map(a=>a.name);state.assetEditor.animationId=asset.animations[0]?.id||null;markDirty();renderAssetEditor();renderAssets()}
 function assetInspector(asset){
     const animations=asset.animations||[];
-    return `<div><b>${escapeHtml(asset.name)}</b> <span class="badge">${escapeHtml(asset.kind)}</span></div><div id="assetBigPreview" class="assetBigPreview"></div><div class="sectionTitle">Asset</div><div class="propGrid"><label>Name</label><input id="assetName" value="${escapeHtml(asset.name)}"><label>Type</label><span>${escapeHtml(asset.kind)}</span></div><div class="sectionTitle">Asset Animation Clips</div><div class="animHelp">Animation clips live on the asset and can be reused in any scene. Edit the JSON structure to add multiple clips, frames, timings, and directions at once.</div>${animations.map((a,i)=>`<div class="animClipCard"><div class="animClipHead"><b>${escapeHtml(a.name)}</b><span class="badge">${fmt(a.duration||1)}s</span><button class="assetAnimPreview" data-i="${i}">Play Preview</button></div><div class="muted" style="font-size:11px">${escapeHtml(a.source||'animation clip')}</div></div>`).join('')||'<div class="muted">This asset has no reusable animation clips.</div>'}<div class="sectionTitle">Animations JSON</div><textarea id="assetAnimationCode">${escapeHtml(asset.animationCode||assetAnimationCode(asset))}</textarea><div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><button id="assetApplyAnimationCode" class="primary">Apply Animation Code</button><button id="assetResetAnimationCode">Regenerate From Clips</button></div><div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap"><button id="assetAddScene" class="primary">Add to Current Scene</button><button id="assetDuplicate">Duplicate Asset</button><button id="assetStopPreview">Stop Preview</button></div>`;
+    return `<div><b>${escapeHtml(asset.name)}</b> <span class="badge">${escapeHtml(asset.kind)}</span></div><div id="assetBigPreview" class="assetBigPreview"></div><button id="assetEditBtn" class="primary" style="width:100%;margin:2px 0 8px">Edit Asset & Animations…</button><div class="sectionTitle">Asset</div><div class="propGrid"><label>Name</label><input id="assetName" value="${escapeHtml(asset.name)}"><label>Type</label><span>${escapeHtml(asset.kind)}</span></div><div class="sectionTitle">Asset Animation Clips</div><div class="animHelp">Animation clips live on the asset and can be reused in any scene. Edit the JSON structure to add multiple clips, frames, timings, and directions at once.</div>${animations.map((a,i)=>`<div class="animClipCard"><div class="animClipHead"><b>${escapeHtml(a.name)}</b><span class="badge">${fmt(a.duration||1)}s</span><button class="assetAnimPreview" data-i="${i}">Play Preview</button></div><div class="muted" style="font-size:11px">${escapeHtml(a.source||'animation clip')}</div></div>`).join('')||'<div class="muted">This asset has no reusable animation clips.</div>'}<div class="sectionTitle">Animations JSON</div><textarea id="assetAnimationCode">${escapeHtml(asset.animationCode||assetAnimationCode(asset))}</textarea><div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><button id="assetApplyAnimationCode" class="primary">Apply Animation Code</button><button id="assetResetAnimationCode">Regenerate From Clips</button></div><div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap"><button id="assetAddScene" class="primary">Add to Current Scene</button><button id="assetDuplicate">Duplicate Asset</button><button id="assetStopPreview">Stop Preview</button></div>`;
 }
 function wireAssetInspector(asset){
     mountAssetPreview(asset,$('#assetBigPreview'));
+    if($('#assetEditBtn'))$('#assetEditBtn').onclick=()=>openAssetEditor(asset.id);
     $('#assetName').onchange=e=>{asset.name=e.target.value||asset.name;markDirty();renderAssets()};$('#assetAddScene').onclick=()=>addAssetToScene(asset.id);$('#assetDuplicate').onclick=()=>{const a=deepClone(asset);a.id=uid('asset');a.name+=' Copy';state.project.assets[a.id]=a;state.selectedAssetId=a.id;markDirty();renderAssets();renderInspector()};$('#assetStopPreview').onclick=()=>{stopAssetPreviewAnimations();mountAssetPreview(asset,$('#assetBigPreview'))};
     $('#assetApplyAnimationCode').onclick=()=>{try{applyAnimationCodeToAsset(asset,$('#assetAnimationCode').value);markDirty();renderAll();toast('Animation code applied.')}catch(err){alert(err.message)}};
     $('#assetResetAnimationCode').onclick=()=>{$('#assetAnimationCode').value=assetAnimationCode(asset)};
@@ -3459,6 +3632,8 @@ function wireLayerInspector(layer){
     $$('.clipEnabled').forEach(e=>e.onchange=()=>{layer.clips[+e.dataset.i].enabled=e.checked;markDirty();applyAtPlayhead()});$$('.clipSpeed').forEach(e=>e.onchange=()=>{layer.clips[+e.dataset.i].speed=+e.value;markDirty();applyAtPlayhead()});$$('.clipOffset').forEach(e=>e.onchange=()=>{layer.clips[+e.dataset.i].offset=+e.value;markDirty();applyAtPlayhead()});
     $$('.clipActiveAtPlayhead').forEach(e=>e.onchange=()=>{const anim=attachedClipLayer(layer);if(!anim)return;setClipActiveKeyframe(anim,+e.dataset.i,state.playhead,e.checked);renderTracks();applyAtPlayhead();renderInspector()});
     if($('#clipKeyframeActiveBtn'))$('#clipKeyframeActiveBtn').onclick=()=>{const anim=attachedClipLayer(layer);if(!anim)return;beginHistoryBatch();$$('.clipActiveAtPlayhead').forEach(e=>setClipActiveKeyframe(anim,+e.dataset.i,state.playhead,e.checked,false));endHistoryBatch();renderTracks();applyAtPlayhead();renderInspector()};
+    if($('#objectAnimationSelect'))$('#objectAnimationSelect').onchange=e=>{state.selectedAnimationId=e.target.value;state.selectedPartPath=null;renderInspector()};
+    if($('#newObjectAnimationBtn'))$('#newObjectAnimationBtn').onclick=()=>{const name=prompt('Animation name','Animation');if(!name)return;ensureStructuredAnimation(layer,name.trim()||'Animation');markDirty();renderTracks();applyAtPlayhead();renderInspector()};
     if($('#partSelect'))$('#partSelect').onchange=e=>{state.selectedPartPath=e.target.value;renderInspector()};
     $$('.partPropInput').forEach(inp=>inp.onchange=()=>{setPartKeyframe(layer,state.selectedPartPath,inp.dataset.kind,inp.dataset.prop,state.playhead,+inp.value);renderTracks();applyAtPlayhead();renderInspector()});
     if($('#partKeyframeBtn'))$('#partKeyframeBtn').onclick=()=>{beginHistoryBatch();$$('.partPropInput').forEach(inp=>setPartKeyframe(layer,state.selectedPartPath,inp.dataset.kind,inp.dataset.prop,state.playhead,+inp.value,false));endHistoryBatch();renderTracks();applyAtPlayhead();renderInspector()};
@@ -3476,11 +3651,20 @@ function setClipActiveKeyframe(anim,index,t,value,dirty=true){
     if(dirty)markDirty();
 }
 function setPartKeyframe(layer,path,kind,prop,t,value,dirty=true){
-    if(!path)return;layer.partTracks??={};const existing=layer.partTracks[path]||layer.lipSyncPartTracks?.[path]||{tracks:{},styleTracks:{},customTracks:{}};if(!layer.partTracks[path])layer.partTracks[path]=deepClone(existing);const raw=layer.partTracks[path];const group=raw.tracks?raw:(layer.partTracks[path]={tracks:raw,styleTracks:{},customTracks:{}});
-    if(kind==='transform'){group.tracks??={};group.tracks[prop]??=[];setKeyframeArray(group.tracks[prop],t,value)}
-    else{const bucket=kind==='style'?'styleTracks':'customTracks';group[bucket]??={};group[bucket][prop]??={unit:'',keyframes:[]};if(Array.isArray(group[bucket][prop]))setKeyframeArray(group[bucket][prop],t,value);else{group[bucket][prop].keyframes??=[];setKeyframeArray(group[bucket][prop].keyframes,t,value)}}
+    if(!path)return;
+    if(layer.type==='asset'){
+        let anim=selectedStructuredAnimation(layer);if(!anim)anim=ensureStructuredAnimation(layer,'Animation');if(!anim)return;
+        anim.partTracks??={};anim.partTracks[path]??={tracks:{},styleTracks:{},customTracks:{}};const raw=anim.partTracks[path],group=raw.tracks?raw:(anim.partTracks[path]={tracks:raw,styleTracks:{},customTracks:{}}),localT=animationLocalT(layer,anim,t);
+        if(kind==='transform'){group.tracks??={};group.tracks[prop]??=[];setKeyframeArray(group.tracks[prop],localT,value)}
+        else{const bucket=kind==='style'?'styleTracks':'customTracks';group[bucket]??={};group[bucket][prop]??={unit:'',keyframes:[]};if(Array.isArray(group[bucket][prop]))setKeyframeArray(group[bucket][prop],localT,value);else{group[bucket][prop].keyframes??=[];setKeyframeArray(group[bucket][prop].keyframes,localT,value)}}
+        assetAnimationCode(state.project.assets[layer.assetId]);
+    }else{
+        layer.partTracks??={};const raw=layer.partTracks[path]??={tracks:{},styleTracks:{},customTracks:{}},group=raw.tracks?raw:(layer.partTracks[path]={tracks:raw,styleTracks:{},customTracks:{}});
+        if(kind==='transform'){group.tracks??={};group.tracks[prop]??=[];setKeyframeArray(group.tracks[prop],t,value)}
+    }
     if(dirty)markDirty();
 }
+
 function removeKeyframesAt(value,t){
     if(Array.isArray(value)){if(value.length&&value.every(x=>x&&typeof x==='object'&&'t'in x)){for(let i=value.length-1;i>=0;i--)if(Math.abs(+value[i].t-t)<.0005)value.splice(i,1);return}value.forEach(v=>removeKeyframesAt(v,t));return}
     if(value&&typeof value==='object'){if(Array.isArray(value.keyframes)){removeKeyframesAt(value.keyframes,t);return}Object.values(value).forEach(v=>removeKeyframesAt(v,t))}
@@ -3716,15 +3900,44 @@ async function mouthKeyframesFromAudioFile(file,scene,intensity=1){
     pts.push({t:1,value:1,ease:'linear'});
     return simplifyScalar(pts,.025);
 }
+function lipSyncLayerForTarget(scene,targetLayer,create=true){
+    if(!scene||!targetLayer)return null;
+    let layer=(scene.layers||[]).find(l=>
+        l.type==='animation' &&
+        l.animationKind==='keyframed' &&
+        l.lipSync===true &&
+        l.targetLayerId===targetLayer.id
+    );
+    if(!layer&&create){
+        layer={
+            id:uid('lipsync'),
+            type:'animation',
+            animationKind:'keyframed',
+            lipSync:true,
+            targetLayerId:targetLayer.id,
+            name:`${targetLayer.name} - Lip Sync`,
+            partTracks:{},
+            partLabels:{},
+            tracks:{},
+            hidden:false,
+            locked:false
+        };
+        const targetIndex=scene.layers.indexOf(targetLayer);
+        scene.layers.splice(Math.max(0,targetIndex+1),0,layer);
+    }
+    return layer;
+}
 function applyLipSyncToTarget(scene,target,scaleYFrames){
-    target.layer.lipSyncPartTracks={
+    const lip=lipSyncLayerForTarget(scene,target.layer,true);
+    lip.partTracks={
         [target.mouthPath]:{
             tracks:{scaleY:scaleYFrames,scaleX:[{t:0,value:1,ease:'linear'}]},
             styleTracks:{},customTracks:{}
         }
     };
-    target.layer.partLabels??={};target.layer.partLabels[target.mouthPath]='Mouth';
-    return target.layer;
+    lip.partLabels??={};lip.partLabels[target.mouthPath]='Mouth';
+    lip.hidden=false;
+    return lip;
 }
 
 function ensureSceneSubtitleLipSync(scene,{includeNarrator=false,intensity=1,rate=9}={}){
@@ -3769,7 +3982,7 @@ async function autoLipSync(){
         }
     }catch(err){endHistoryBatch();alert(`Lip sync failed:\n${err.message}`);return}
     endHistoryBatch();if(!made){alert('No usable subtitle/audio lip-sync data was found for the selected target settings.');return}
-    state.selectedLayerId=targets[0]?.layer?.id||state.selectedLayerId;renderAll();toast(`Generated lip sync for ${made} target${made===1?'':'s'}.`);
+    state.selectedLayerId=lipSyncLayerForTarget(scene,targets[0]?.layer,false)?.id||targets[0]?.layer?.id||state.selectedLayerId;renderAll();toast(`Generated lip sync for ${made} target${made===1?'':'s'}.`);
 }
 
 function deleteLayerById(id){
@@ -3830,20 +4043,127 @@ function visitTimedArrays(value,fn){
 function retimeSceneNormalized(scene,oldDuration,newDuration,prependSeconds=0){
     const mapT=t=>clamp(((+t||0)*oldDuration+prependSeconds)/newDuration,0,1);
     for(const layer of scene.layers||[]){
+        const oldBounds=layerClipBounds(layer);
         visitTimedArrays(layer.tracks||{},arr=>arr.forEach(k=>k.t=mapT(k.t)));
         visitTimedArrays(layer.partTracks||{},arr=>arr.forEach(k=>k.t=mapT(k.t)));
         visitTimedArrays(layer.lipSyncPartTracks||{},arr=>arr.forEach(k=>k.t=mapT(k.t)));
         visitTimedArrays(layer.clips||{},arr=>arr.forEach(k=>k.t=mapT(k.t)));
+        for(const clip of layer.clips||[]){
+            if(Number.isFinite(+clip.start))clip.start=mapT(clip.start);
+            if(Number.isFinite(+clip.end))clip.end=mapT(clip.end);
+        }
         if(layer.type==='subtitles')for(const cue of layer.cues||[]){cue.start=mapT(cue.start);cue.end=mapT(cue.end)}
+        if(layer.type!=='camera'&&layer.type!=='effect'&&layer.type!=='animation'){
+            layer.start=mapT(oldBounds.start);
+            layer.end=Math.max(layer.start+.001,mapT(oldBounds.end));
+        }
     }
+}
+function trackValueAtForTrim(track,t){
+    if(!Array.isArray(track)||!track.length)return undefined;
+    const sorted=[...track].sort((a,b)=>(+a.t||0)-(+b.t||0));
+    const values=sorted.map(k=>k?.value);
+    if(values.every(v=>typeof v==='boolean'))return boolTrackAt(sorted,t,!!values[0]);
+    if(values.every(v=>Number.isFinite(+v)))return evalTrack(sorted,t,+values[0]||0);
+    let value=sorted[0]?.value;
+    for(const key of sorted){if((+key.t||0)<=t+1e-9)value=key.value;else break}
+    return value;
+}
+function trimTrackIsBoolean(track){
+    return Array.isArray(track)&&track.length>0&&track.every(k=>typeof k?.value==='boolean');
+}
+function trimEaseAt(track,t){
+    if(trimTrackIsBoolean(track))return'hold';
+    const sorted=[...track].filter(k=>k&&Number.isFinite(+k.t)).sort((a,b)=>+a.t-+b.t);
+    if(!sorted.length)return'linear';
+    // evalTrack uses the LEFT key's ease for the segment leading to the next key.
+    // A synthetic trim-boundary key must inherit that segment easing; using hold here
+    // turns otherwise-linear motion into a constant step after trimming.
+    for(let i=0;i<sorted.length-1;i++){
+        const a=sorted[i],b=sorted[i+1];
+        if(t>=+a.t-1e-9&&t<+b.t-1e-9)return a.ease||'linear';
+    }
+    return sorted[Math.max(0,sorted.length-1)]?.ease||'linear';
+}
+function trimTimedArray(track,keepStartT,keepEndT){
+    if(!Array.isArray(track)||!track.length)return;
+    const sorted=[...track].filter(k=>k&&Number.isFinite(+k.t)).sort((a,b)=>+a.t-+b.t);
+    if(!sorted.length){track.length=0;return}
+    const span=Math.max(1e-9,keepEndT-keepStartT),startValue=trackValueAtForTrim(sorted,keepStartT),endValue=trackValueAtForTrim(sorted,keepEndT);
+    const kept=sorted.filter(k=>+k.t>=keepStartT-1e-9&&+k.t<=keepEndT+1e-9).map(k=>deepClone(k));
+    const hasStart=kept.some(k=>Math.abs(+k.t-keepStartT)<1e-7),hasEnd=kept.some(k=>Math.abs(+k.t-keepEndT)<1e-7);
+    if(startValue!==undefined&&!hasStart)kept.unshift({t:keepStartT,value:startValue,ease:trimEaseAt(sorted,keepStartT)});
+    if(endValue!==undefined&&!hasEnd)kept.push({t:keepEndT,value:endValue,ease:trimTrackIsBoolean(sorted)?'hold':trimEaseAt(sorted,keepEndT)});
+    const byTime=new Map();
+    for(const key of kept){const out=deepClone(key);out.t=clamp((+key.t-keepStartT)/span,0,1);byTime.set(Math.round(out.t*1000000),out)}
+    track.splice(0,track.length,...[...byTime.values()].sort((a,b)=>a.t-b.t));
+}
+function trimTimedObject(value,keepStartT,keepEndT){
+    if(Array.isArray(value)){
+        if(value.length&&value.every(x=>x&&typeof x==='object'&&'t'in x)){trimTimedArray(value,keepStartT,keepEndT);return}
+        for(const child of value)trimTimedObject(child,keepStartT,keepEndT);return;
+    }
+    if(value&&typeof value==='object'){
+        if(Array.isArray(value.keyframes)){trimTimedArray(value.keyframes,keepStartT,keepEndT);return}
+        for(const child of Object.values(value))trimTimedObject(child,keepStartT,keepEndT);
+    }
+}
+function trimSceneToRange(scene,keepStartSeconds,keepEndSeconds){
+    const oldDuration=Math.max(.01,+scene.duration||.01),startSec=clamp(+keepStartSeconds||0,0,oldDuration-.01),endSec=clamp(+keepEndSeconds||oldDuration,startSec+.01,oldDuration);
+    const keepStartT=startSec/oldDuration,keepEndT=endSec/oldDuration,newDuration=Math.max(.01,endSec-startSec),spanT=Math.max(1e-9,keepEndT-keepStartT);
+    const mapT=t=>clamp(((+t||0)-keepStartT)/spanT,0,1);
+    const removedIds=new Set();
+    for(const layer of scene.layers||[]){
+        const bounds=layerClipBounds(layer),hasSceneBounds=layer.type!=='camera'&&layer.type!=='effect'&&layer.type!=='animation';
+        if(hasSceneBounds&&(bounds.end<=keepStartT+1e-9||bounds.start>=keepEndT-1e-9)){removedIds.add(layer.id);continue}
+        trimTimedObject(layer.tracks||{},keepStartT,keepEndT);
+        trimTimedObject(layer.partTracks||{},keepStartT,keepEndT);
+        trimTimedObject(layer.lipSyncPartTracks||{},keepStartT,keepEndT);
+        trimTimedObject(layer.clips||{},keepStartT,keepEndT);
+        for(const clip of layer.clips||[]){
+            if(Number.isFinite(+clip.start))clip.start=mapT(clamp(+clip.start,keepStartT,keepEndT));
+            if(Number.isFinite(+clip.end))clip.end=mapT(clamp(+clip.end,keepStartT,keepEndT));
+        }
+        if(layer.type==='subtitles'){
+            const cues=[];
+            for(const cue of layer.cues||[]){
+                const a=Math.max(+cue.start||0,keepStartT),b=Math.min(+cue.end||0,keepEndT);
+                if(b<=a+1e-9)continue;
+                cues.push({...cue,start:mapT(a),end:mapT(b)});
+            }
+            layer.cues=cues;
+        }
+        if(hasSceneBounds){layer.start=mapT(Math.max(bounds.start,keepStartT));layer.end=mapT(Math.min(bounds.end,keepEndT));if(layer.end<=layer.start)layer.end=Math.min(1,layer.start+.001)}
+    }
+    if(removedIds.size){
+        scene.layers=(scene.layers||[]).filter(layer=>!removedIds.has(layer.id)&&!(layer.targetLayerId&&removedIds.has(layer.targetLayerId)));
+    }
+    scene.duration=newDuration;
+    return{oldDuration,newDuration,startSec,endSec};
 }
 async function editSceneLength(){
     if(!state.project?.scenes?.length)return;
     const opts=state.project.scenes.map((s,i)=>`<option value="${i}" ${i===state.currentSceneIndex?'selected':''}>${i+1}. ${escapeHtml(s.name)} (${fmt(s.duration)}s)</option>`).join('');
-    const body=`<div class="propGrid"><label>Scene</label><select id="lengthScene">${opts}</select><label>Operation</label><select id="lengthMode"><option value="add">Add seconds</option><option value="set">Set total length</option></select><label>Seconds</label><input id="lengthValue" type="number" step=".1" value="2"><label>Add at</label><select id="lengthAnchor"><option value="end">End (keep existing timing)</option><option value="start">Beginning (shift existing timing later)</option></select></div><div class="animHelp">Timing is preserved in seconds. Extending a scene does not stretch its existing animation, subtitles, or camera keyframes.</div>`;
-    const result=await showModal('Scene Length',body,[{label:'Cancel',value:null},{label:'Apply',primary:true,keep:true,onClick:(back,res)=>{res({index:+back.querySelector('#lengthScene').value,mode:back.querySelector('#lengthMode').value,value:+back.querySelector('#lengthValue').value,anchor:back.querySelector('#lengthAnchor').value});back.remove()}}]);
-    if(!result)return;const scene=state.project.scenes[result.index];if(!scene)return;const old=Math.max(.01,+scene.duration||.01);let next=result.mode==='set'?Math.max(.01,result.value):Math.max(.01,old+result.value);const prepend=result.mode==='add'&&result.anchor==='start'?next-old:result.mode==='set'&&result.anchor==='start'?Math.max(0,next-old):0;
-    beginHistoryBatch();retimeSceneNormalized(scene,old,next,prepend);scene.duration=next;endHistoryBatch();if(result.index===state.currentSceneIndex)state.playhead=clamp((state.playhead*old+prepend)/next,0,1);renderAll();toast(`${scene.name}: ${fmt(old)}s -> ${fmt(next)}s`);
+    const body=`<div class="propGrid"><label>Scene</label><select id="lengthScene">${opts}</select><label>Operation</label><select id="lengthMode"><option value="add">Add seconds</option><option value="set">Set total length</option><option value="trim">Trim seconds</option></select><label>Seconds</label><input id="lengthValue" type="number" min=".01" step=".1" value="2"><label id="lengthAnchorLabel">At</label><select id="lengthAnchor"><option value="end">End</option><option value="start">Beginning</option></select></div><div id="lengthHelp" class="animHelp">Timing is preserved in seconds. Extending a scene does not stretch its existing animation, subtitles, camera keyframes, or clip bounds.</div>`;
+    const result=await new Promise(resolve=>{
+        showModal('Scene Length',body,[{label:'Cancel',value:null},{label:'Apply',primary:true,keep:true,onClick:(back,res)=>{res({index:+back.querySelector('#lengthScene').value,mode:back.querySelector('#lengthMode').value,value:+back.querySelector('#lengthValue').value,anchor:back.querySelector('#lengthAnchor').value});back.remove()}}]).then(resolve);
+        setTimeout(()=>{const mode=$('#lengthMode'),help=$('#lengthHelp'),label=$('#lengthAnchorLabel');if(!mode)return;const update=()=>{const trim=mode.value==='trim';label.textContent=trim?'Trim from':'At';help.textContent=trim?'Trim is destructive: content outside the retained range is cut. Trimming from the beginning shifts surviving clips, keyframes, subtitles, and camera timing earlier.':'Timing is preserved in seconds. Extending a scene does not stretch its existing animation, subtitles, camera keyframes, or clip bounds.'};mode.onchange=update;update()},0);
+    });
+    if(!result)return;const scene=state.project.scenes[result.index];if(!scene)return;const old=Math.max(.01,+scene.duration||.01),amount=Math.max(.01,+result.value||.01);
+    if(result.mode==='trim'&&amount>=old-.009){alert(`Cannot trim ${fmt(amount)}s from a ${fmt(old)}s scene.`);return}
+    beginHistoryBatch();
+    let next=old,prepend=0,trimInfo=null;
+    if(result.mode==='trim'){
+        trimInfo=result.anchor==='start'?trimSceneToRange(scene,amount,old):trimSceneToRange(scene,0,old-amount);next=trimInfo.newDuration;
+    }else{
+        next=result.mode==='set'?Math.max(.01,amount):Math.max(.01,old+amount);prepend=result.mode==='add'&&result.anchor==='start'?next-old:result.mode==='set'&&result.anchor==='start'?Math.max(0,next-old):0;retimeSceneNormalized(scene,old,next,prepend);scene.duration=next;
+    }
+    endHistoryBatch();
+    if(result.index===state.currentSceneIndex){
+        if(result.mode==='trim'){const oldSeconds=state.playhead*old,shifted=oldSeconds-(trimInfo?.startSec||0);state.playhead=clamp(shifted/next,0,1)}else state.playhead=clamp((state.playhead*old+prepend)/next,0,1);
+        if(!currentScene()?.layers?.some(l=>l.id===state.selectedLayerId))state.selectedLayerId=currentScene()?.layers?.[0]?.id||null;
+    }
+    renderAll();toast(`${scene.name}: ${fmt(old)}s -> ${fmt(next)}s${result.mode==='trim'?` (trimmed ${result.anchor})`:''}`);
 }
 function offsetTrackValues(track,delta){if(!Array.isArray(track)||!Number.isFinite(delta)||delta===0)return;for(const k of track)if(k&&Number.isFinite(+k.value))k.value=+k.value+delta}
 function offsetNamedTracks(value,deltas){
@@ -3906,41 +4226,36 @@ function sanitizeSvgMarkup(svg){
 }
 function animationCodeTemplate(){
     return JSON.stringify([
-        {name:'Idle',duration:1.2,easing:'ease-in-out',iterations:'infinite',direction:'normal',frames:[
-            {offset:'0%',style:{transform:'translateY(0px) scale(1)'}},
-            {offset:'50%',style:{transform:'translateY(-10px) scale(1.04)'}},
-            {offset:'100%',style:{transform:'translateY(0px) scale(1)'}}
-        ]},
-        {name:'Pulse',duration:.8,easing:'ease-in-out',iterations:'infinite',direction:'normal',frames:[
-            {offset:'0%',style:{transform:'scale(.96)',opacity:'.78'}},
-            {offset:'50%',style:{transform:'scale(1.06)',opacity:'1'}},
-            {offset:'100%',style:{transform:'scale(.96)',opacity:'.78'}}
-        ]}
+        {name:'Walk',duration:1,easing:'ease-in-out',iterations:'infinite',direction:'normal',parts:{
+            '0':{tracks:{y:[{t:0,value:0},{t:.5,value:-4},{t:1,value:0}]}},
+            '0.0':{tracks:{rotation:[{t:0,value:-8},{t:.5,value:8},{t:1,value:-8}]}}
+        }}
     ],null,2);
 }
+
 function assetAnimationCode(asset){
     return JSON.stringify((asset.animations||[]).map(clip=>{
         const animName=(clip.keyframeNames||[])[0]||clip.name,def=state.project?.animationLibrary?.[animName]||{};
-        return{name:clip.name,duration:clip.duration||1,easing:clip.timing||'linear',iterations:clip.iterations||'infinite',direction:clip.direction||'normal',frames:def.frames||[]};
+        const out={name:clip.name,duration:clip.duration||1,easing:clip.timing||'linear',iterations:clip.iterations||'infinite',direction:clip.direction||'normal'};
+        if(clip.partTracks&&Object.keys(clip.partTracks).length)out.parts=deepClone(clip.partTracks);
+        if(def.frames?.length)out.frames=def.frames;
+        return out;
     }),null,2);
 }
 function applyAnimationCodeToAsset(asset,code){
     const defs=JSON.parse(code);if(!Array.isArray(defs))throw new Error('Animation code must be a JSON array.');
-    const names=[],durations=[],delays=[],iters=[],dirs=[],timings=[],clips=[];
-    asset.node.nativeAnimations={names,duration:'',delay:'',iterationCount:'',direction:'',timingFunction:''};
-    defs.forEach((def,i)=>{
+    const oldByName=new Map((asset.animations||[]).map(a=>[a.name,a])),clips=[];
+    for(const [i,def] of defs.entries()){
         if(!def||typeof def!=='object')throw new Error(`Animation ${i+1} must be an object.`);
-        const name=String(def.name||`Animation ${i+1}`).trim(),duration=Math.max(.01,+def.duration||1),frames=def.frames;
-        if(!Array.isArray(frames)||!frames.length)throw new Error(`${name} needs a non-empty frames array.`);
-        const animId=`asset_${simpleHash(`${asset.id}:${name}`)}`;
-        state.project.animationLibrary[animId]={name:animId,frames:frames.map(frame=>({offset:String(frame.offset??'0%'),style:frame.style&&typeof frame.style==='object'?frame.style:{}}))};
-        names.push(animId);durations.push(`${duration}s`);delays.push(`${+def.delay||0}s`);iters.push(def.iterations||'infinite');dirs.push(def.direction||'normal');timings.push(def.easing||def.timing||'linear');
-        clips.push({id:`clip_${simpleHash(name)}`,name,keyframeNames:[animId],duration,delay:+def.delay||0,iterations:def.iterations||'infinite',direction:def.direction||'normal',timing:def.easing||def.timing||'linear',source:'code'});
-    });
-    asset.node.nativeAnimations.duration=durations.join(', ');asset.node.nativeAnimations.delay=delays.join(', ');asset.node.nativeAnimations.iterationCount=iters.join(', ');asset.node.nativeAnimations.direction=dirs.join(', ');asset.node.nativeAnimations.timingFunction=timings.join(', ');
+        const name=String(def.name||`Animation ${i+1}`).trim(),duration=Math.max(.01,+def.duration||1),old=oldByName.get(name),clip={id:old?.id||`clip_${simpleHash(`${asset.id}:${name}`)}`,name,duration,delay:+def.delay||0,iterations:def.iterations||'infinite',direction:def.direction||'normal',timing:def.easing||def.timing||'linear',source:'code'};
+        const parts=def.parts||def.partTracks;if(parts&&typeof parts==='object')clip.partTracks=deepClone(parts);
+        if(Array.isArray(def.frames)&&def.frames.length){const animId=`asset_${simpleHash(`${asset.id}:${name}`)}`;state.project.animationLibrary[animId]={name:animId,frames:def.frames.map(frame=>({offset:String(frame.offset??'0%'),style:frame.style&&typeof frame.style==='object'?frame.style:{}}))};clip.keyframeNames=[animId];}
+        if(!clip.partTracks&&!clip.keyframeNames)clip.partTracks={};clips.push(clip);
+    }
     asset.animations=clips;asset.nativeAnimations=clips.map(c=>c.name);asset.animationCode=code;
     for(const scene of state.project.scenes||[])for(const layer of scene.layers||[])if(layer.assetId===asset.id)ensureLayerHasAssetClips(layer,asset);
 }
+
 function newAsset(){
     if(!state.project){toast('Load or create a project first.');return}
     const sample='<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="60" r="42" fill="#8fb8ff" stroke="#1b2230" stroke-width="6"/><circle cx="46" cy="52" r="5" fill="#111"/><circle cx="74" cy="52" r="5" fill="#111"/><path d="M42 76 Q60 88 78 76" fill="none" stroke="#111" stroke-width="5" stroke-linecap="round"/></svg>';
@@ -3954,6 +4269,7 @@ function blenderAnimatedPathsByAsset(){
     for(const [assetId,asset] of Object.entries(state.project?.assets||{})){
         const paths=pathsFor(assetId);
         (function walk(node){if(node?.nativeAnimations?.names?.length)paths.add(node.path||'0');for(const child of node?.children||[])walk(child)})(asset.node);
+        for(const animation of asset.animations||[])for(const path of Object.keys(animation.partTracks||{}))paths.add(path);
     }
     for(const scene of state.project?.scenes||[]){
         const layersById=new Map((scene.layers||[]).map(layer=>[layer.id,layer]));
@@ -4146,10 +4462,16 @@ async function saveProject(asNew=false){
 }
 function mergeAnimationTrees(target,source){
     if(!source||typeof source!=='object')return target||{};target=target&&typeof target==='object'?target:{};
-    for(const [k,v] of Object.entries(source)){
-        if(Array.isArray(v)){const arr=Array.isArray(target[k])?target[k]:[];target[k]=[...arr,...deepClone(v)].sort((a,b)=>(+a?.t||0)-(+b?.t||0))}
-        else if(v&&typeof v==='object')target[k]=mergeAnimationTrees(target[k],v);else if(target[k]===undefined)target[k]=deepClone(v);
-    }return target;
+    for(const [k,v] of Object.entries(source)){if(Array.isArray(v)){const arr=Array.isArray(target[k])?target[k]:[];target[k]=[...arr,...deepClone(v)].sort((a,b)=>(+a?.t||0)-(+b?.t||0))}else if(v&&typeof v==='object')target[k]=mergeAnimationTrees(target[k],v);else if(target[k]===undefined)target[k]=deepClone(v)}return target;
+}
+function remapAnimationTimes(value,start,end){
+    const span=Math.max(.000001,end-start),out=deepClone(value||{}),walk=v=>{if(Array.isArray(v)){if(v.length&&v.every(x=>x&&typeof x==='object'&&'t'in x)){for(const k of v)k.t=clamp(((+k.t||0)-start)/span,0,1);v.sort((a,b)=>a.t-b.t)}else v.forEach(walk);return}if(v&&typeof v==='object'){if(Array.isArray(v.keyframes))walk(v.keyframes);else Object.values(v).forEach(walk)}};walk(out);return out;
+}
+function uniqueAssetAnimationName(asset,base){let name=base||'Animation',i=2;while((asset.animations||[]).some(a=>a.name===name))name=`${base} ${i++}`;return name}
+function convertObjectTrackToAnimation(project,scene,layer,tracks,label,source){
+    if(!tracks||!Object.keys(tracks).length||!layer.assetId)return null;const asset=project.assets[layer.assetId];if(!asset)return null;asset.animations??=[];
+    const start=clamp(Number.isFinite(+layer.start)?+layer.start:0,0,1),end=clamp(Number.isFinite(+layer.end)?+layer.end:1,start+.000001,1),name=uniqueAssetAnimationName(asset,`${scene.name} - ${layer.name} ${label}`),anim={id:`clip_${simpleHash(`${asset.id}:${scene.id}:${layer.id}:${source}`)}`,name,duration:Math.max(.01,(end-start)*Math.max(.01,+scene.duration||1)),delay:0,iterations:'1',direction:'normal',timing:'linear',source,partTracks:remapAnimationTimes(tracks,start,end)};
+    asset.animations.push(anim);asset.nativeAnimations=asset.animations.map(a=>a.name);layer.clips??=[];layer.clips.push({clipId:anim.id,name:anim.name,speed:1,offset:0,loop:false,enabled:true,start,end,activeKeyframes:[{t:start,value:true,ease:'hold'},...(end<.999999?[{t:end,value:false,ease:'hold'}]:[])]});return anim;
 }
 function migrateProject(project){
     project.assets??={};project.animationLibrary??={};project.scenes??=[];
@@ -4158,20 +4480,49 @@ function migrateProject(project){
         scene.layers??=[];for(const layer of scene.layers){if(['asset','text','subtitles'].includes(layer.type)){layer.start=clamp(Number.isFinite(+layer.start)?+layer.start:0,0,1);layer.end=clamp(Number.isFinite(+layer.end)?+layer.end:1,layer.start+.001,1)}if(layer.clips?.length){const asset=project.assets[layer.assetId];layer.clips=normalizeSceneClipList(layer.clips,asset);for(const clip of layer.clips)clip.loop??=true}}
         const remove=new Set();
         for(const anim of scene.layers.filter(l=>l.type==='animation')){
-            const target=scene.layers.find(l=>l.id===anim.targetLayerId);if(!target)continue;
-            if(anim.animationKind==='clip'){const asset=project.assets[target.assetId];target.clips=normalizeSceneClipList([...(target.clips||[]),...(anim.clips||[])],asset);remove.add(anim.id)}
-            else if(anim.animationKind==='keyframed'){
-                if(anim.lipSync)target.lipSyncPartTracks=mergeAnimationTrees(target.lipSyncPartTracks||{},anim.partTracks||{});else target.partTracks=mergeAnimationTrees(target.partTracks||{},anim.partTracks||{});
-                target.partLabels={...(target.partLabels||{}),...(anim.partLabels||{})};remove.add(anim.id);
+            const target=scene.layers.find(l=>l.id===anim.targetLayerId);
+            if(!target)continue;
+            if(anim.animationKind==='clip'){
+                const asset=project.assets[target.assetId];
+                target.clips=normalizeSceneClipList([...(target.clips||[]),...(anim.clips||[])],asset);
+                remove.add(anim.id);
+            }else if(anim.animationKind==='keyframed'&&anim.lipSync){
+                // Lip sync deliberately remains a separate attached timeline layer.
+                anim.name=anim.name||`${target.name} - Lip Sync`;
+                anim.partTracks=anim.partTracks||{};
+                anim.partLabels={...(target.partLabels||{}),...(anim.partLabels||{})};
+                anim.hidden=!!anim.hidden;
+                anim.locked=!!anim.locked;
+            }else if(anim.animationKind==='keyframed'){
+                target.partTracks=mergeAnimationTrees(target.partTracks||{},anim.partTracks||{});
+                target.partLabels={...(target.partLabels||{}),...(anim.partLabels||{})};
+                remove.add(anim.id);
             }
         }
         if(remove.size)scene.layers=scene.layers.filter(l=>!remove.has(l.id));
-        for(const layer of scene.layers)if(layer.type==='asset')ensureLayerHasAssetClips(layer,project.assets[layer.assetId]);
-    }return project;
+        for(const layer of [...scene.layers]){
+            if(layer.type!=='asset')continue;
+            const normal=layer.partTracks&&Object.keys(layer.partTracks).length?deepClone(layer.partTracks):null;
+            const legacyLip=layer.lipSyncPartTracks&&Object.keys(layer.lipSyncPartTracks).length?deepClone(layer.lipSyncPartTracks):null;
+            if(normal){
+                convertObjectTrackToAnimation(project,scene,layer,normal,'Motion','converted-object-motion');
+                delete layer.partTracks;
+            }
+            if(legacyLip){
+                const lip=lipSyncLayerForTarget(scene,layer,true);
+                lip.partTracks=mergeAnimationTrees(lip.partTracks||{},legacyLip);
+                lip.partLabels={...(layer.partLabels||{}),...(lip.partLabels||{})};
+                delete layer.lipSyncPartTracks;
+            }
+            ensureLayerHasAssetClips(layer,project.assets[layer.assetId]);
+        }
+    }
+    for(const scene of project.scenes)for(const layer of scene.layers||[])if(layer.type==='asset')ensureLayerHasAssetClips(layer,project.assets[layer.assetId]);
+    return project;
 }
 
 function loadProjectObject(project,name='',path=''){
-    if(project?.format!==FORMAT)throw new Error('This is not an Unlim8ted Movie Project JSON file.');migrateProject(project);state.project=project;state.fileName=name;state.filePath=path;state.currentSceneIndex=0;state.selectedLayerId=project.scenes?.[0]?.layers?.[0]?.id||null;state.selectedAssetId=null;state.selectedKeyframe=null;state.selectedKeyframes=[];state.selectedPartPath=null;state.playhead=0;state.renderCache.clear();resetHistory(true);renderAll();toast(`Opened ${project.meta?.name||name}`);
+    if(project?.format!==FORMAT)throw new Error('This is not an Unlim8ted Movie Project JSON file.');migrateProject(project);state.project=project;state.fileName=name;state.filePath=path;state.currentSceneIndex=0;state.selectedLayerId=project.scenes?.[0]?.layers?.[0]?.id||null;state.selectedAssetId=null;state.selectedKeyframe=null;state.selectedKeyframes=[];state.selectedPartPath=null;state.selectedAnimationId=null;state.playhead=0;state.renderCache.clear();resetHistory(true);renderAll();toast(`Opened ${project.meta?.name||name}`);
 }
 
 function playToggle(){state.playing=!state.playing;$('#playBtn').textContent=state.playing?'Pause':'Play';state.lastFrameTime=performance.now();if(state.playing)requestAnimationFrame(playLoop)}
@@ -4182,6 +4533,7 @@ $('#loadHtmlBtn').onclick=()=>$('#htmlFileInput').click();
 $('#mergeReferenceBtn').onclick=mergeReferenceAnimations;
 $('#loadProjectBtn').onclick=()=>$('#projectFileInput').click();
 $('#autoKeyframeToggle').onchange=e=>{state.autoKeyframe=e.target.checked;toast(`Auto keyframe ${state.autoKeyframe?'on':'off'}.`)};
+$('#assetEditorCloseBtn').onclick=closeAssetEditor;$('#assetEditorAnimationSelect').onchange=e=>{state.assetEditor.animationId=e.target.value;state.assetEditor.t=0;state.assetEditor.selectedKey=null;renderAssetEditor()};$('#assetEditorNewAnimationBtn').onclick=newAssetEditorAnimation;$('#assetEditorDuplicateAnimationBtn').onclick=duplicateAssetEditorAnimation;$('#assetEditorRenameAnimationBtn').onclick=renameAssetEditorAnimation;$('#assetEditorDeleteAnimationBtn').onclick=deleteAssetEditorAnimation;$('#assetEditorPlayBtn').onclick=()=>{state.assetEditor.playing=!state.assetEditor.playing;state.assetEditor.lastFrameTime=0;renderAssetEditor();if(state.assetEditor.playing)requestAnimationFrame(assetEditorTick)};$('#assetEditorTimeSlider').oninput=e=>{state.assetEditor.playing=false;state.assetEditor.t=clamp(+e.target.value/1000,0,1);renderAssetEditor()};
 $('#saveBtn').onclick=()=>saveProject(false);$('#saveAsBtn').onclick=()=>saveProject(true);$('#exportBlenderBtn').onclick=exportToBlender;$('#undoBtn').onclick=undo;$('#redoBtn').onclick=redo;$('#lipSyncBtn').onclick=autoLipSync;$('#projectViewerBtn').onclick=openProjectViewer;$('#addSceneBtn').onclick=addScene;$('#sceneLengthBtn').onclick=editSceneLength;$('#copyLayerSceneBtn').onclick=copySelectedLayerToClipboard;$('#offsetKeyframesBtn').onclick=offsetSelectedKeyframes;$('#deleteLayerBtn').onclick=deleteSelectedLayer;$('#deleteSceneBtn').onclick=deleteScene;$('#newAssetBtn').onclick=newAsset;$('#assetSearch').oninput=renderAssets;
 $('#playBtn').onclick=playToggle;$('#jumpStartBtn').onclick=()=>{state.playhead=0;applyAtPlayhead();renderInspector()};$('#jumpEndBtn').onclick=()=>{state.playhead=1;applyAtPlayhead();renderInspector()};$('#timeSlider').oninput=e=>{state.playhead=+e.target.value/1000;applyAtPlayhead();renderInspector()};
 $('#viewerCloseBtn').onclick=closeProjectViewer;$('#viewerPlayBtn').onclick=viewerPlayToggle;$('#viewerJumpStartBtn').onclick=()=>{state.viewer.time=0;state.viewer.sceneIndex=-1;state.viewer.animationCache=new WeakMap();renderViewerFrame()};$('#viewerProgress').oninput=e=>{state.viewer.time=(+e.target.value/1000)*projectDuration();state.viewer.sceneIndex=-1;state.viewer.animationCache=new WeakMap();renderViewerFrame()};
@@ -4189,6 +4541,7 @@ $('#previewStage').addEventListener('mousedown',onPreviewBackgroundDown);
 $('#htmlFileInput').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const settings=await requestImportSettings(f.name);if(!settings)return;try{await importFromHtml(f.name,await f.text(),settings)}catch(err){alert(err.message)}};
 $('#projectFileInput').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;if(state.dirty&&!confirm('Discard unsaved changes?'))return;try{loadProjectObject(JSON.parse(await f.text()),f.name,'')}catch(err){alert(err.message)}};
 window.addEventListener('keydown',e=>{
+    if(state.assetEditor.open&&e.key==='Escape'){e.preventDefault();closeAssetEditor();return}
     const key=e.key.toLowerCase(),editing=['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName);
     if(e.key==='Escape'&&state.viewer.open){e.preventDefault();closeProjectViewer();return}
     if(e.code==='Space'){e.preventDefault();state.viewer.open?viewerPlayToggle():playToggle();return}
@@ -4606,12 +4959,17 @@ class DesktopApi:
     """
 
     def __init__(self, webview_module):
-        self.webview = webview_module
-        self.window = None
-        self.blender_executable = _find_blender_executable()
+        # IMPORTANT: pywebview recursively exposes/inspects public attributes of
+        # js_api objects. Keeping a Window or the webview module public here can
+        # make it descend into window.native / WebView2 COM objects during
+        # startup, causing recursion and cross-UI-thread COM access. Keep all
+        # native references private; only callable bridge methods stay public.
+        self._webview = webview_module
+        self._window = None
+        self._blender_executable = _find_blender_executable()
 
     def attach(self, window) -> None:
-        self.window = window
+        self._window = window
 
     def save_project(
         self,
@@ -4620,7 +4978,7 @@ class DesktopApi:
         current_path: str = "",
         save_as: bool = False,
     ) -> dict:
-        if self.window is None:
+        if self._window is None:
             return {"ok": False, "error": "Editor window is not ready."}
 
         path: Path | None = None
@@ -4631,11 +4989,11 @@ class DesktopApi:
 
         if path is None:
             dialog_type = getattr(
-                getattr(self.webview, "FileDialog", object),
+                getattr(self._webview, "FileDialog", object),
                 "SAVE",
-                getattr(self.webview, "SAVE_DIALOG", 30),
+                getattr(self._webview, "SAVE_DIALOG", 30),
             )
-            result = self.window.create_file_dialog(
+            result = self._window.create_file_dialog(
                 dialog_type,
                 directory=str(ROOT),
                 save_filename=suggested_name,
@@ -4694,10 +5052,10 @@ class DesktopApi:
         options_text: str = "{}",
     ) -> dict:
         """Build a standalone .blend with an Assets scene and a Movie scene."""
-        if self.window is None:
+        if self._window is None:
             return {"ok": False, "error": "Editor window is not ready."}
 
-        blender = self.blender_executable or _find_blender_executable()
+        blender = self._blender_executable or _find_blender_executable()
         if blender is None:
             return {
                 "ok": False,
@@ -4707,7 +5065,7 @@ class DesktopApi:
                     "executable and restart the editor."
                 ),
             }
-        self.blender_executable = blender
+        self._blender_executable = blender
 
         try:
             project = json.loads(project_text)
@@ -4734,14 +5092,14 @@ class DesktopApi:
                 stack.extend(value)
 
         dialog_type = getattr(
-            getattr(self.webview, "FileDialog", object),
+            getattr(self._webview, "FileDialog", object),
             "SAVE",
-            getattr(self.webview, "SAVE_DIALOG", 30),
+            getattr(self._webview, "SAVE_DIALOG", 30),
         )
         safe_suggestion = Path(suggested_name or "movie.blend").name
         if not safe_suggestion.lower().endswith(".blend"):
             safe_suggestion += ".blend"
-        result = self.window.create_file_dialog(
+        result = self._window.create_file_dialog(
             dialog_type,
             directory=str(ROOT),
             save_filename=safe_suggestion,
@@ -4872,8 +5230,10 @@ def main() -> None:
         print(f"Could not start the desktop editor: {exc}", file=sys.stderr)
         raise SystemExit(1) from exc
 
+    print("[startup] pywebview imported", flush=True)
     api = DesktopApi(webview)
     server, url = _start_editor_server()
+    print(f"[startup] editor HTTP server ready at {url}", flush=True)
     icon_path = _ensure_app_icon()
     window_options = {
         # _start_editor_server() does an actual /health request before returning,
@@ -4889,6 +5249,7 @@ def main() -> None:
         "icon": str(icon_path),
     }
     try:
+        print("[startup] creating window descriptor", flush=True)
         try:
             window = webview.create_window(
                 f"Unlim8ted Movie Editor {APP_VERSION}", **window_options
@@ -4903,14 +5264,16 @@ def main() -> None:
         server.server_close()
         raise
     api.attach(window)
+    print("[startup] window descriptor created; entering GUI loop", flush=True)
 
-    print(f"Unlim8ted Movie Editor {APP_VERSION}")
+    print(f"Unlim8ted Movie Editor {APP_VERSION}", flush=True)
     print(f"Desktop window mode at {url}")
     print("Source HTML is loaded only when you choose it in the editor.")
     try:
         # No startup callback/navigation hop. The HTTP worker is already proven
         # ready, and WebView2 gets one URL exactly once during native creation.
         webview.start(debug=args.debug)
+        print("[startup] GUI loop exited normally", flush=True)
     finally:
         server.shutdown()
         server.server_close()
