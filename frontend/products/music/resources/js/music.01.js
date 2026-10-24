@@ -499,7 +499,7 @@
     }
 
     const musicCategories = [
-      { id: "electronic", kicker: "Library", title: "Electronic", sub: "Original electronic compositions." },
+      { id: "electronic", kicker: "Library", title: "Unplaced", sub: "Original compositions, still finding their home." },
       { id: "glitch", kicker: "Soundtrack", title: "The Glitch Soundtrack", sub: "Music from The Glitch." },
       { id: "detective-edward", kicker: "Soundtrack", title: "Detective Edward Soundtrack", sub: "Music from Detective Edward." },
       { id: "timecat", kicker: "Soundtrack", title: "TimeCat Soundtrack", sub: "Music from Unlim8ted's game in development, TimeCat." },
