@@ -347,6 +347,41 @@
         .meatballLogo { height: 200px; display: grid; place-items: center; background: #191410; border-radius: 10px; --meatball-size: 140px; }
         .unavailable { opacity: .7; }
         .unavailable:hover { transform: none; }
+        .completed:hover { transform: none; }
+        /* Completed projects use the same muted, unavailable-card treatment. */
+        .item-box.unavailable.completed .item-artwork {
+            position: relative;
+            filter: grayscale(0.75);
+        }
+        .item-box.unavailable.completed .item-artwork::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(170, 170, 170, 0.22);
+            pointer-events: none;
+        }
+        .item-artwork {
+            width: 100%;
+            height: 200px;
+            display: block;
+            overflow: hidden;
+            border-radius: 10px 10px 0 0;
+        }
+        .item-artwork svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .item-box .project-status {
+            display: inline-block;
+            margin: 1px 0 20px;
+            padding: 7px 13px;
+            border-radius: 20px;
+            background: #e5e5e5;
+            color: #626262;
+            font-size: .87rem;
+            font-weight: 700;
+        }
     </style><link rel="stylesheet" href="/products/ai/meatball/resources/css/meatball-assistant.css"><link rel="stylesheet" href="../resources/css/legacy-category.css"><script type="module" src="https://unlim8ted.com/components/site-navbar.js"></script>
       <script type="module">
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
@@ -373,6 +408,7 @@
                 <option value="Text modification">Text Modification</option>
                 <option value="Text classification">Text Classification</option>
                 <option value="Music generation">Music Generation</option>
+                <option value="Distributed computing">Distributed Computing</option>
 
                 <!-- Add more filter options as needed -->
             </select>
@@ -383,8 +419,97 @@
                 <h3>Talk to Meatball</h3>
             </a>
             <div class="item-box unavailable" data-category="Text generation" aria-disabled="true">
+                <div class="item-artwork">
+                    <svg viewBox="0 0 250 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="film-art-title">
+                        <title id="film-art-title">Film clapperboard and screenplay icon</title>
+                        <defs>
+                            <linearGradient id="film-bg" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0" stop-color="#17142c"/>
+                                <stop offset="1" stop-color="#3d2756"/>
+                            </linearGradient>
+                            <linearGradient id="film-paper" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0" stop-color="#fffefa"/>
+                                <stop offset="1" stop-color="#e4ecf0"/>
+                            </linearGradient>
+                            <filter id="film-shadow" x="-40%" y="-40%" width="180%" height="180%">
+                                <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000" flood-opacity=".25"/>
+                            </filter>
+                        </defs>
+                        <rect width="250" height="200" fill="url(#film-bg)"/>
+                        <circle cx="204" cy="34" r="65" fill="#9479e8" opacity=".10"/>
+                        <circle cx="42" cy="162" r="64" fill="#38d9c5" opacity=".08"/>
+                        <g fill="none" stroke="#bca7e3" stroke-width="1.5" opacity=".5">
+                            <path d="M22 31h14M29 24v14M216 145h12M222 139v12"/>
+                            <path d="M185 173l3-3 3 3-3 3z"/>
+                        </g>
+                        <g filter="url(#film-shadow)">
+                            <path d="M99 31h67l19 19v112a6 6 0 0 1-6 6h-80a6 6 0 0 1-6-6V37a6 6 0 0 1 6-6z" fill="url(#film-paper)"/>
+                            <path d="M166 31v19h19" fill="#c4c9d8"/>
+                            <path d="M166 31v19h19" fill="none" stroke="#b2b9c7" stroke-width="2"/>
+                            <g stroke="#78869a" stroke-width="3" stroke-linecap="round" opacity=".72">
+                                <path d="M112 77h45M112 87h54M112 97h37M112 120h51M112 130h42M112 140h30"/>
+                            </g>
+                            <rect x="37" y="82" width="103" height="70" rx="7" fill="#20293b" stroke="#aab7cf" stroke-width="1.5"/>
+                            <path d="M37 89h103v19H37z" fill="#e5eaf3"/>
+                            <path d="M43 108l17-19m9 19 17-19m9 19 17-19m9 19 14-19" stroke="#30394e" stroke-width="9"/>
+                            <path d="M35 82l99-23a6 6 0 0 1 7 5l3 13-105 24z" fill="#e9edf4" stroke="#aab7cf" stroke-width="1.5"/>
+                            <path d="M50 79l12-3m9-2 13-3m9-2 13-3m9-2 12-3" stroke="#333d53" stroke-width="9"/>
+                            <path d="M64 121h51M64 134h33" stroke="#53e5cf" stroke-width="3" stroke-linecap="round" opacity=".85"/>
+                        </g>
+                    </svg>
+                </div>
                 <h3>Film Script Writer</h3>
                 <p>Removed for cost reasons.</p>
+            </div>
+            <div class="item-box unavailable completed" data-category="Distributed computing" aria-disabled="true" aria-label="Volunteer Compute, concluded">
+                <div class="item-artwork">
+                    <svg viewBox="0 0 250 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="compute-art-title">
+                        <title id="compute-art-title">Connected volunteer computers contributing to a central processor</title>
+                        <defs>
+                            <linearGradient id="compute-bg" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0" stop-color="#0b2434"/>
+                                <stop offset="1" stop-color="#11453e"/>
+                            </linearGradient>
+                            <linearGradient id="compute-chip" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0" stop-color="#46f2dc"/>
+                                <stop offset="1" stop-color="#64aaf5"/>
+                            </linearGradient>
+                            <filter id="compute-glow" x="-75%" y="-75%" width="250%" height="250%">
+                                <feGaussianBlur stdDeviation="9"/>
+                            </filter>
+                        </defs>
+                        <rect width="250" height="200" fill="url(#compute-bg)"/>
+                        <circle cx="124" cy="99" r="49" fill="#37e5c7" opacity=".18" filter="url(#compute-glow)"/>
+                        <g stroke="#4fd6c7" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".75">
+                            <path d="M90 87L54 61M159 88l36-27M90 119l-36 26M159 120l36 25"/>
+                        </g>
+                        <g stroke="#7ff5e4" stroke-width="1.5" fill="#153d4d">
+                            <rect x="24" y="35" width="51" height="36" rx="5"/>
+                            <rect x="175" y="35" width="51" height="36" rx="5"/>
+                            <rect x="24" y="135" width="51" height="36" rx="5"/>
+                            <rect x="175" y="135" width="51" height="36" rx="5"/>
+                        </g>
+                        <g fill="#66f5de" opacity=".9">
+                            <path d="M45 72h10v5H45zM196 72h10v5h-10zM45 172h10v5H45zM196 172h10v5h-10z"/>
+                            <circle cx="49" cy="53" r="4"/><circle cx="200" cy="53" r="4"/>
+                            <circle cx="49" cy="153" r="4"/><circle cx="200" cy="153" r="4"/>
+                        </g>
+                        <g stroke="#0d2c3a" stroke-width="3" stroke-linecap="round">
+                            <path d="M37 64h25M188 64h25M37 164h25M188 164h25"/>
+                        </g>
+                        <g>
+                            <rect x="90" y="68" width="70" height="70" rx="12" fill="#123b4e" stroke="url(#compute-chip)" stroke-width="3"/>
+                            <rect x="106" y="84" width="38" height="38" rx="5" fill="url(#compute-chip)"/>
+                            <path d="M116 103l7 7 14-16" stroke="#0d4850" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                            <g stroke="#67e8e2" stroke-width="3" stroke-linecap="round">
+                                <path d="M103 63v-8m14 8v-8m14 8v-8m14 8v-8M103 143v8m14-8v8m14-8v8m14-8v8"/>
+                                <path d="M85 84h-8m8 14h-8m8 14h-8m8 14h-8M165 84h8m-8 14h8m-8 14h8m-8 14h8"/>
+                            </g>
+                        </g>
+                    </svg>
+                </div>
+                <h3>Volunteer Compute</h3>
+                <p class="project-status">Concluded</p>
             </div>
         </div>
         <!-- Copyright -->
