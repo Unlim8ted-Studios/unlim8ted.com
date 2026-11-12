@@ -348,17 +348,9 @@
         .unavailable { opacity: .7; }
         .unavailable:hover { transform: none; }
         .completed:hover { transform: none; }
-        /* Completed projects use the same muted, unavailable-card treatment. */
-        .item-box.unavailable.completed .item-artwork {
-            position: relative;
-            filter: grayscale(0.75);
-        }
-        .item-box.unavailable.completed .item-artwork::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: rgba(170, 170, 170, 0.22);
-            pointer-events: none;
+        /* Keep concluded projects visually unavailable, but preserve some color like Film Script Writer. */
+        .item-box.unavailable.completed {
+            opacity: .7;
         }
         .item-artwork {
             width: 100%;
@@ -371,16 +363,6 @@
             display: block;
             width: 100%;
             height: 100%;
-        }
-        .item-box .project-status {
-            display: inline-block;
-            margin: 1px 0 20px;
-            padding: 7px 13px;
-            border-radius: 20px;
-            background: #e5e5e5;
-            color: #626262;
-            font-size: .87rem;
-            font-weight: 700;
         }
     </style><link rel="stylesheet" href="/products/ai/meatball/resources/css/meatball-assistant.css"><link rel="stylesheet" href="../resources/css/legacy-category.css"><script type="module" src="https://unlim8ted.com/components/site-navbar.js"></script>
       <script type="module">
@@ -509,7 +491,7 @@
                     </svg>
                 </div>
                 <h3>Volunteer Compute</h3>
-                <p class="project-status">Concluded</p>
+                <p>Concluded</p>
             </div>
         </div>
         <!-- Copyright -->
@@ -527,6 +509,3 @@
 </main>
 </body>
 </html>
-
-
-
