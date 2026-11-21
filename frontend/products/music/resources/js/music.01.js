@@ -201,7 +201,8 @@
     function drawMidiNotes() {
       if (!isPlaying || vizMode !== "midi" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-      const currentTime = audio ? audio.currentTime * 1000 : performance.now() - startTime;
+      if (!audio) return;
+      const currentTime = audio.currentTime * 1000;
       const w = canvas.getBoundingClientRect().width;
       const h = canvas.getBoundingClientRect().height;
 
@@ -648,16 +649,18 @@
         const data = await r.arrayBuffer();
         const midi = new Midi(data);
 
+        const configuredDelay = Number(item["midi-delay-ms"] ?? 50);
+        const midiDelayMs = Number.isFinite(configuredDelay) ? Math.max(0, configuredDelay) : 50;
         notes = midi.tracks.flatMap((track, index) =>
           track.notes.map(n => ({
             midi: n.midi,
-            startTime: n.time * 1000,
+            startTime: n.time * 1000 + midiDelayMs,
             duration: n.duration * 1000,
             instrument: index
           }))
         );
 
-        durationMs = midi.duration * 1000;
+        durationMs = midi.duration * 1000 + midiDelayMs;
         timeline.max = durationMs;
         timeline.value = 0;
 
@@ -665,8 +668,10 @@
         setupAudioElement(audioFileUrl);
 
         audio.onloadedmetadata = () => {
-          // If the MP3 duration differs, timeline still works (we keep durationMs from MIDI for visuals)
-          if (!durationMs && audio.duration) timeline.max = audio.duration * 1000;
+          if (Number.isFinite(audio.duration) && audio.duration > 0) {
+            durationMs = audio.duration * 1000;
+            timeline.max = durationMs;
+          }
         };
 
         startTime = performance.now();

@@ -4238,14 +4238,17 @@
   },
   {
     "id": "music-2b",
+    "midi-delay-ms": 140,
     "product-type": "music",
     "name": "2b",
     "music-section": "detective-edward",
     "file": "https://assets.unlim8ted.com/music/2b.mp3",
-    "midi": "https://assets.unlim8ted.com/music/2b.mid"
+    "midi": "https://assets.unlim8ted.com/music/2b.mid",
+    "pdf": "https://assets.unlim8ted.com/music/pdf's/2b-Score_and_Parts.pdf"
   },
   {
     "id": "music-unexpected-twist",
+    "midi-delay-ms": 50,
     "product-type": "music",
     "name": "Unexpected Twist",
     "file": "https://assets.unlim8ted.com/music/Unexpected%20Twist.mp3",
