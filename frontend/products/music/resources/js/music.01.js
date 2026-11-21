@@ -649,8 +649,8 @@
         const data = await r.arrayBuffer();
         const midi = new Midi(data);
 
-        const configuredDelay = Number(item["midi-delay-ms"] ?? 50);
-        const midiDelayMs = Number.isFinite(configuredDelay) ? Math.max(0, configuredDelay) : 50;
+        const configuredDelay = Number(item["midi-delay-ms"] ?? 0);
+        const midiDelayMs = Number.isFinite(configuredDelay) ? Math.max(0, configuredDelay) : 0;
         notes = midi.tracks.flatMap((track, index) =>
           track.notes.map(n => ({
             midi: n.midi,
