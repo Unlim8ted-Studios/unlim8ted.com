@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Unlim8ted Phone</title>
-  <meta name="description" content="A CM4-based handheld phone project with enclosure, OS, and archived PCB work." />
+  <meta name="description" content="Unlim8ted Phone is a Raspberry Pi CM4 handheld in development, with a custom enclosure and local software interface." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -578,7 +578,7 @@
   <nav class="nav">
     <a class="brand" href="#top" aria-label="Unlim8ted Phone home"><span>Unlim8ted Phone</span></a>
     <div class="nav-links" aria-label="Page sections">
-      <a href="#context">Context</a>
+      <a href="#context">Overview</a>
       <a href="#build">Build</a>
       <a href="#parts">Parts</a>
       <a href="#os">OS</a>
@@ -591,15 +591,15 @@
       <div class="hero-copy">
         <p class="eyebrow reveal">CM4 handheld project</p>
         <h1 class="hero-title reveal">Unlim8ted Phone.</h1>
-        <p class="hero-lede reveal">A custom handheld built around the Raspberry Pi Compute Module 4, a printable enclosure system, and a local kiosk-style interface. This page is a snapshot of the current build rather than a product page.</p>
+        <p class="hero-lede reveal">Unlim8ted Phone is a handheld device in development, based on the Raspberry Pi Compute Module 4. The project includes the hardware assembly, a 3D-printed enclosure, and a local software interface.</p>
         <div class="hero-actions reveal">
-          <a class="btn btn--solid" href="#build">Follow the build</a>
-          <a class="btn" href="https://github.com/Unlim8ted-Studio-Productions/unlim8ted-phone">Open repository</a>
+          <a class="btn btn--solid" href="#build">Build details</a>
+          <a class="btn" href="https://github.com/Unlim8ted-Studio-Productions/unlim8ted-phone">View on GitHub</a>
         </div>
         <div class="hero-meta">
-          <div class="glass reveal"><span>Compute</span><strong>Raspberry Pi CM4 Lite baseline</strong></div>
-          <div class="glass reveal"><span>Enclosure</span><strong>SCAD and STL parts for a multi-piece body</strong></div>
-          <div class="glass reveal"><span>Status</span><strong>Active build with archived PCB work preserved</strong></div>
+          <div class="glass reveal"><span>Compute</span><strong>Raspberry Pi CM4 Lite</strong></div>
+          <div class="glass reveal"><span>Enclosure</span><strong>3D-printed case with separate covers</strong></div>
+          <div class="glass reveal"><span>Status</span><strong>Hardware and software in development</strong></div>
         </div>
       </div>
 
@@ -609,7 +609,7 @@
             <canvas id="modelCanvas"></canvas>
           </div>
           <div class="viewer-label">
-            <span id="viewerStatus">Loading mesh</span>
+            <span id="viewerStatus">Loading model</span>
             <strong id="viewerFile">Main_Case.stl</strong>
           </div>
         </aside>
@@ -619,12 +619,12 @@
 
     <section class="intro shell" id="context">
       <div>
-        <p class="eyebrow reveal">Context</p>
-        <h2 class="section-title reveal">The repo is the object.</h2>
+        <p class="eyebrow reveal">Project overview</p>
+        <h2 class="section-title reveal">Hardware, enclosure, and software.</h2>
       </div>
       <div class="intro-copy reveal">
-        <p>The project is organized around the things needed to make the device real: 3D enclosure files, operating system work, documentation, and earlier PCB development that is now kept as reference.</p>
-        <p>The current hardware direction uses off-the-shelf modules rather than treating the old custom PCB path as the active assembly route.</p>
+        <p>The current design combines off-the-shelf components with a custom enclosure and software. Development files include 3D models, source code, and build documentation.</p>
+        <p>The 3D viewer displays the enclosure parts individually. The software preview below provides access to the interface in a browser.</p>
       </div>
     </section>
 
@@ -632,31 +632,31 @@
       <div class="horizontal-sticky" data-horizontal-sticky>
         <div class="horizontal-track" data-horizontal-track>
           <article class="panel panel--wide glass reveal">
-            <span class="panel-index">01 / Hardware baseline</span>
-            <h3>Known parts first.</h3>
+            <span class="panel-index">01 / Hardware</span>
+            <h3>Hardware configuration.</h3>
             <div class="panel-media"><p style="font-family:var(--display);font-size:clamp(2.4rem,5vw,5.8rem);line-height:.9;color:var(--text);max-width:9ch;text-align:center;letter-spacing:-.06em;">CM4 + display + power.</p></div>
-            <p>The current path centers on a CM4, Waveshare carrier/display hardware, a LiPo power board, and a battery. The page names the stack without pretending it is finished consumer hardware.</p>
+            <p>The build uses a CM4, Waveshare carrier and display hardware, a LiPo power board, and a battery.</p>
           </article>
 
           <article class="panel glass reveal">
             <span class="panel-index">02 / Enclosure</span>
-            <h3>Parts that hold parts.</h3>
+            <h3>Enclosure design.</h3>
             <div class="panel-media"><img src="https://assets.unlim8ted.com/images/products/hardware/unlim8ted-phone/Components.gif" alt="Exploded component animation of the Unlim8ted Phone." /></div>
-            <p>The case is split into printable and serviceable pieces: shell, covers, internal holders, camera volume, and connector transition geometry.</p>
+            <p>The enclosure consists of a main shell, removable covers, and internal mounts for the CM4, battery, and power board. Additional parts provide space for the camera and USB-C connector.</p>
           </article>
 
           <article class="panel glass reveal">
-            <span class="panel-index">03 / Runtime</span>
-            <h3>A local shell.</h3>
-            <div class="panel-media"><p style="font-family:var(--display);font-size:clamp(2.1rem,4vw,4.5rem);line-height:.92;color:var(--text);max-width:10ch;text-align:center;letter-spacing:-.06em;">Kiosk interface, not a mockup.</p></div>
-            <p>The OS work is represented as a device-specific kiosk surface with local modules and a Python-backed runtime layer.</p>
+            <span class="panel-index">03 / Software</span>
+            <h3>Device software.</h3>
+            <div class="panel-media"><p style="font-family:var(--display);font-size:clamp(2.1rem,4vw,4.5rem);line-height:.92;color:var(--text);max-width:10ch;text-align:center;letter-spacing:-.06em;">Local interface.</p></div>
+            <p>The device software uses a local kiosk interface and a Python backend for its modules.</p>
           </article>
 
           <article class="panel glass reveal">
-            <span class="panel-index">04 / Archived path</span>
-            <h3>Old PCB work stays visible.</h3>
+            <span class="panel-index">04 / Earlier designs</span>
+            <h3>Archived PCB designs.</h3>
             <div class="panel-media"><div class="mesh-graphic" aria-hidden="true"></div></div>
-            <p>The custom PCB files remain in the repo for context. They are not presented as the active fabrication route for the current build.</p>
+            <p>Previous custom board designs are available in the repository for reference. The current hardware assembly uses off-the-shelf modules.</p>
           </article>
         </div>
       </div>
@@ -674,24 +674,24 @@
 
     <section class="os-section shell" id="os">
       <div class="os-copy">
-        <p class="eyebrow reveal">OS surface</p>
-        <h2 class="section-title reveal">The interface belongs inside the device story.</h2>
-        <p class="reveal">The embedded preview is framed as a browser-limited look at the local shell. It stays secondary to the hardware/enclosure story instead of competing with it.</p>
+        <p class="eyebrow reveal">Software preview</p>
+        <h2 class="section-title reveal">Interface preview.</h2>
+        <p class="reveal">This preview runs in a browser. Functions that require the device's hardware are unavailable.</p>
       </div>
       <div class="phone-frame glass reveal">
         <div class="phone-screen">
-          <iframe src="./os/overlay/opt/unlim8ted/ui/index.html" title="Embedded Unlim8ted OS UI" loading="lazy"></iframe>
+          <iframe src="./os/overlay/opt/unlim8ted/ui/index.html" title="Unlim8ted Phone interface preview" loading="lazy"></iframe>
         </div>
       </div>
     </section>
 
     <section class="notes shell">
       <p class="eyebrow reveal">Build notes</p>
-      <h2 class="section-title reveal">Current, practical, unfinished.</h2>
+      <h2 class="section-title reveal">Development status.</h2>
       <div class="notes-grid">
-        <article class="note glass reveal"><span>Assembly</span><h3>Designed around printable sections and revision.</h3></article>
-        <article class="note glass reveal"><span>Software</span><h3>Local modules sit behind a kiosk shell.</h3></article>
-        <article class="note glass reveal"><span>History</span><h3>Archived board work remains useful as context.</h3></article>
+        <article class="note glass reveal"><span>Assembly</span><h3>Enclosure revisions.</h3></article>
+        <article class="note glass reveal"><span>Software</span><h3>Interface and application development.</h3></article>
+        <article class="note glass reveal"><span>History</span><h3>Archived board documentation.</h3></article>
       </div>
     </section>
 
@@ -699,10 +699,10 @@
       <div class="footer-panel glass reveal">
         <div>
           <p class="eyebrow">Source</p>
-          <h2>Open the repo.</h2>
+          <h2>Project files.</h2>
         </div>
         <div class="footer-row">
-          <p>The source files are the clearest record of what the project currently is.</p>
+          <p>The GitHub repository contains the enclosure models, software, build documentation, and archived PCB designs.</p>
           <a class="btn btn--solid" href="https://github.com/Unlim8ted-Studio-Productions/unlim8ted-phone">View on GitHub</a>
         </div>
       </div>
@@ -716,15 +716,15 @@
     import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 
     const MODEL_FILES = [
-      { label: "Main case", file: "Main_Case.stl", path: "https://raw.githubusercontent.com/Unlim8ted-Studio-Productions/unlim8ted-phone/refs/heads/main/3d/STL/Main_Case.stl", note: "Primary enclosure shell and main silhouette." },
-      { label: "Back cover", file: "Back_Cover.stl", path: "https://raw.githubusercontent.com/Unlim8ted-Studio-Productions/unlim8ted-phone/refs/heads/main/3d/STL/Back_Cover.stl", note: "Rear closure and seam relationship." },
-      { label: "Bottom cover", file: "Bottom_Cover.stl", path: "https://raw.githubusercontent.com/Unlim8ted-Studio-Productions/unlim8ted-phone/refs/heads/main/3d/STL/Bottom_Cover.stl", note: "Lower access section and underside split." },
-      { label: "CM4 holder", file: "Compute Module Plane.stl", path: "https://raw.githubusercontent.com/Unlim8ted-Studio-Productions/unlim8ted-phone/refs/heads/main/3d/STL/Compute Module Plane.stl", note: "Internal CM4 locating part." },
-      { label: "Battery holder", file: "Battery_Holder.stl", path: "https://raw.githubusercontent.com/Unlim8ted-Studio-Productions/unlim8ted-phone/refs/heads/main/3d/STL/Battery_Holder.stl", note: "Battery support and pack position." },
-      { label: "Power board holder", file: "Battery_Controller_Holder.stl", path: "https://raw.githubusercontent.com/Unlim8ted-Studio-Productions/unlim8ted-phone/refs/heads/main/3d/STL/Battery_Controller_Holder.stl", note: "Charging and power board mount." },
-      { label: "Camera bump", file: "Camera_Bump.stl", path: "https://raw.githubusercontent.com/Unlim8ted-Studio-Productions/unlim8ted-phone/refs/heads/main/3d/STL/Back_Cover_Camera_Bump.stl", note: "Camera volume and rear profile." },
-      { label: "USB-C entrance", file: "TypeC_Entrance.stl", path: "https://raw.githubusercontent.com/Unlim8ted-Studio-Productions/unlim8ted-phone/refs/heads/main/3d/STL/Type_C_Port_Entrance.stl", note: "Connector clearance and lower-edge opening." },
-      { label: "Full assembly", file: "phone.stl", path: "https://raw.githubusercontent.com/Unlim8ted-Studio-Productions/unlim8ted-phone/refs/heads/main/3d/STL/phone.stl", note: "Combined assembly view when available." }
+      { label: "Main case", file: "Main_Case.stl", path: "https://raw.githubusercontent.com/Unlim8ted-Studio-Productions/unlim8ted-phone/refs/heads/main/3d/STL/Main_Case.stl", note: "The main body of the case." },
+      { label: "Back cover", file: "Back_Cover.stl", path: "https://raw.githubusercontent.com/Unlim8ted-Studio-Productions/unlim8ted-phone/refs/heads/main/3d/STL/Back_Cover.stl", note: "The cover for the back of the phone." },
+      { label: "Bottom cover", file: "Bottom_Cover.stl", path: "https://raw.githubusercontent.com/Unlim8ted-Studio-Productions/unlim8ted-phone/refs/heads/main/3d/STL/Bottom_Cover.stl", note: "The removable bottom section." },
+      { label: "CM4 holder", file: "Compute Module Plane.stl", path: "https://raw.githubusercontent.com/Unlim8ted-Studio-Productions/unlim8ted-phone/refs/heads/main/3d/STL/Compute Module Plane.stl", note: "Holds the Compute Module in place." },
+      { label: "Battery holder", file: "Battery_Holder.stl", path: "https://raw.githubusercontent.com/Unlim8ted-Studio-Productions/unlim8ted-phone/refs/heads/main/3d/STL/Battery_Holder.stl", note: "Holds the battery inside the case." },
+      { label: "Power board holder", file: "Battery_Controller_Holder.stl", path: "https://raw.githubusercontent.com/Unlim8ted-Studio-Productions/unlim8ted-phone/refs/heads/main/3d/STL/Battery_Controller_Holder.stl", note: "Mounts the charging and power board." },
+      { label: "Camera bump", file: "Camera_Bump.stl", path: "https://raw.githubusercontent.com/Unlim8ted-Studio-Productions/unlim8ted-phone/refs/heads/main/3d/STL/Back_Cover_Camera_Bump.stl", note: "Makes room for the rear camera." },
+      { label: "USB-C entrance", file: "TypeC_Entrance.stl", path: "https://raw.githubusercontent.com/Unlim8ted-Studio-Productions/unlim8ted-phone/refs/heads/main/3d/STL/Type_C_Port_Entrance.stl", note: "The opening for the USB-C connector." },
+      { label: "Full assembly", file: "phone.stl", path: "https://raw.githubusercontent.com/Unlim8ted-Studio-Productions/unlim8ted-phone/refs/heads/main/3d/STL/phone.stl", note: "See the case parts together." }
     ];
 
     const state = {
@@ -890,7 +890,7 @@
       const item = MODEL_FILES[index] || MODEL_FILES[0];
       state.activeIndex = index;
       fileEl.textContent = item.file;
-      statusEl.textContent = "Loading mesh";
+      statusEl.textContent = "Loading model";
       document.querySelectorAll(".part-button").forEach((btn, i) => btn.classList.toggle("is-active", i === index));
 
       try {
@@ -899,11 +899,11 @@
         const buffer = await response.arrayBuffer();
         const geometry = parseSTL(buffer);
         setMesh(geometry);
-        statusEl.textContent = "Interactive STL preview";
+        statusEl.textContent = "Drag to rotate the model";
       } catch (error) {
         console.warn(`Unable to load ${item.path}:`, error);
         setMesh(fallbackGeometry(index));
-        statusEl.textContent = "Preview placeholder — STL not loaded";
+        statusEl.textContent = "Model preview unavailable";
       }
     }
 
