@@ -274,7 +274,7 @@
   },
   {
     "id": "Don't-Kill-Me",
-    "image": null,
+    "image": "https://assets.unlim8ted.com/images/products/books/dont-kill-me.svg",
     "additional_images": [],
     "video": null,
     "additional_videos": [],
@@ -287,7 +287,7 @@
   },
   {
     "id": "Exploring-the-Impacts-of-Generative-Artificial-Intelligence",
-    "image": null,
+    "image": "https://assets.unlim8ted.com/images/products/books/generative-intelligence.svg",
     "additional_images": [],
     "video": null,
     "additional_videos": [],
@@ -300,7 +300,7 @@
   },
   {
     "id": "Failed-Unlim8ted-Advertisement",
-    "image": null,
+    "image": "https://assets.unlim8ted.com/images/products/books/failed-advertisement.svg",
     "additional_images": [],
     "video": null,
     "additional_videos": [],
@@ -313,7 +313,7 @@
   },
   {
     "id": "Watch-Till-End-Be-Like",
-    "image": null,
+    "image": "https://assets.unlim8ted.com/images/products/books/watch-till-end.svg",
     "additional_images": [],
     "video": null,
     "additional_videos": [],
@@ -326,7 +326,7 @@
   },
   {
     "id": "I-(Unwillfully)-Let-My-Cat-Answer-My-Emails-for-~1-Week",
-    "image": null,
+    "image": "https://assets.unlim8ted.com/images/products/books/cat-emails.svg",
     "additional_images": [],
     "video": null,
     "additional_videos": [],
@@ -339,7 +339,7 @@
   },
   {
     "id": "If-Video-Games-Had-Realistic-Physics",
-    "image": null,
+    "image": "https://assets.unlim8ted.com/images/products/books/realistic-physics.svg",
     "additional_images": [],
     "video": null,
     "additional_videos": [],
@@ -352,7 +352,7 @@
   },
   {
     "id": "Natural™-Water",
-    "image": null,
+    "image": "https://assets.unlim8ted.com/images/products/books/natural-water.svg",
     "additional_images": [],
     "video": null,
     "additional_videos": [],
@@ -365,7 +365,7 @@
   },
   {
     "id": "Office-Wildlife-Documentary",
-    "image": null,
+    "image": "https://assets.unlim8ted.com/images/products/books/office-wildlife.svg",
     "additional_images": [],
     "video": null,
     "additional_videos": [],
@@ -378,7 +378,7 @@
   },
   {
     "id": "The-Chicken-Crosses-the-Road...-Why?",
-    "image": null,
+    "image": "https://assets.unlim8ted.com/images/products/books/chicken-road.svg",
     "additional_images": [],
     "video": null,
     "additional_videos": [],
@@ -391,7 +391,7 @@
   },
   {
     "id": "The-Glitch",
-    "image": null,
+    "image": "https://assets.unlim8ted.com/images/products/films/TheGlitchCover.png",
     "additional_images": [],
     "video": null,
     "additional_videos": [],
@@ -404,7 +404,7 @@
   },
   {
     "id": "Trackmania-Be-Like",
-    "image": null,
+    "image": "https://assets.unlim8ted.com/images/products/books/trackmania.svg",
     "additional_images": [],
     "video": null,
     "additional_videos": [],
@@ -417,7 +417,7 @@
   },
   {
     "id": "Trailers-Be-Like",
-    "image": null,
+    "image": "https://assets.unlim8ted.com/images/products/books/trailers.svg",
     "additional_images": [],
     "video": null,
     "additional_videos": [],
@@ -430,7 +430,7 @@
   },
   {
     "id": "The-Glitch-Trailer",
-    "image": null,
+    "image": "https://assets.unlim8ted.com/images/products/films/TheGlitchCover.png",
     "additional_images": [],
     "video": null,
     "additional_videos": [],
@@ -443,7 +443,7 @@
   },
   {
     "id": "Celeste-Be-Like",
-    "image": null,
+    "image": "https://assets.unlim8ted.com/images/products/books/celeste.svg",
     "additional_images": [],
     "video": null,
     "additional_videos": [],
@@ -4110,6 +4110,7 @@
   },
   {
     "id": "unlim8ted-stinger",
+    "midi-delay-ms": 50,
     "product-type": "music",
     "name": "Unlim8ted Stinger",
     "file": "https://assets.unlim8ted.com/music/Unlim8ted%20Stinger.mp3",
@@ -4118,6 +4119,7 @@
   },
   {
     "id": "music-the-echos-of-the-bells",
+    "midi-delay-ms": 0,
     "product-type": "music",
     "name": "The Echos of the Bells",
     "file": "https://assets.unlim8ted.com/music/The%20Echos%20of%20the%20Bells.mp3",
@@ -4126,6 +4128,7 @@
   },
   {
     "id": "music-serene-winter-night",
+    "midi-delay-ms": 0,
     "product-type": "music",
     "name": "Serene Winter Night",
     "file": "https://assets.unlim8ted.com/music/Serene%20Winter%20Night.mp3",
@@ -4134,6 +4137,7 @@
   },
   {
     "id": "music-a-bright-winter",
+    "midi-delay-ms": 180,
     "product-type": "music",
     "name": "A Bright Winter",
     "file": "https://assets.unlim8ted.com/music/A%20Bright%20Winter.mp3",
@@ -4142,6 +4146,7 @@
   },
   {
     "id": "music-resonating-magic",
+    "midi-delay-ms": 0,
     "product-type": "music",
     "name": "Resonating Magic",
     "file": "https://assets.unlim8ted.com/music/Resonating%20Magic.mp3",
@@ -4150,6 +4155,7 @@
   },
   {
     "id": "music-neon-lasers",
+    "midi-delay-ms": 20,
     "product-type": "music",
     "name": "Neon Lasers",
     "file": "https://assets.unlim8ted.com/music/Blue%20Lasers.mp3",
@@ -4158,6 +4164,7 @@
   },
   {
     "id": "music-quiet-defiance",
+    "midi-delay-ms": 0,
     "product-type": "music",
     "name": "Quiet Defiance",
     "file": "https://assets.unlim8ted.com/music/Defiant%20Quiet.mp3",
@@ -4166,6 +4173,7 @@
   },
   {
     "id": "music-close-to-the-end",
+    "midi-delay-ms": 0,
     "product-type": "music",
     "name": "Close to the End",
     "file": "https://assets.unlim8ted.com/music/Close%20to%20the%20End.mp3",
@@ -4174,6 +4182,7 @@
   },
   {
     "id": "music-darkness",
+    "midi-delay-ms": 0,
     "product-type": "music",
     "name": "Darkness",
     "file": "https://assets.unlim8ted.com/music/Darkness.mp3",
@@ -4182,6 +4191,7 @@
   },
   {
     "id": "music-emergency-override",
+    "midi-delay-ms": 0,
     "product-type": "music",
     "name": "Emergency Override",
     "file": "https://assets.unlim8ted.com/music/Emergency%20Override.mp3",
@@ -4190,6 +4200,7 @@
   },
   {
     "id": "music-restart",
+    "midi-delay-ms": 0,
     "product-type": "music",
     "name": "Restart",
     "file": "https://assets.unlim8ted.com/music/Restart.mp3",
@@ -4198,6 +4209,7 @@
   },
   {
     "id": "music-fast-falling-rain",
+    "midi-delay-ms": 0,
     "product-type": "music",
     "name": "Fast Falling Rain",
     "file": "https://assets.unlim8ted.com/music/Fast%20Falling%20Rain.mp3",
@@ -4206,6 +4218,7 @@
   },
   {
     "id": "music-sharp-strings",
+    "midi-delay-ms": 30,
     "product-type": "music",
     "name": "Sharp Strings",
     "file": "https://assets.unlim8ted.com/music/Sharp%20Strings.mp3",
@@ -4214,6 +4227,7 @@
   },
   {
     "id": "music-Clocks-Sound-Like",
+    "midi-delay-ms": 40,
     "product-type": "music",
     "name": "Clocks Sound Like",
     "file": "https://assets.unlim8ted.com/music/Clocks%20Sound%20Like.mp3",
@@ -4222,6 +4236,7 @@
   },
   {
     "id": "music-know-what-you-do",
+    "midi-delay-ms": 10,
     "product-type": "music",
     "name": "Know What You Do",
     "file": "https://assets.unlim8ted.com/music/Know%20What%20You%20Do.mp3",
@@ -4230,6 +4245,7 @@
   },
   {
     "id": "music-the-black-box-problem",
+    "midi-delay-ms": 0,
     "product-type": "music",
     "name": "The Black Box Problem",
     "file": "https://assets.unlim8ted.com/music/The%20Black%20Box%20Problem.mp3",
@@ -4237,7 +4253,18 @@
     "pdf": "https://assets.unlim8ted.com/music/pdf's/The%20Black%20Box%20Problem-Score_and_Parts.pdf"
   },
   {
+    "id": "music-2b",
+    "midi-delay-ms": 1020,
+    "product-type": "music",
+    "name": "2b",
+    "music-section": "detective-edward",
+    "file": "https://assets.unlim8ted.com/music/2b.mp3",
+    "midi": "https://assets.unlim8ted.com/music/2b.mid",
+    "pdf": "https://assets.unlim8ted.com/music/pdf's/2b-Score_and_Parts.pdf"
+  },
+  {
     "id": "music-unexpected-twist",
+    "midi-delay-ms": 20,
     "product-type": "music",
     "name": "Unexpected Twist",
     "file": "https://assets.unlim8ted.com/music/Unexpected%20Twist.mp3",
@@ -4246,6 +4273,7 @@
   },
   {
     "id": "music-credits",
+    "midi-delay-ms": 20,
     "product-type": "music",
     "name": "Credits",
     "file": "https://assets.unlim8ted.com/music/Credits.mp3",
@@ -4261,6 +4289,7 @@
   },
   {
     "id": "timecat-02-mysterious-beach-dance",
+    "midi-delay-ms": 0,
     "product-type": "music",
     "music-section": "timecat",
     "name": "Mysterious Beach Dance",
@@ -4270,6 +4299,7 @@
   },
   {
     "id": "timecat-03-ambient-lab",
+    "midi-delay-ms": 0,
     "product-type": "music",
     "music-section": "timecat",
     "name": "Ambient Lab",
@@ -4279,6 +4309,7 @@
   },
   {
     "id": "timecat-04-lab-boss",
+    "midi-delay-ms": 0,
     "product-type": "music",
     "music-section": "timecat",
     "name": "Lab Boss",
